@@ -50,33 +50,14 @@
                 <span>💡</span> 填表前置提醒
             </h3>
             <p class="text-xs text-blue-700/90 leading-relaxed">
-                本表單需要呼叫系統的「列印功能」來儲存 PDF。為確保簽名與排版最完美，<b>強烈建議指定使用標準瀏覽器開啟。</b>
+                本表單填寫完畢後，需要呼叫內建的「列印功能」來儲存為 PDF。請確認您目前處於穩定的網路環境。
             </p>
         </div>
 
-        <div class="space-y-3.5">
-            <button onclick="launchSafari()" class="w-full flex items-center justify-between p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-indigo-500 hover:bg-indigo-50/30 transition duration-200 text-left group">
-                <div class="flex items-center gap-3">
-                    <span class="text-2xl">🧭</span>
-                    <div>
-                        <div class="font-bold text-gray-800 text-sm group-hover:text-indigo-600">使用 Apple Safari 開啟</div>
-                        <div class="text-xs text-gray-400 mt-0.5">僅限 iPhone / iPad / Mac 同仁點選</div>
-                    </div>
-                </div>
-                <span class="text-gray-400 group-hover:text-indigo-500 font-bold transition">➔</span>
-            </button>
-
-            <button onclick="showFormDirectly()" class="w-full flex items-center justify-between p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-emerald-500 hover:bg-emerald-50/30 transition duration-200 text-left group">
-                <div class="flex items-center gap-3">
-                    <span class="text-2xl">💻</span>
-                    <div>
-                        <div class="font-bold text-gray-800 text-sm group-hover:text-emerald-600">使用目前瀏覽器直接填寫</div>
-                        <div class="text-xs text-gray-400 mt-0.5">已在獨立瀏覽器中，或使用 Edge 請點此</div>
-                    </div>
-                </div>
-                <span class="text-gray-400 group-hover:text-emerald-500 font-bold transition">➔</span>
-            </button>
-        </div>
+        <button onclick="showFormDirectly()" class="w-full flex items-center justify-center gap-2 p-4 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white rounded-xl shadow-lg shadow-blue-600/20 transition duration-150 font-bold tracking-wider text-base">
+            <span>📝</span> 開始填寫申請書
+        </button>
+        
         <div class="text-center text-[11px] text-gray-400 mt-8 tracking-wider">© 2026 台灣美光記憶體股份有限公司企業工會</div>
     </div>
 
@@ -99,7 +80,4 @@
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">姓 名</label><input type="text" id="m-name" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入姓名" oninput="syncData('m-name', 'd-name')"></div>
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">性 別</label><select id="m-gender" class="w-full border border-gray-300 rounded p-2 text-base bg-white" onchange="syncData('m-gender', 'd-gender')"><option value="" disabled selected>請選擇</option><option value="男">男</option><option value="女">女</option></select></div>
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">出生年月日</label><input type="date" id="m-birth" class="w-full border border-gray-300 rounded p-2 text-base bg-white" onchange="syncData('m-birth', 'd-birth')"></div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1">工 號</label><input type="text" id="m-id" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入工號" oninput="syncData('m-id', 'd-id')"></div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1">公司分機</label><input type="text" id="m-ext" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入分機" oninput="syncData('m-ext', 'd-ext')"></div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1">單 位</label><input type="text" id="m-unit" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入單位" oninput="syncData('m-unit', 'd-unit')"></div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1">戶籍住址</label><input type="text" id="m-raddr" class="w-full border border-gray-300 rounded p-2 text-base bg
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">工 號</label><input type="text" id="m-id" class="w-full border border-gray-300 rounded p-2 text-base bg-white"
