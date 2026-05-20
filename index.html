@@ -5,55 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>入會申請書</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f3f4f6; padding: 10px; }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f3f4f6; padding: 20px; }
         .form-input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
         .date-input { width: 60px; border: none; border-bottom: 1px solid #000; text-align: center; background: transparent; outline: none; }
         
         .watermark-overlay { 
-            position: absolute; inset: 0; 
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(4, 1fr);
-            opacity: 0.08;
-            pointer-events: none; 
-            z-index: 0;
-            overflow: hidden;
-            color: #004a99;
+            position: absolute; inset: 0; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; opacity: 0.1; 
+            pointer-events: none; z-index: 0; 
         }
-        .watermark-item {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transform: rotate(-25deg);
-        }
-        .watermark-m { font-size: 80px; font-weight: 800; line-height: 1; }
-        .watermark-text { font-size: 14px; font-weight: bold; letter-spacing: 1px; }
-        
         .main-form-content { position: relative; z-index: 10; }
-        #signature-display { min-height: 96px; cursor: pointer; display: flex; align-items: center; justify-content: center; background: white; touch-action: none; border: 2px dashed #ccc; }
+        #signature-display { 
+            min-height: 96px; cursor: pointer; display: flex; align-items: center; justify-content: center; 
+            background: white; border-2 border-dashed #ccc; border-radius: 4px; color: #999; 
+            transition: all 0.3s;
+        }
+        #signature-display:hover { background-color: #f9fafb; }
         #signature-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
-        #signature-pad { touch-action: none; background: white; width: 90vw; max-width: 500px; height: 250px; border: 1px solid #000; cursor: crosshair; }
-
+        #signature-pad { touch-action: none; background: white; width: 90vw; max-width: 500px; height: 250px; border: 1px solid #000; }
+        
+        .platform-badge {
+            position: fixed; top: 10px; right: 10px; padding: 6px 12px; border-radius: 20px; 
+            color: white; font-size: 12px; font-weight: bold; z-index: 999;
+        }
+        .badge-android { background-color: #3DDC84; }
+        .badge-ios { background-color: #555555; }
+        .badge-desktop { background-color: #4CAF50; }
+        
+        .button-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn-primary { flex: 1; padding: 12px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; transition: all 0.3s; min-width: 150px; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .btn-android { background-color: #3DDC84; color: #fff; }
+        .btn-ios { background-color: #555555; color: #fff; }
+        .btn-desktop { background-color: #4CAF50; color: #fff; }
+        .btn-secondary { background-color: #6B7280; color: #fff; flex: 1; }
+        
         @media print {
             #action-buttons-area { display: none !important; }
+            .platform-badge { display: none !important; }
             body { background: white; padding: 0; }
-            /* 讓輸入框在列印時看起來更像紙本格式 */
             input, select { border: none !important; border-bottom: 1px solid #000 !important; border-radius: 0 !important; }
+        }
+        
+        @media (max-width: 640px) {
+            .button-group { flex-direction: column; }
+            .btn-primary { width: 100%; }
         }
     </style>
 </head>
 <body>
 
-<div id="form-to-pdf" class="max-w-2xl mx-auto bg-white p-8 shadow-xl relative overflow-hidden">
+<div id="platform-badge" class="platform-badge"></div>
+
+<div id="form-to-pdf" class="max-w-2xl mx-auto bg-white p-8 shadow-xl relative">
     <div class="watermark-overlay">
-        <div class="watermark-item"><div class="watermark-m">m</div><div class="watermark-text">MICRON LABOR UNION</div></div>
-        <div class="watermark-item"><div class="watermark-m">m</div><div class="watermark-text">MICRON LABOR UNION</div></div>
-        <div class="watermark-item"><div class="watermark-m">m</div><div class="watermark-text">MICRON LABOR UNION</div></div>
-        <div class="watermark-item"><div class="watermark-m">m</div><div class="watermark-text">MICRON LABOR UNION</div></div>
-        <div class="watermark-item"><div class="watermark-m">m</div><div class="watermark-text">MICRON LABOR UNION</div></div>
-        <div class="watermark-item"><div class="watermark-m">m</div><div class="watermark-text">MICRON LABOR UNION</div></div>
-        <div class="watermark-item"><div class="watermark-m">m</div><div class="watermark-text">MICRON LABOR UNION</div></div>
-        <div class="watermark-item"><div class="watermark-m">m</div><div class="watermark-text">MICRON LABOR UNION</div></div>
+        <div style="font-size: 150px; font-weight: bold; color: #000; line-height: 1;">m</div>
+        <div style="font-size: 30px; font-weight: bold; color: #000;">Micron Labor Union</div>
     </div>
 
     <div class="main-form-content">
@@ -63,12 +73,7 @@
                 <div>姓名<input type="text" class="form-input"></div>
                 <div>性別<select class="form-input"><option>男</option><option>女</option></select></div>
             </div>
-            
-            <div class="grid grid-cols-2 gap-4">
-                <div>出生年月日<input type="date" class="form-input"></div>
-                <div>手機<input type="tel" class="form-input"></div>
-            </div>
-
+            <div>出生年月日<input type="date" class="form-input"></div>
             <div class="grid grid-cols-3 gap-2">
                 <div>工號<input type="text" class="form-input"></div>
                 <div>分機<input type="text" class="form-input"></div>
@@ -76,9 +81,10 @@
             </div>
             <div>戶籍地址<input type="text" class="form-input"></div>
             <div>通訊地址<input type="text" class="form-input"></div>
+            <div>手機<input type="tel" class="form-input"></div>
             
             <div class="p-4 bg-gray-50 border rounded text-xs leading-relaxed">
-                本人同意按工會章程行使權利與義務並同意於加入企業工會成為會員之日起由台灣美光記憶體股份有限公司依據工會法於每月薪資代扣工會經常會費(按章程規定之會費)，且於本人退會或離開美光後將停止此代扣作業。
+                本人同意按工會章程行使權利與義務並同意於加入企業工會成為會員之日起由台灣美光記憶體股份有限公司依據工會法於每月薪資代扣工會會費。
             </div>
             
             <div class="flex flex-col items-center pt-4">
@@ -95,9 +101,7 @@
         </div>
 
         <div id="action-buttons-area" class="mt-8">
-            <button onclick="window.print()" class="w-full bg-blue-600 text-white py-3 rounded font-bold hover:bg-blue-700 transition">
-                列印 / 另存為 PDF
-            </button>
+            <div id="button-container" class="button-group"></div>
         </div>
     </div>
 </div>
@@ -119,23 +123,153 @@
     const ctx = canvas.getContext('2d');
     let isDrawing = false;
 
-    function openModal() { modal.style.display = 'flex'; canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; ctx.strokeStyle = '#000000'; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; }
+    function openModal() { 
+        modal.style.display = 'flex'; 
+        canvas.width = canvas.offsetWidth; 
+        canvas.height = canvas.offsetHeight; 
+        ctx.lineWidth = 3; 
+        ctx.lineJoin = 'round'; 
+    }
     function closeModal() { modal.style.display = 'none'; }
     function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
-    
     function saveSignature() { 
         const display = document.getElementById('signature-display'); 
-        const dataURL = canvas.toDataURL('image/png');
-        display.innerHTML = `<img src="${dataURL}" style="max-height:80px; width:auto; display:block; margin:0 auto;">`; 
+        display.innerHTML = `<img src="${canvas.toDataURL()}" style="max-height:80px; width:auto;">`; 
         closeModal(); 
     }
 
-    function getPos(e) { const rect = canvas.getBoundingClientRect(); const clientX = e.touches ? e.touches[0].clientX : e.clientX; const clientY = e.touches ? e.touches[0].clientY : e.clientY; return { x: clientX - rect.left, y: clientY - rect.top }; }
-    function startDrawing(e) { isDrawing = true; const pos = getPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
-    function draw(e) { if (!isDrawing) return; const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); }
+    // 簽名邏輯
+    canvas.addEventListener('mousedown', (e) => { isDrawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
+    canvas.addEventListener('mousemove', (e) => { if (isDrawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } });
+    window.addEventListener('mouseup', () => isDrawing = false);
+    
+    // 觸摸支持
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); const touch = e.touches[0]; const rect = canvas.getBoundingClientRect(); const x = touch.clientX - rect.left; const y = touch.clientY - rect.top; isDrawing = true; ctx.beginPath(); ctx.moveTo(x, y); }, {passive: false});
+    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if (!isDrawing) return; const touch = e.touches[0]; const rect = canvas.getBoundingClientRect(); const x = touch.clientX - rect.left; const y = touch.clientY - rect.top; ctx.lineTo(x, y); ctx.stroke(); }, {passive: false});
+    canvas.addEventListener('touchend', () => { isDrawing = false; });
 
-    canvas.addEventListener('mousedown', startDrawing); canvas.addEventListener('mousemove', draw); window.addEventListener('mouseup', () => isDrawing = false);
-    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, {passive: false}); canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, {passive: false}); window.addEventListener('touchend', () => isDrawing = false);
+    // ===== 平台偵測 =====
+    function getPlatform() {
+        const ua = navigator.userAgent.toLowerCase();
+        if (/android/.test(ua)) return 'android';
+        if (/iphone|ipad|ipod/.test(ua)) return 'ios';
+        return 'desktop';
+    }
+
+    // ===== UI 初始化 =====
+    function initializeUI() {
+        const platform = getPlatform();
+        const badge = document.getElementById('platform-badge');
+        const container = document.getElementById('button-container');
+        
+        // 設定平台徽章
+        const badgeLabels = { android: 'Android', ios: 'iOS', desktop: 'Desktop' };
+        const badgeClasses = { android: 'badge-android', ios: 'badge-ios', desktop: 'badge-desktop' };
+        badge.textContent = badgeLabels[platform];
+        badge.className = `platform-badge ${badgeClasses[platform]}`;
+        
+        // 根據平台生成按鈕
+        container.innerHTML = getButtonsForPlatform(platform);
+    }
+
+    function getButtonsForPlatform(platform) {
+        if (platform === 'android') {
+            return `
+                <button onclick="generatePDFAndroid()" class="btn-primary btn-android">📥 下載 PDF</button>
+                <button onclick="window.print()" class="btn-primary btn-secondary">🖨️ 列印</button>
+            `;
+        } else if (platform === 'ios') {
+            return `
+                <button onclick="generatePDFiOS()" class="btn-primary btn-ios">📥 生成並分享 PDF</button>
+                <button onclick="window.print()" class="btn-primary btn-secondary">🖨️ 列印</button>
+            `;
+        } else {
+            return `
+                <button onclick="generatePDFDesktop()" class="btn-primary btn-desktop">💾 下載 PDF</button>
+                <button onclick="window.print()" class="btn-primary btn-secondary">🖨️ 列印</button>
+            `;
+        }
+    }
+
+    // ===== PDF 生成函數 =====
+    function syncFormData() {
+        document.querySelectorAll('input, select').forEach(el => {
+            el.setAttribute('value', el.value);
+        });
+    }
+
+    function getFileName() {
+        const nameInput = document.querySelector('input[type="text"]');
+        return nameInput.value ? `入會申請書_${nameInput.value}.pdf` : '入會申請書.pdf';
+    }
+
+    function generatePDFAndroid() {
+        syncFormData();
+        const element = document.getElementById('form-to-pdf');
+        const opt = {
+            margin: 10,
+            filename: getFileName(),
+            image: { type: 'jpeg', quality: 1 },
+            html2canvas: { scale: 2, useCORS: true, ignoreElements: (el) => el.id === 'action-buttons-area' },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+        alert('PDF 已開始下載到您的下載文件夾');
+    }
+
+    function generatePDFiOS() {
+        syncFormData();
+        const element = document.getElementById('form-to-pdf');
+        const opt = {
+            margin: 10,
+            filename: getFileName(),
+            image: { type: 'jpeg', quality: 1 },
+            html2canvas: { scale: 2, useCORS: true, ignoreElements: (el) => el.id === 'action-buttons-area' },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        
+        html2pdf().set(opt).from(element).toPdf().get('pdf').then((pdf) => {
+            const pdfBlob = pdf.output('blob');
+            const url = URL.createObjectURL(pdfBlob);
+            
+            // iOS: 嘗試使用 Web Share API
+            if (navigator.share) {
+                const fileName = getFileName();
+                const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+                navigator.share({
+                    files: [file],
+                    title: '入會申請書',
+                    text: '台灣美光企業工會入會申請書'
+                }).catch((err) => {
+                    if (err.name !== 'AbortError') {
+                        console.log('分享失敗，使用回退方案', err);
+                        // 回退: 在新分頁打開 PDF
+                        window.open(url, '_blank');
+                    }
+                });
+            } else {
+                // 回退: 在新分頁打開 PDF
+                alert('您的設備不支持分享功能，PDF 將在新分頁打開');
+                window.open(url, '_blank');
+            }
+        });
+    }
+
+    function generatePDFDesktop() {
+        syncFormData();
+        const element = document.getElementById('form-to-pdf');
+        const opt = {
+            margin: 10,
+            filename: getFileName(),
+            image: { type: 'jpeg', quality: 1 },
+            html2canvas: { scale: 2, useCORS: true, ignoreElements: (el) => el.id === 'action-buttons-area' },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
+
+    // 頁面加載時初始化
+    document.addEventListener('DOMContentLoaded', initializeUI);
 </script>
 </body>
 </html>
