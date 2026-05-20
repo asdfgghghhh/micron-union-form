@@ -18,13 +18,31 @@
         .pdf-table td { background-color: #ffffff; text-align: left; }
         
         /* 水印樣式 */
-        .watermark-container { position: relative; overflow: hidden; }
-        .watermark-bg {
-            position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);olor: rgba(0,0,0,0.035);
-            font-weight: bold; color: #000; z-index: 1; pointer-events: none; white-space: nowrap; user-select: none;
-            text-align: center; width: 100%;
-        }
-        
+.watermark-container {
+    position: relative;
+    overflow: hidden;}
+
+.watermark-bg {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    color: rgba(0,0,0,0.035);
+
+    font-weight: bold;
+    z-index: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    user-select: none;
+    text-align: center;
+    width: 100%;}
+``
+        /* 確保表格在上面 */
+.pdf-table {
+    position: relative;
+    z-index: 10;
+
         /* 簽名板樣式固定 */
         #signature-pad { border: 1px dashed #9ca3af; background-color: #f9fafb; cursor: pointer; width: 300px; height: 120px; display: block; }
         #modal-signature-pad { background-color: #ffffff; cursor: crosshair; touch-action: none; width: 100%; height: 100%; }
