@@ -3,100 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>台灣美光記憶體股份有限公司企業工會 - 入會申請系統</title>
+    <title>工會入會申請書</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f3f4f6; }
-        
-        /* 核心：PDF 專用容器平時隱藏，按下按鈕時覆蓋螢幕 */
-        #pdf-overlay-container {
-            display: none;
+        /* 網頁版面與 PDF 版面完全分開 */
+        #pdf-export-zone {
             position: fixed;
-            top: 0; left: 0;
-            width: 794px; /* A4 寬 */
-            background: white;
-            z-index: 9999;
+            top: 0;
+            left: -9999px; /* 不用 display:none，改用移出視窗外，讓瀏覽器持續渲染 */
+            width: 794px; /* 固定 A4 寬度 */
             padding: 40px;
+            background: white;
+            z-index: 100;
         }
-        .pdf-table { border-collapse: collapse; width: 100%; border: 1px solid #000; }
-        .pdf-table th, .pdf-table td { border: 1px solid #000; height: 45px; text-align: center; padding: 5px; }
-        .pdf-table th { background: #f9fafb; font-weight: bold; width: 15%; }
+        .a4-table { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1px solid black; }
+        .a4-table td, .a4-table th { border: 1px solid black; padding: 10px; height: 50px; }
+        .a4-table th { background: #f3f4f6; width: 15%; }
     </style>
 </head>
-<body class="p-4">
+<body class="bg-gray-100 p-4">
 
-    <div id="web-content" class="max-w-4xl mx-auto bg-white p-8 shadow-lg">
-        <h1 class="text-2xl font-bold text-center mb-6">台灣美光記憶體股份有限公司企業工會 - 入會申請書</h1>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input type="text" id="i-name" placeholder="姓名" class="border p-2">
-            <input type="text" id="i-id" placeholder="工號" class="border p-2">
-            <input type="date" id="i-birth" class="border p-2">
-            <input type="text" id="i-mobile" placeholder="手機" class="border p-2">
-        </div>
-        
-        <div class="mt-8 border p-4">
-            <p>簽名區：</p>
-            <canvas id="sig-canvas" class="border w-full h-32 bg-gray-50"></canvas>
-            <button onclick="clearSig()" class="mt-2 bg-red-500 text-white p-2">清除簽名</button>
-        </div>
-
-        <button onclick="generatePDF()" class="w-full mt-8 bg-emerald-600 text-white py-4 font-bold text-xl">生成並下載 PDF</button>
+    <div id="web-ui" class="max-w-2xl mx-auto bg-white p-6 shadow-md rounded">
+        <h1 class="text-xl font-bold mb-4">入會申請系統</h1>
+        <input type="text" id="i-name" placeholder="姓名" class="w-full border p-2 mb-2">
+        <input type="text" id="i-id" placeholder="工號" class="w-full border p-2 mb-2">
+        <canvas id="canvas" class="border w-full h-32 mb-4 bg-gray-50"></canvas>
+        <button onclick="savePDF()" class="w-full bg-blue-600 text-white p-3 font-bold">下載 PDF</button>
     </div>
 
-    <div id="pdf-overlay-container">
-        <h2 class="text-center text-xl font-bold">台灣美光記憶體股份有限公司企業工會 - 入會申請書</h2>
-        <table class="pdf-table mt-4">
+    <div id="pdf-export-zone">
+        <h1 style="text-align:center; font-size: 24px; font-weight:bold;">台灣美光記憶體股份有限公司企業工會</h1>
+        <table class="a4-table mt-6">
             <tr><th>姓名</th><td id="p-name"></td><th>工號</th><td id="p-id"></td></tr>
-            <tr><th>出生日期</th><td id="p-birth"></td><th>手機</th><td id="p-mobile"></td></tr>
         </table>
         <div class="mt-8">
-            <p>申請人簽名：</p>
-            <img id="p-sig-img" class="w-48 h-20 border-b border-black mt-2">
+            <p>簽名：</p>
+            <img id="p-sig" style="width: 200px; height: 80px; border-bottom: 1px solid black;">
         </div>
     </div>
 
     <script>
-        // 簽名板邏輯
-        const canvas = document.getElementById('sig-canvas');
+        // 簽名板
+        const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-        let drawing = false;
-        canvas.onmousedown = () => drawing = true;
-        canvas.onmouseup = () => drawing = false;
-        canvas.onmousemove = (e) => {
-            if(!drawing) return;
-            ctx.fillRect(e.offsetX, e.offsetY, 2, 2);
-        };
-        function clearSig() { ctx.clearRect(0,0, canvas.width, canvas.height); }
+        let draw = false;
+        canvas.onmousedown = () => draw = true;
+        canvas.onmouseup = () => draw = false;
+        canvas.onmousemove = (e) => { if(draw) ctx.fillRect(e.offsetX, e.offsetY, 2, 2); };
 
-        async function generatePDF() {
-            // 1. 同步資料
+        async function savePDF() {
+            // 填入 PDF 專用區
             document.getElementById('p-name').innerText = document.getElementById('i-name').value;
             document.getElementById('p-id').innerText = document.getElementById('i-id').value;
-            document.getElementById('p-birth').innerText = document.getElementById('i-birth').value;
-            document.getElementById('p-mobile').innerText = document.getElementById('i-mobile').value;
-            document.getElementById('p-sig-img').src = canvas.toDataURL();
+            document.getElementById('p-sig').src = canvas.toDataURL();
 
-            // 2. 顯示 PDF 容器並隱藏網頁
-            const container = document.getElementById('pdf-overlay-container');
-            const web = document.getElementById('web-content');
-            container.style.display = 'block';
-            web.style.opacity = '0';
-
-            // 3. 強制延遲確保渲染完成
-            await new Promise(r => setTimeout(r, 200));
-
-            // 4. 轉譯
-            html2pdf().from(container).set({
-                margin: 0.5,
-                jsPDF: { format: 'a4', orientation: 'portrait' }
-            }).save().then(() => {
-                // 5. 恢復
-                container.style.display = 'none';
-                web.style.opacity = '1';
-            });
+            // 轉譯
+            const element = document.getElementById('pdf-export-zone');
+            const opt = {
+                margin: 0,
+                filename: '申請書.pdf',
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'px', format: [794, 1123], orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
         }
     </script>
 </body>
