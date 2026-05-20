@@ -9,61 +9,67 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght=400;500;700&display=swap');
         body { font-family: 'Noto Sans TC', sans-serif; background-color: #f3f4f6; }
-
-        /* 表格優化：移除固定高度，改用 padding 讓版面更有彈性 */
+        .form-input { width: 100%; padding: 10px 8px; outline: none; background: transparent; border: none; }
         .pdf-table { border-collapse: collapse; width: 100%; table-layout: fixed; }
-        .pdf-table th, .pdf-table td { border: 1px solid #374151; padding: 12px 8px; vertical-align: middle; }
+        .pdf-table th, .pdf-table td { border: 1px solid #374151; padding: 10px; vertical-align: middle; text-align: left; }
         .pdf-table th { background-color: #f9fafb; font-weight: 700; width: 15%; text-align: center; }
-        .form-input { width: 100%; border: none; outline: none; background: transparent; }
-
-        /* 修正 PDF 匯出容器樣式 */
-        #pdf-export-template { 
-            width: 794px; /* A4 標準寬度 */
-            background-color: #ffffff; 
-            padding: 40px; 
-            box-sizing: border-box;
-            overflow: hidden;
-        }
-
-        #signature-pad { border: 1px dashed #9ca3af; background-color: #f9fafb; width: 300px; height: 120px; display: block; }
+        #signature-pad { border: 1px dashed #9ca3af; background-color: #f9fafb; cursor: pointer; width: 300px; height: 120px; }
+        /* 修正 PDF 渲染容器 */
+        #pdf-export-template { width: 794px; background-color: #ffffff; padding: 40px; box-sizing: border-box; overflow: hidden; }
     </style>
 </head>
-<body class="py-4 px-2">
+<body class="py-4 px-2 md:py-8 md:px-4 flex flex-col justify-center items-center min-h-screen">
+
+    <div id="form-zone" class="bg-white shadow-xl rounded-lg max-w-4xl w-full p-4 md:p-10">
+        <div class="text-center mb-6 pt-2">
+            <h1 class="text-xl md:text-3xl font-bold tracking-widest text-gray-900 mb-2">台灣美光記憶體股份有限公司企業工會</h1>
+            <h2 class="text-lg md:text-2xl font-bold tracking-widest text-gray-800">入會申請書</h2>
+        </div>
+
+        <!-- 表單輸入區 -->
+        <div class="watermark-container border border-gray-700 mb-6">
+            <table class="pdf-table">
+                <tr><th>姓　　名</th><td><input type="text" id="d-name" class="form-input" placeholder="請輸入姓名"></td><th>性　　別</th><td><select id="d-gender" class="form-input"><option value="">請選擇</option><option value="男">男</option><option value="女">女</option></select></td><th>出生<br>年月日</th><td><input type="date" id="d-birth" class="form-input"></td></tr>
+                <tr><th>工　　號</th><td><input type="text" id="d-id" class="form-input" placeholder="請輸入工號"></td><th>公司分機</th><td><input type="text" id="d-ext" class="form-input"></td><th>單　　位</th><td><input type="text" id="d-unit" class="form-input"></td></tr>
+                <tr><th>戶籍住址</th><td colspan="5"><input type="text" id="d-raddr" class="form-input"></td></tr>
+                <tr><th>通訊住址</th><td colspan="5"><input type="text" id="d-caddr" class="form-input"></td></tr>
+                <tr><th>通訊電話</th><td colspan="2"><input type="text" id="d-phone" class="form-input"></td><th>手機號碼</th><td colspan="2"><input type="text" id="d-mobile" class="form-input"></td></tr>
+            </table>
+        </div>
+
+        <button onclick="executePrint()" class="w-full py-4 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700">儲存 / 生成完美 PDF</button>
+    </div>
+
+    <!-- 隱藏的 PDF 範本 (與上方對應) -->
+    <div style="position: absolute; left: -9999px;">
+        <div id="pdf-export-template">
+            <h1 style="text-align: center; font-size: 24px; font-weight: bold;">台灣美光記憶體股份有限公司企業工會 - 入會申請書</h1>
+            <table class="pdf-table">
+                <tr><th>姓　　名</th><td id="p-name"></td><th>性　　別</th><td id="p-gender"></td><th>出生年月日</th><td id="p-birth"></td></tr>
+                <tr><th>工　　號</th><td id="p-id"></td><th>公司分機</th><td id="p-ext"></td><th>單　　位</th><td id="p-unit"></td></tr>
+                <tr><th>戶籍住址</th><td colspan="5" id="p-raddr"></td></tr>
+                <tr><th>通訊住址</th><td colspan="5" id="p-caddr"></td></tr>
+                <tr><th>通訊電話</th><td colspan="2" id="p-phone"></td><th>手機號碼</th><td colspan="2" id="p-mobile"></td></tr>
+            </table>
+        </div>
+    </div>
 
     <script>
-        // ... (省略簽名板初始化程式碼) ...
-
         function executePrint() {
-            // 抓取值並同步填入 PDF 模板
-            const fields = ['name', 'gender', 'birth', 'id', 'ext', 'unit', 'raddr', 'caddr', 'phone', 'mobile'];
-            fields.forEach(f => {
-                document.getElementById('p-' + f).innerText = document.getElementById('d-' + f).value || document.getElementById('m-' + f).value || '';
+            // 同步資料
+            ['name', 'gender', 'birth', 'id', 'ext', 'unit', 'raddr', 'caddr', 'phone', 'mobile'].forEach(id => {
+                document.getElementById('p-' + id).innerText = document.getElementById('d-' + id).value;
             });
 
-            document.getElementById('p-year').innerText = document.getElementById('roc-year').value;
-            document.getElementById('p-month').innerText = document.getElementById('roc-month').value;
-            document.getElementById('p-day').innerText = document.getElementById('roc-day').value;
-
-            // 處理簽名
-            const sigImg = document.getElementById('pdf-signature-img');
-            if (hasSigned) {
-                sigImg.src = canvas.toDataURL();
-                sigImg.style.display = 'block';
-            } else {
-                sigImg.style.display = 'none';
-            }
-
-            // 【核心修正：調整 PDF 生成參數】
+            // 生成 PDF
             const element = document.getElementById('pdf-export-template');
             const opt = {
-                margin: 0.4, // 設定適當邊距
+                margin: 0.5,
                 filename: '美光工會入會申請書.pdf',
-                image: { type: 'jpeg', quality: 1.0 },
                 html2canvas: { 
-                    scale: 2,           // 降低 scale 至 2，避免溢出且保持清晰度
+                    scale: 2,           // 確保畫質與大小平衡
                     useCORS: true, 
-                    letterRendering: true,
-                    windowWidth: 794    // 強制指定視窗寬度為 A4 寬
+                    windowWidth: 794    // 強制設定為 A4 寬度，徹底解決溢出問題
                 },
                 jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
             };
