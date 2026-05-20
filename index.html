@@ -157,25 +157,23 @@
         let isDrawing = false;
         let isMDrawing = false;
 
+        // 重點：移除 window.onresize 避免點擊外部或彈出鍵盤時重新初始化導致內容蒸發
         window.onload = function() {
             initMainCanvas();
         };
 
-        window.onresize = function() {
-            initMainCanvas();
-        };
-
-        // 初始化 A4 申請書內的小簽名框
         function initMainCanvas() {
-            canvas.width = 300;
-            canvas.height = 120;
+            // 固定實體像素解析度，防止任何動態清空
+            if (canvas.width !== 300) {
+                canvas.width = 300;
+                canvas.height = 120;
+            }
             ctx.strokeStyle = '#000000';
             ctx.lineWidth = 2.5;
             ctx.lineJoin = 'round';
             ctx.lineCap = 'round';
         }
 
-        // 判斷點擊裝置：小於 1024px 開啟手機大視窗
         function handleCanvasClick(e) {
             if (window.innerWidth < 1024) {
                 e.preventDefault();
@@ -183,17 +181,16 @@
             }
         }
 
-        // 開啟滿版簽名視窗
         function openSignatureModal() {
             modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; // 防止底層網頁亂滾
+            document.body.style.overflow = 'hidden'; 
             
-            // 實體像素大小與 CSS 容器完全對齊
+            // 每次開大視窗才初始化大畫布，保障高解析度不拉伸
             mCanvas.width = mCanvas.offsetWidth;
             mCanvas.height = mCanvas.offsetHeight;
             
             mCtx.strokeStyle = '#000000';
-            mCtx.lineWidth = 4; // 加粗筆觸更好看
+            mCtx.lineWidth = 4; 
             mCtx.lineJoin = 'round';
             mCtx.lineCap = 'round';
         }
@@ -203,7 +200,6 @@
             document.body.style.overflow = 'auto';
         }
 
-        // 取得相對坐標
         function getPos(e, c) {
             const rect = c.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -214,7 +210,7 @@
             };
         }
 
-        // 桌機滑鼠原地畫圖邏輯
+        // 電腦版滑鼠事件
         canvas.addEventListener('mousedown', (e) => {
             if (window.innerWidth < 1024) return;
             isDrawing = true;
@@ -230,7 +226,7 @@
         });
         window.addEventListener('mouseup', () => { isDrawing = false; });
 
-        // 手機大視窗觸控手勢
+        // 手機大視窗觸控事件
         mCanvas.addEventListener('touchstart', (e) => {
             isMDrawing = true;
             const p = getPos(e, mCanvas);
@@ -248,40 +244,34 @@
 
         window.addEventListener('touchend', () => { isMDrawing = false; });
 
-        // 清除按鈕
         function clearSignature() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
         function clearModalSignature() { mCtx.clearRect(0, 0, mCanvas.width, mCanvas.height); }
 
-        // 【核心修正】等比例置中縮放演算法（Contain 模式），絕不壓扁名字
+        // 【終極修復】同步且等比例繪製演算法：不經非同步，瞬間寫入，鎖死畫布！
         function saveModalSignature() {
-            // 1. 創立臨時變數存放這張剛簽完的大圖
-            const tempImage = new Image();
-            tempImage.src = mCanvas.toDataURL();
+            // 確保目標畫布狀態正確
+            initMainCanvas();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            tempImage.onload = function() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                // 2. 計算兩邊畫布的縮放比率，找出維持長寬比的縮放值 (Ratio)
-                const hRatio = canvas.width / mCanvas.width;
-                const vRatio = canvas.height / mCanvas.height;
-                const ratio  = Math.min(hRatio, vRatio); // 採用較小值，確保整張圖都塞得進去且不變形
-                
-                // 3. 計算讓圖片完美居中的位移量 (Center offset)
-                const shiftX = (canvas.width - mCanvas.width * ratio) / 2;
-                const shiftY = (canvas.height - mCanvas.height * ratio) / 2;
-                
-                // 4. 等比例渲染繪製回 A4 格子裡
-                ctx.drawImage(
-                    tempImage, 
-                    0, 0, mCanvas.width, mCanvas.height, // 來源區塊
-                    shiftX, shiftY, mCanvas.width * ratio, mCanvas.height * ratio // 目標區塊 (完美不變形)
-                );
-                
-                closeSignatureModal();
-            };
+            // 計算不變形比例
+            const hRatio = canvas.width / mCanvas.width;
+            const vRatio = canvas.height / mCanvas.height;
+            const ratio  = Math.min(hRatio, vRatio);
+            
+            // 計算置中位移
+            const shiftX = (canvas.width - mCanvas.width * ratio) / 2;
+            const shiftY = (canvas.height - mCanvas.height * ratio) / 2;
+            
+            // 直接將大 Canvas 同步渲染至小 Canvas 中，免除 onload 被轉移焦點的問題
+            ctx.drawImage(
+                mCanvas, 
+                0, 0, mCanvas.width, mCanvas.height, 
+                shiftX, shiftY, mCanvas.width * ratio, mCanvas.height * ratio
+            );
+            
+            closeSignatureModal();
         }
 
-        // 欄位同步與日期自動帶入
         function syncData(sourceId, targetId) {
             const src = document.getElementById(sourceId);
             const tgt = document.getElementById(targetId);
@@ -293,7 +283,6 @@
         document.getElementById('roc-month').value = today.getMonth() + 1;
         document.getElementById('roc-day').value = today.getDate();
 
-        // 列印與 PDF
         function executePrint() {
             canvas.style.border = 'none';
             canvas.style.borderBottom = '1px solid black';
