@@ -162,20 +162,31 @@
     }
 
     // 📱 手機版 PDF 生成 - 使用單次 canvas 捕捉 + 正確分頁
-    function generatePDFMobile(element, fileName) {
-        const opt = {
-            margin: [10, 10, 10, 10],
-            filename: fileName,
-            image: { type: 'jpeg', quality: 0.95 },
-            html2canvas: {
-                scale: 1.2,                    // 降低縮放避免失真
-                useCORS: true,
-                logging: false,
-                allowTaint: true,
-                backgroundColor: '#ffffff',
-                windowWidth: 794,              // A4 寬度 (210mm in pixels)
-                // ✅ 不設置 windowHeight - 讓 html2canvas 自動計算完整高度
-            },
+   function generatePDFMobile(element, fileName) {
+    const opt = {
+        margin: 10,
+        filename: fileName,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+            scale: 2, // 建議設為 2 以獲得較好的清晰度
+            useCORS: true,
+            logging: false,
+            // 關鍵修改：強制抓取元素的完整高度
+            height: element.scrollHeight, 
+            windowHeight: element.scrollHeight,
+            width: element.scrollWidth,
+            windowWidth: element.scrollWidth
+        },
+        jsPDF: {
+            unit: 'mm',
+            format: 'a4',
+            orientation: 'portrait'
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+
+    html2pdf().set(opt).from(element).save();
+}
             jsPDF: {
                 unit: 'mm',
                 format: 'a4',
