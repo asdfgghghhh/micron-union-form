@@ -96,6 +96,7 @@
     const ctx = canvas.getContext('2d');
     let isDrawing = false;
 
+    // --- 簽名板功能 ---
     function openModal() { 
         modal.style.display = 'flex'; 
         canvas.width = canvas.offsetWidth; 
@@ -119,39 +120,24 @@
         return { x: clientX - rect.left, y: clientY - rect.top }; 
     }
     
-    function startDrawing(e) { 
-        isDrawing = true; 
-        const pos = getPos(e); 
-        ctx.beginPath(); 
-        ctx.moveTo(pos.x, pos.y); 
-    }
-    
-    function draw(e) { 
-        if (!isDrawing) return; 
-        const pos = getPos(e); 
-        ctx.lineTo(pos.x, pos.y); 
-        ctx.stroke(); 
-    }
+    function startDrawing(e) { isDrawing = true; const pos = getPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
+    function draw(e) { if (!isDrawing) return; const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); }
 
-    canvas.addEventListener('mousedown', startDrawing); 
-    canvas.addEventListener('mousemove', draw); 
-    window.addEventListener('mouseup', () => isDrawing = false);
-    
+    canvas.addEventListener('mousedown', startDrawing); canvas.addEventListener('mousemove', draw); window.addEventListener('mouseup', () => isDrawing = false);
     canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, {passive: false}); 
     canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, {passive: false}); 
     canvas.addEventListener('touchend', (e) => { e.preventDefault(); isDrawing = false; }, {passive: false});
 
-    // ========== PDF 生成邏輯 ==========
-    function generatePDF() {
-        // 同步所有輸入值到 HTML 屬性
+    // --- PDF 生成主程式 ---
+    async function generatePDF() {
         document.querySelectorAll('input, select').forEach(el => {
-            el.setAttribute('value', el.value);
+            if (el.type !== 'checkbox' && el.type !== 'radio') el.setAttribute('value', el.value);
         });
 
         const element = document.getElementById('form-to-pdf');
         const nameInput = document.querySelector('input[type="text"]');
         const fileName = nameInput.value ? `入會申請書_${nameInput.value}.pdf` : '入會申請書.pdf';
-
+        
         const isMobile = /android|ios|iphone|ipad|ipot/.test(navigator.userAgent.toLowerCase());
 
         if (isMobile) {
@@ -160,54 +146,41 @@
             generatePDFDesktop(element, fileName);
         }
     }
-function generatePDFMobile(element, fileName) {
-    // 1. 取得內容的實際高度 (px)，轉為 mm
-    const elementHeight = element.scrollHeight; 
-    const heightInMm = elementHeight * 0.264583; // 1px 約等於 0.264583mm
 
-    const opt = {
-        margin: 0,
-        filename: fileName,
-        image: { type: 'jpeg', quality: 1 },
-        html2canvas: {
-            scale: 2, // 解析度設為 2 比較清晰
-            useCORS: true,
-            windowWidth: 794
-        },
-        jsPDF: {
-            unit: 'mm',
-            // [寬度: 210, 高度: 計算出的內容高度]
-            // 這樣 PDF 就會剛好包住所有內容，不會產生第二頁
-            format: [210, heightInMm + 20], 
-            orientation: 'portrait'
-        },
-        // 設定為 'none'，確保完全不觸發任何分頁邏輯
-        pagebreak: { mode: 'none' } 
-    };
+    function generatePDFMobile(element, fileName) {
+        const elementHeight = element.scrollHeight;
+        const heightInMm = elementHeight * 0.264583;
 
-    html2pdf()
-        .set(opt)
-        .from(element)
-        .save()
-        .catch(err => {
-            console.error('PDF 生成失敗:', err);
-        });
-}
+        const opt = {
+            margin: 0,
+            filename: fileName,
+            image: { type: 'jpeg', quality: 1 },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                windowWidth: element.scrollWidth,
+                height: elementHeight,
+                windowHeight: elementHeight,
+                ignoreElements: (el) => el.id === 'action-buttons-area'
+            },
+            jsPDF: {
+                unit: 'mm',
+                format: [210, heightInMm + 10],
+                orientation: 'portrait'
+            },
+            pagebreak: { mode: 'none' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
 
-    // 💻 桌面版 PDF 生成 (保持原樣)
     function generatePDFDesktop(element, fileName) {
         const opt = {
             margin: 10,
             filename: fileName,
             image: { type: 'jpeg', quality: 1 },
-            html2canvas: { 
-                scale: 2, 
-                useCORS: true, 
-                ignoreElements: (el) => el.id === 'action-buttons-area' 
-            },
+            html2canvas: { scale: 2, useCORS: true, ignoreElements: (el) => el.id === 'action-buttons-area' },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
-
         html2pdf().set(opt).from(element).save();
     }
 </script>
