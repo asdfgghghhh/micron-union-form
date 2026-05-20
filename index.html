@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>台灣美光記憶體股份有限公司企業工會 - 入會申請書</title>
-    <!-- 載入 Tailwind CSS 與 轉檔所需套件 -->
+    <title>台灣美光記憶體股份有限公司企業工會 - 入會申請系統</title>
+    <!-- 載入 Tailwind CSS 與 轉檔套件 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -39,30 +39,87 @@
         #signature-pad { border: 1px dashed #9ca3af; background-color: #f9fafb; cursor: crosshair; touch-action: none; max-width: 100%; }
     </style>
 </head>
-<body class="py-4 px-2 md:py-8 md:px-4 flex justify-center items-start min-h-screen">
+<body class="py-4 px-2 md:py-8 md:px-4 flex flex-col justify-center items-center min-h-screen">
 
-    <div id="capture-area" class="print-container bg-white shadow-xl rounded-lg max-w-4xl w-full p-4 md:p-8 relative">
+    <!-- ========================================== -->
+    <!-- 第一階段：智能瀏覽器引導入口區 -->
+    <!-- ========================================== -->
+    <div id="guide-zone" class="no-print bg-white shadow-2xl rounded-2xl max-w-md w-full p-6 md:p-8 border border-gray-100 text-center my-auto">
+        <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-600/30">
+            <span class="text-white text-3xl font-bold font-serif tracking-tighter">m</span>
+        </div>
+        <h1 class="text-xl md:text-2xl font-bold text-gray-800 tracking-wider">台灣美光企業工會</h1>
+        <h2 class="text-base text-gray-600 mt-1 font-medium mb-6">線上入會申請系統</h2>
+
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-left mb-6">
+            <h3 class="text-sm font-bold text-blue-800 flex items-center gap-1.5 mb-1">
+                <span>💡</span> 填表前置提醒
+            </h3>
+            <p class="text-xs text-blue-700/90 leading-relaxed">
+                本表單包含「電子簽名」與「PDF 自動生成」功能。為確保簽名不破圖、檔案順利下載，<b>強烈建議指定使用標準瀏覽器開啟。</b>
+            </p>
+        </div>
+
+        <div class="space-y-3.5">
+            <!-- 喚醒 Chrome -->
+            <button onclick="launchBrowser('chrome')" class="w-full flex items-center justify-between p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50/30 transition duration-200 text-left group">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">🌐</span>
+                    <div>
+                        <div class="font-bold text-gray-800 text-sm group-hover:text-blue-600">使用 Google Chrome 開擊</div>
+                        <div class="text-xs text-gray-400 mt-0.5">電腦、Android、iPhone 推薦（相容性最高）</div>
+                    </div>
+                </div>
+                <span class="text-gray-400 group-hover:text-blue-500 font-bold transition">➔</span>
+            </button>
+
+            <!-- 喚醒 Safari -->
+            <button onclick="launchBrowser('safari')" class="w-full flex items-center justify-between p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-indigo-500 hover:bg-indigo-50/30 transition duration-200 text-left group">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">🧭</span>
+                    <div>
+                        <div class="font-bold text-gray-800 text-sm group-hover:text-indigo-600">使用 Apple Safari 開啟</div>
+                        <div class="text-xs text-gray-400 mt-0.5">僅限 iPhone / iPad / Mac 同仁點選</div>
+                    </div>
+                </div>
+                <span class="text-gray-400 group-hover:text-indigo-500 font-bold transition">➔</span>
+            </button>
+
+            <!-- 在原地直接開 -->
+            <button onclick="showFormDirectly()" class="w-full flex items-center justify-between p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-emerald-500 hover:bg-emerald-50/30 transition duration-200 text-left group">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">💻</span>
+                    <div>
+                        <div class="font-bold text-gray-800 text-sm group-hover:text-emerald-600">使用目前瀏覽器直接填寫</div>
+                        <div class="text-xs text-gray-400 mt-0.5">如您已在 Chrome / Edge 中，請直接點此</div>
+                    </div>
+                </div>
+                <span class="text-gray-400 group-hover:text-emerald-500 font-bold transition">➔</span>
+            </button>
+        </div>
+        <div class="text-center text-[11px] text-gray-400 mt-8 tracking-wider">© 2026 台灣美光記憶體股份有限公司企業工會</div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- 第二階段：原本的完整入會申請書表單區 (預設隱藏) -->
+    <!-- ========================================== -->
+    <div id="form-zone" class="hidden print-container bg-white shadow-xl rounded-lg max-w-4xl w-full p-4 md:p-8 relative">
         
         <!-- 操作按鈕區 (電腦版) -->
         <div class="no-print hidden md:flex absolute top-4 right-4 gap-2">
-            <button onclick="clearSignature()" class="px-4 py-2 bg-red-100 text-red-600 rounded hover:bg-red-200 transition text-sm font-medium">
-                清除簽名
-            </button>
-            <button onclick="openSaveModal()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium shadow">
-                儲存 / 列印為 PDF
-            </button>
+            <button onclick="clearSignature()" class="px-4 py-2 bg-red-100 text-red-600 rounded hover:bg-red-200 transition text-sm font-medium">清除簽名</button>
+            <button onclick="executeSave()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium shadow">儲存 / 列印為 PDF</button>
         </div>
 
         <!-- 標題區 -->
         <div class="text-center mb-4 md:mb-6 mt-2 md:mt-4 relative z-10">
             <h1 class="text-xl md:text-3xl font-bold tracking-widest mb-1 md:mb-3">台灣美光記憶體股份有限公司企業工會</h1>
-            <h2 class="text-lg md:text-2xl font-medium tracking-widest flex justify-center items-end gap-16">
-                <span>入會申請書</span>
-            </h2>
+            <h2 class="text-lg md:text-2xl font-medium tracking-widest flex justify-center items-end gap-16"><span>入會申請書</span></h2>
             <div class="text-right text-sm mr-4 mt-1">序<span class="inline-block w-24 border-b border-gray-400 ml-2"></span></div>
         </div>
 
-        <!-- 手機版欄位 -->
+        <!-- 手機版填寫欄位 -->
         <div class="mobile-form-view block md:hidden space-y-4 no-print">
             <div class="bg-gray-50 p-4 rounded-lg space-y-3 border border-gray-200">
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">姓 名</label><input type="text" id="m-name" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入姓名" oninput="syncData('m-name', 'd-name')"></div>
@@ -78,7 +135,7 @@
             </div>
         </div>
 
-        <!-- A4 標準表格 -->
+        <!-- A4 標準列印表格 -->
         <div id="desktop-view-zone" class="desktop-table-view hidden md:block watermark-container border border-gray-700">
             <div class="watermark-bg flex flex-col items-center"><span class="text-[120px] md:text-[200px]">m</span><span class="text-[24px] md:text-[40px] -mt-[40px] md:-mt-[60px]">Micron Labor Union</span></div>
             <table>
@@ -111,7 +168,7 @@
             </table>
         </div>
 
-        <!-- 條款與簽名區 -->
+        <!-- 條款與手寫簽名區 -->
         <div class="print-compact border-x border-b border-gray-700 bg-white p-4 md:p-6 relative z-10 -mt-[1px]">
             <p class="leading-relaxed text-sm md:text-base mb-4 font-medium text-gray-800">
                 本人同意按工會章程行使權利與義務並同意於加入企業工會成為會員之日起<br class="hidden md:inline">
@@ -140,65 +197,64 @@
 
         <!-- 手機版操作按鈕 -->
         <div class="no-print flex md:hidden gap-2 mt-6">
-            <button onclick="clearSignature()" class="flex-1 py-3 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition text-sm font-medium text-center">清除簽名</button>
-            <button onclick="openSaveModal()" class="flex-[2] py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium text-center shadow">儲存 / 列印 PDF</button>
+            <button onclick="clearSignature()" class="flex-1 py-3 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition text-sm font-medium">清除簽名</button>
+            <button onclick="executeSave()" class="flex-[2] py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium shadow">儲存 PDF</button>
         </div>
     </div>
 
     <!-- ========================================== -->
-    <!-- 智能環境自選彈窗 (Modal) -->
+    <!-- 控制核心 JavaScript -->
     <!-- ========================================== -->
-    <div id="saveModal" class="no-print fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl border border-gray-100 animate-in fade-in zoom-in duration-200">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-gray-900">請選擇您的瀏覽器環境</h3>
-                <button onclick="closeSaveModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
-            </div>
-            <p class="text-sm text-gray-500 mb-5">為了確保簽名不破圖、版面不變形，請點選您目前的開啟方式：</p>
-            
-            <div class="space-y-3">
-                <!-- 選項 1：標準瀏覽器 -->
-                <button onclick="executeSave('standard')" class="w-full flex items-center justify-between p-3.5 border border-gray-200 rounded-xl hover:bg-blue-50 hover:border-blue-300 transition text-left group">
-                    <div>
-                        <div class="font-bold text-gray-800 text-sm group-hover:text-blue-600">電腦版 Chrome / Safari</div>
-                        <div class="text-xs text-gray-400 mt-0.5">直接呼叫作業系統的最完美 PDF 儲存</div>
-                    </div>
-                    <span class="text-blue-500 font-bold">➔</span>
-                </button>
-
-                <!-- 選項 2：Edge 或手機環境 -->
-                <button onclick="executeSave('edge-direct')" class="w-full flex items-center justify-between p-3.5 border border-gray-200 rounded-xl hover:bg-blue-50 hover:border-blue-300 transition text-left group">
-                    <div>
-                        <div class="font-bold text-gray-800 text-sm group-hover:text-blue-600">Edge 瀏覽器 / 手機 / 平板</div>
-                        <div class="text-xs text-gray-400 mt-0.5">免印表機權限，直接在內核打包產生 PDF 下載</div>
-                    </div>
-                    <span class="text-blue-500 font-bold">➔</span>
-                </button>
-
-                <!-- 選項 3：通訊軟體內建環境 -->
-                <button onclick="executeSave('line-app')" class="w-full flex items-center justify-between p-3.5 border border-gray-200 rounded-xl hover:bg-amber-50 hover:border-amber-300 transition text-left group">
-                    <div>
-                        <div class="font-bold text-amber-800 text-sm">我是從 LINE / 公司通訊軟體點開的</div>
-                        <div class="text-xs text-amber-600/70 mt-0.5">內建瀏覽器功能遭鎖死，點此看解法</div>
-                    </div>
-                    <span class="text-amber-500 font-bold">⚠️</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
     <script>
+        // 1. 偵測網址參數：如果是被 Deep Link 跳轉過來的，自動略過選單進入表單
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('redirected') === 'true') {
+                showFormDirectly();
+            }
+        };
+
+        // 顯示表單主要控制
+        function showFormDirectly() {
+            document.getElementById('guide-zone').classList.add('hidden');
+            document.getElementById('form-zone').classList.remove('hidden');
+            resizeCanvas(); // 初始化簽名板大小
+        }
+
+        // 智能導流跳轉核心
+        function launchBrowser(type) {
+            // 取得當前網址並附帶參數，告訴下一棒「我已經跳轉過來了，請直接顯示表單」
+            const currentUrl = window.location.href.split('?')[0];
+            const targetUrl = currentUrl + '?redirected=true';
+            const cleanUrl = targetUrl.replace(/^https?:\/\//, '');
+
+            if (type === 'chrome') {
+                const chromeIntent = 'googlechromes://' + cleanUrl;
+                // 防綁架：如果使用者沒裝 Chrome 或沒反應，2 秒後原地直接開
+                const fallback = setTimeout(() => { showFormDirectly(); }, 2000);
+                window.location.href = chromeIntent;
+            } 
+            else if (type === 'safari') {
+                const safariIntent = 'x-web-search://?' + targetUrl;
+                const fallback = setTimeout(() => { showFormDirectly(); }, 2000);
+                window.location.href = safariIntent;
+            }
+        }
+
+        // 2. 表單核心：資料同步欄位
         function syncData(sourceId, targetId) {
             const src = document.getElementById(sourceId);
             const tgt = document.getElementById(targetId);
             if (src && tgt) tgt.value = src.value;
         }
 
+        // 預填民國日期
         const today = new Date();
         document.getElementById('roc-year').value = today.getFullYear() - 1911;
         document.getElementById('roc-month').value = today.getMonth() + 1;
         document.getElementById('roc-day').value = today.getDate();
 
+        // 3. 簽名板核心
         const canvas = document.getElementById('signature-pad');
         const ctx = canvas.getContext('2d');
         let isDrawing = false; let lastX = 0; let lastY = 0;
@@ -213,19 +269,18 @@
             }
             return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
         }
-
         function startDrawing(e) {
             isDrawing = true; const coords = getCoordinates(e); lastX = coords.x; lastY = coords.y;
             ctx.beginPath(); ctx.arc(lastX, lastY, ctx.lineWidth / 2, 0, Math.PI * 2); ctx.fill();
-            ctx.beginPath(); ctx.moveTo(lastX, lastY);
+            ctx.beginPath(); moveTo(lastX, lastY);
         }
-
         function draw(e) {
             if (!isDrawing) return; e.preventDefault();
             const coords = getCoordinates(e); ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(coords.x, coords.y); ctx.stroke();
             lastX = coords.x; lastY = coords.y;
         }
         function stopDrawing() { isDrawing = false; ctx.beginPath(); }
+        function clearSignature() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
         canvas.addEventListener('mousedown', startDrawing); canvas.addEventListener('mousemove', draw);
         canvas.addEventListener('mouseup', stopDrawing); canvas.addEventListener('mouseout', stopDrawing);
@@ -233,27 +288,33 @@
         canvas.addEventListener('touchmove', draw, { passive: false });
         canvas.addEventListener('touchend', stopDrawing);
 
-        function clearSignature() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+        function resizeCanvas() {
+            // 確保手機版簽名時解析度正確不模糊
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            if (canvas.width === 300 && window.innerWidth < 640) {
+                canvas.width = canvas.offsetWidth * ratio;
+                canvas.height = canvas.offsetHeight * ratio;
+                ctx.scale(ratio, ratio);
+                ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+            }
+        }
 
-        // 控制自選彈窗
-        function openSaveModal() { document.getElementById('saveModal').classList.remove('hidden'); }
-        function closeSaveModal() { document.getElementById('saveModal').classList.add('hidden'); }
-
-        // 執行對應瀏覽器的存檔核心
-        function executeSave(type) {
-            closeSaveModal();
+        // 4. 超強 PDF 輸出核心 (自動相容所有瀏覽器，包含 Edge、手機)
+        function executeSave() {
             const userName = document.getElementById('d-name').value || '未命名';
+            
+            // 偵測是否為電腦版標準環境 (Chrome/Safari)
+            const isDesktopStandard = window.innerWidth >= 768 && !navigator.userAgent.includes("Edge") && !navigator.userAgent.includes("Edg");
 
-            if (type === 'standard') {
+            if (isDesktopStandard) {
+                // 電腦版主流瀏覽器直接呼叫系統最高畫質列印
                 canvas.style.border = 'none';
                 canvas.style.borderBottom = '1px solid black';
                 window.print();
                 setTimeout(() => { canvas.style.border = '1px dashed #9ca3af'; }, 150);
-            } 
-            
-            else if (type === 'edge-direct') {
-                // 專為 Edge 研發：強制內核直接在記憶體中將 HTML 渲染成 A4 規格的 PDF
-                alert("💡 已啟動 Edge/行動裝置 核心轉譯技術！\n系統正在為您封裝單頁 A4 PDF，完成後將自動下載。");
+            } else {
+                // 手機版、LINE、或是電腦版 Edge 環境：啟動無痛內核封裝打包技術
+                alert("💡 已啟動智慧內核轉譯技術！\n系統正在為您將表單與簽名封裝為 A4 PDF，完成後將自動下載。");
                 
                 const desktopView = document.getElementById('desktop-view-zone');
                 const isHidden = desktopView.classList.contains('hidden');
@@ -262,7 +323,7 @@
                 const noPrintElements = document.querySelectorAll('.no-print');
                 noPrintElements.forEach(el => el.style.opacity = '0');
 
-                html2canvas(document.getElementById('capture-area'), {
+                html2canvas(document.getElementById('form-zone'), {
                     scale: 2,
                     useCORS: true,
                     backgroundColor: '#ffffff'
@@ -270,21 +331,16 @@
                     if (isHidden) desktopView.classList.add('hidden');
                     noPrintElements.forEach(el => el.style.opacity = '1');
 
-                    // 利用 jsPDF 直接包裝成標準 A4 PDF，徹底解決 Edge 的列印阻擋問題
                     const { jsPDF } = window.jspdf;
                     const pdf = new jsPDF('p', 'mm', 'a4');
-                    const imgWidth = 210; // A4 標準寬度 (mm)
+                    const imgWidth = 210; 
                     const imgHeight = (canvasImage.height * imgWidth) / canvasImage.width;
                     
                     pdf.addImage(canvasImage.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
                     pdf.save(`美光工會入會申請書_${userName}.pdf`);
                 }).catch(err => {
-                    alert("封鎖等級過高，請嘗試更換 Chrome 瀏覽器或直接螢幕截圖。");
+                    alert("目前環境安全限制較高，如未自動下載，建議直接螢幕截圖保存。");
                 });
-            } 
-            
-            else if (type === 'line-app') {
-                alert("⚠️ 您目前處於通訊軟體的防綁架內建瀏覽器中。\n\n【解決步驟】\n1. 請點擊螢幕最右上方或最右下角的「三個點 ···」或「分享箭頭」\n2. 點選【在 Safari 中開啟】或【在 Chrome 中開啟】\n3. 重新進入網頁後，就能順利點擊儲存囉！");
             }
         }
     </script>
