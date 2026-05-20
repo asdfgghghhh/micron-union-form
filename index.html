@@ -165,7 +165,7 @@
             initMainCanvas();
         };
 
-        // 初始化主畫布尺寸
+        // 初始化 A4 申請書內的小簽名框
         function initMainCanvas() {
             canvas.width = 300;
             canvas.height = 120;
@@ -175,7 +175,7 @@
             ctx.lineCap = 'round';
         }
 
-        // 智能判斷：手機點擊開啟彈出視窗；電腦桌機直接在原地畫
+        // 判斷點擊裝置：小於 1024px 開啟手機大視窗
         function handleCanvasClick(e) {
             if (window.innerWidth < 1024) {
                 e.preventDefault();
@@ -183,17 +183,17 @@
             }
         }
 
-        // 開啟全螢幕簽名視窗
+        // 開啟滿版簽名視窗
         function openSignatureModal() {
             modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; // 鎖定網頁背景不亂滾
+            document.body.style.overflow = 'hidden'; // 防止底層網頁亂滾
             
-            // 實體寬高重設，清除任何拉伸
+            // 實體像素大小與 CSS 容器完全對齊
             mCanvas.width = mCanvas.offsetWidth;
             mCanvas.height = mCanvas.offsetHeight;
             
             mCtx.strokeStyle = '#000000';
-            mCtx.lineWidth = 4; // 手指簽名加粗更滑順
+            mCtx.lineWidth = 4; // 加粗筆觸更好看
             mCtx.lineJoin = 'round';
             mCtx.lineCap = 'round';
         }
@@ -203,7 +203,7 @@
             document.body.style.overflow = 'auto';
         }
 
-        // 取得精準的觸控/滑鼠坐標
+        // 取得相對坐標
         function getPos(e, c) {
             const rect = c.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -214,7 +214,7 @@
             };
         }
 
-        // 桌機版滑鼠原地簽名事件綁定
+        // 桌機滑鼠原地畫圖邏輯
         canvas.addEventListener('mousedown', (e) => {
             if (window.innerWidth < 1024) return;
             isDrawing = true;
@@ -230,7 +230,7 @@
         });
         window.addEventListener('mouseup', () => { isDrawing = false; });
 
-        // 全螢幕大畫布觸控事件綁定 (保證絕對有線條)
+        // 手機大視窗觸控手勢
         mCanvas.addEventListener('touchstart', (e) => {
             isMDrawing = true;
             const p = getPos(e, mCanvas);
@@ -240,7 +240,7 @@
 
         mCanvas.addEventListener('touchmove', (e) => {
             if (!isMDrawing) return;
-            e.preventDefault(); // 阻斷瀏覽器預設捲動
+            e.preventDefault();
             const p = getPos(e, mCanvas);
             mCtx.lineTo(p.x, p.y);
             mCtx.stroke();
@@ -248,19 +248,40 @@
 
         window.addEventListener('touchend', () => { isMDrawing = false; });
 
-        // 清除功能
+        // 清除按鈕
         function clearSignature() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
         function clearModalSignature() { mCtx.clearRect(0, 0, mCanvas.width, mCanvas.height); }
 
-        // 確認完成：完美等比例壓縮帶回原本的 A4 表格格子
+        // 【核心修正】等比例置中縮放演算法（Contain 模式），絕不壓扁名字
         function saveModalSignature() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            // 完美將大畫布內容縮小畫入主畫布中
-            ctx.drawImage(mCanvas, 0, 0, canvas.width, canvas.height);
-            closeSignatureModal();
+            // 1. 創立臨時變數存放這張剛簽完的大圖
+            const tempImage = new Image();
+            tempImage.src = mCanvas.toDataURL();
+            
+            tempImage.onload = function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // 2. 計算兩邊畫布的縮放比率，找出維持長寬比的縮放值 (Ratio)
+                const hRatio = canvas.width / mCanvas.width;
+                const vRatio = canvas.height / mCanvas.height;
+                const ratio  = Math.min(hRatio, vRatio); // 採用較小值，確保整張圖都塞得進去且不變形
+                
+                // 3. 計算讓圖片完美居中的位移量 (Center offset)
+                const shiftX = (canvas.width - mCanvas.width * ratio) / 2;
+                const shiftY = (canvas.height - mCanvas.height * ratio) / 2;
+                
+                // 4. 等比例渲染繪製回 A4 格子裡
+                ctx.drawImage(
+                    tempImage, 
+                    0, 0, mCanvas.width, mCanvas.height, // 來源區塊
+                    shiftX, shiftY, mCanvas.width * ratio, mCanvas.height * ratio // 目標區塊 (完美不變形)
+                );
+                
+                closeSignatureModal();
+            };
         }
 
-        // 欄位同步與日期
+        // 欄位同步與日期自動帶入
         function syncData(sourceId, targetId) {
             const src = document.getElementById(sourceId);
             const tgt = document.getElementById(targetId);
@@ -272,6 +293,7 @@
         document.getElementById('roc-month').value = today.getMonth() + 1;
         document.getElementById('roc-day').value = today.getDate();
 
+        // 列印與 PDF
         function executePrint() {
             canvas.style.border = 'none';
             canvas.style.borderBottom = '1px solid black';
