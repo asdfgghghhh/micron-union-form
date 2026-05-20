@@ -33,7 +33,7 @@
             position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); opacity: 0.04;
             font-size: 150px; font-weight: bold; color: #000; z-index: 1; pointer-events: none; white-space: nowrap; user-select: none;
         }
-        #signature-pad { border: 1px dashed #9ca3af; background-color: #f9fafb; cursor: pointer; touch-action: none; max-width: 100%; }
+        #signature-pad { border: 1px dashed #9ca3af; background-color: #f9fafb; cursor: pointer; max-width: 100%; height: 120px; }
         #modal-signature-pad { background-color: #ffffff; cursor: crosshair; touch-action: none; width: 100%; height: 100%; }
     </style>
 </head>
@@ -108,8 +108,8 @@
             <div class="print-space flex flex-col sm:flex-row justify-end items-center sm:items-end mt-4 md:mt-6 gap-4">
                 <span class="font-medium text-base md:text-lg sm:mb-4">申請人：</span>
                 <div class="flex flex-col items-center w-full sm:w-auto">
-                    <canvas id="signature-pad" width="300" height="120" class="rounded w-full sm:w-[300px]" onclick="openSignatureModal()"></canvas>
-                    <span class="text-xs text-gray-500 mt-1 no-print">(點擊上方框格進行手寫簽名)</span>
+                    <canvas id="signature-pad" class="rounded w-[300px]" onclick="handleCanvasClick(event)" ontouchstart="handleCanvasClick(event)"></canvas>
+                    <span class="text-xs text-gray-500 mt-1 no-print">(請點擊框格進行手寫簽名)</span>
                 </div>
                 <span class="font-medium text-base md:text-lg sm:mb-4">(簽章)</span>
             </div>
@@ -137,146 +137,146 @@
             <h3 class="text-lg font-bold tracking-wider">請在下方白色區域內手寫簽名</h3>
             <button onclick="closeSignatureModal()" class="text-gray-400 text-2xl px-2">✕</button>
         </div>
-
         <div class="flex-1 my-4 bg-white rounded-xl overflow-hidden shadow-inner relative">
             <canvas id="modal-signature-pad"></canvas>
         </div>
-
         <div class="flex gap-3 pb-2">
-            <button onclick="clearModalSignature()" class="flex-1 py-3.5 bg-gray-700 text-gray-200 font-medium rounded-xl active:bg-gray-600 transition text-base">重填清除</button>
-            <button onclick="saveModalSignature()" class="flex-[2] py-3.5 bg-emerald-600 text-white font-bold rounded-xl active:bg-emerald-700 transition text-base shadow-lg shadow-emerald-700/30">確認完成簽名</button>
+            <button onclick="clearModalSignature()" class="flex-1 py-3.5 bg-gray-700 text-gray-200 font-medium rounded-xl transition text-base">重填清除</button>
+            <button onclick="saveModalSignature()" class="flex-[2] py-3.5 bg-emerald-600 text-white font-bold rounded-xl transition text-base shadow-lg">確認完成簽名</button>
         </div>
     </div>
 
 
     <script>
-        window.onload = function() {
-            resizeCanvas();
-        };
-
-        // 欄位雙向同步邏輯
-        function syncData(sourceId, targetId) {
-            const src = document.getElementById(sourceId);
-            const tgt = document.getElementById(targetId);
-            if (src && tgt) tgt.value = src.value;
-        }
-
-        // 自動填寫民國日期
-        const today = new Date();
-        document.getElementById('roc-year').value = today.getFullYear() - 1911;
-        document.getElementById('roc-month').value = today.getMonth() + 1;
-        document.getElementById('roc-day').value = today.getDate();
-
-        // ------------------------------------------
-        // 簽名板 1：主畫面 A4 表格內的畫布 (電腦版使用，手機版作預覽)
-        // ------------------------------------------
         const canvas = document.getElementById('signature-pad');
         const ctx = canvas.getContext('2d');
-        let isDrawing = false; let lastX = 0; let lastY = 0;
-        ctx.strokeStyle = '#000000'; ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-
-        function getCoordinates(e, targetCanvas) {
-            const rect = targetCanvas.getBoundingClientRect();
-            const scaleX = targetCanvas.width / rect.width;
-            const scaleY = targetCanvas.height / rect.height;
-            if (e.touches && e.touches.length > 0) {
-                return { x: (e.touches[0].clientX - rect.left) * scaleX, y: (e.touches[0].clientY - rect.top) * scaleY };
-            }
-            return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
-        }
-
-        function startDrawing(e) {
-            isDrawing = true; const coords = getCoordinates(e, canvas); lastX = coords.x; lastY = coords.y;
-            ctx.beginPath(); ctx.arc(lastX, lastY, ctx.lineWidth / 2, 0, Math.PI * 2); ctx.fill();
-            ctx.beginPath(); ctx.moveTo(lastX, lastY);
-        }
-        function draw(e) {
-            if (!isDrawing) return; e.preventDefault();
-            const coords = getCoordinates(e, canvas); ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(coords.x, coords.y); ctx.stroke();
-            lastX = coords.x; lastY = coords.y;
-        }
-        function stopDrawing() { isDrawing = false; ctx.beginPath(); }
-        function clearSignature() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
-
-        canvas.addEventListener('mousedown', startDrawing); canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', stopDrawing); canvas.addEventListener('mouseout', stopDrawing);
-
-        function resizeCanvas() {
-            const ratio = Math.max(window.devicePixelRatio || 1, 1);
-            if (canvas.width === 300 && window.innerWidth < 640) {
-                canvas.width = canvas.offsetWidth * ratio;
-                canvas.height = canvas.offsetHeight * ratio;
-                ctx.scale(ratio, ratio);
-                ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-            }
-        }
-
-        // ------------------------------------------
-        // 簽名板 2：手機專用彈出式大簽名視窗的核心控制
-        // ------------------------------------------
         const modal = document.getElementById('signature-modal');
         const mCanvas = document.getElementById('modal-signature-pad');
         const mCtx = mCanvas.getContext('2d');
-        let isMDrawing = false; let lastMX = 0; let lastMY = 0;
 
+        let isDrawing = false;
+        let isMDrawing = false;
+
+        window.onload = function() {
+            initMainCanvas();
+        };
+
+        window.onresize = function() {
+            initMainCanvas();
+        };
+
+        // 初始化主畫布尺寸
+        function initMainCanvas() {
+            canvas.width = 300;
+            canvas.height = 120;
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2.5;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+        }
+
+        // 智能判斷：手機點擊開啟彈出視窗；電腦桌機直接在原地畫
+        function handleCanvasClick(e) {
+            if (window.innerWidth < 1024) {
+                e.preventDefault();
+                openSignatureModal();
+            }
+        }
+
+        // 開啟全螢幕簽名視窗
         function openSignatureModal() {
-            // 只有在手機/平板版(寬度小於1024px)點擊時才彈出，電腦桌機版直接原地書寫即可
-            if (window.innerWidth >= 1024) return;
-
             modal.classList.remove('hidden');
-            // 動態精準校正大簽名板的高解析度尺寸
-            const ratio = Math.max(window.devicePixelRatio || 1, 1);
-            mCanvas.width = mCanvas.offsetWidth * ratio;
-            mCanvas.height = mCanvas.offsetHeight * ratio;
-            mCtx.scale(ratio, ratio);
+            document.body.style.overflow = 'hidden'; // 鎖定網頁背景不亂滾
             
-            // 設定大簽名板的水流筆觸
+            // 實體寬高重設，清除任何拉伸
+            mCanvas.width = mCanvas.offsetWidth;
+            mCanvas.height = mCanvas.offsetHeight;
+            
             mCtx.strokeStyle = '#000000';
-            mCtx.lineWidth = 3.5; // 稍微加粗，手機看更清晰
+            mCtx.lineWidth = 4; // 手指簽名加粗更滑順
             mCtx.lineJoin = 'round';
             mCtx.lineCap = 'round';
         }
 
         function closeSignatureModal() {
             modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
         }
 
-        function startMDrawing(e) {
-            isMDrawing = true; const coords = getCoordinates(e, mCanvas); lastMX = coords.x; lastMY = coords.y;
-            mCtx.beginPath(); mCtx.arc(lastMX, lastMY, mCtx.lineWidth / 2, 0, Math.PI * 2); mCtx.fill();
-            mCtx.beginPath(); mCtx.moveTo(lastMX, lastMY);
+        // 取得精準的觸控/滑鼠坐標
+        function getPos(e, c) {
+            const rect = c.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
         }
-        function drawM(e) {
-            if (!isMDrawing) return; e.preventDefault(); e.stopPropagation();
-            const coords = getCoordinates(e, mCanvas); mCtx.beginPath(); mCtx.moveTo(lastMX, lastMY); mCtx.lineTo(coords.x, coords.y); mCtx.stroke();
-            lastMX = coords.x; lastMY = coords.y;
-        }
-        function stopMDrawing() { isMDrawing = false; mCtx.beginPath(); }
+
+        // 桌機版滑鼠原地簽名事件綁定
+        canvas.addEventListener('mousedown', (e) => {
+            if (window.innerWidth < 1024) return;
+            isDrawing = true;
+            const p = getPos(e, canvas);
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+        });
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing || window.innerWidth < 1024) return;
+            const p = getPos(e, canvas);
+            ctx.lineTo(p.x, p.y);
+            ctx.stroke();
+        });
+        window.addEventListener('mouseup', () => { isDrawing = false; });
+
+        // 全螢幕大畫布觸控事件綁定 (保證絕對有線條)
+        mCanvas.addEventListener('touchstart', (e) => {
+            isMDrawing = true;
+            const p = getPos(e, mCanvas);
+            mCtx.beginPath();
+            mCtx.moveTo(p.x, p.y);
+        }, { passive: false });
+
+        mCanvas.addEventListener('touchmove', (e) => {
+            if (!isMDrawing) return;
+            e.preventDefault(); // 阻斷瀏覽器預設捲動
+            const p = getPos(e, mCanvas);
+            mCtx.lineTo(p.x, p.y);
+            mCtx.stroke();
+        }, { passive: false });
+
+        window.addEventListener('touchend', () => { isMDrawing = false; });
+
+        // 清除功能
+        function clearSignature() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
         function clearModalSignature() { mCtx.clearRect(0, 0, mCanvas.width, mCanvas.height); }
 
-        // 綁定滿版大畫布的觸控手勢
-        mCanvas.addEventListener('touchstart', startMDrawing, { passive: false });
-        mCanvas.addEventListener('touchmove', drawM, { passive: false });
-        mCanvas.addEventListener('touchend', stopMDrawing);
-
-        // 重點：大簽名完成後，完美等比例壓縮帶回原 A4 表格中
+        // 確認完成：完美等比例壓縮帶回原本的 A4 表格格子
         function saveModalSignature() {
-            // 將大畫布內容渲染複製到主表單畫布中
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // 完美將大畫布內容縮小畫入主畫布中
             ctx.drawImage(mCanvas, 0, 0, canvas.width, canvas.height);
             closeSignatureModal();
         }
 
-        // ------------------------------------------
-        // 原生穩定的 A4 列印 / 轉存 PDF 核心
-        // ------------------------------------------
+        // 欄位同步與日期
+        function syncData(sourceId, targetId) {
+            const src = document.getElementById(sourceId);
+            const tgt = document.getElementById(targetId);
+            if (src && tgt) tgt.value = src.value;
+        }
+
+        const today = new Date();
+        document.getElementById('roc-year').value = today.getFullYear() - 1911;
+        document.getElementById('roc-month').value = today.getMonth() + 1;
+        document.getElementById('roc-day').value = today.getDate();
+
         function executePrint() {
             canvas.style.border = 'none';
             canvas.style.borderBottom = '1px solid black';
             window.print();
-            setTimeout(() => { 
-                canvas.style.border = '1px dashed #9ca3af'; 
-            }, 150);
+            setTimeout(() => { canvas.style.border = '1px dashed #9ca3af'; }, 150);
         }
     </script>
 </body>
