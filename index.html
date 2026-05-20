@@ -7,90 +7,115 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f3f4f6; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; }
-        .watermark { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0.05; pointer-events: none; user-select: none; z-index: 0; }
-        .form-input { width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f3f4f6; padding: 20px; }
+        .form-input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .date-input { width: 60px; border: none; border-bottom: 1px solid #000; text-align: center; background: transparent; outline: none; }
         
-        .date-input { width: 50px; border: none; border-bottom: 1px solid #000; text-align: center; background: transparent; outline: none; }
-        .date-input:focus { border-bottom: 2px solid #2563eb; }
+        /* 修正後的浮水印：強制充滿容器並垂直水平置中 */
+        .watermark-overlay { 
+            position: absolute;
+            inset: 0; /* 四邊距離為0，填滿父容器 */
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+            opacity: 0.1; /* 透明度設定 */
+            pointer-events: none; /* 穿透點擊 */
+            z-index: 0; 
+        }
         
-        #signature-pad { touch-action: none; width: 100%; max-width: 300px; height: 80px; border: 1px dashed #999; }
+        .main-form-content { position: relative; z-index: 10; }
+        #signature-display { pointer-events: auto; z-index: 20; cursor: pointer; }
+        
+        #signature-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        #signature-pad { touch-action: none; background: white; width: 90vw; max-width: 500px; height: 250px; border: 1px solid #000; }
         
         @media print {
             @page { margin: 5mm !important; size: auto; }
-            body { background: white !important; padding: 0 !important; margin: 0 !important; }
+            body { background: white !important; }
             .no-print { display: none !important; }
-            .print-container { box-shadow: none !important; margin: auto !important; width: 100% !important; max-width: 600px !important; }
-            .date-input { border-bottom: 1px solid #000 !important; }
+            .print-container { box-shadow: none !important; max-width: 100% !important; margin: 0 !important; }
+            .watermark-overlay { opacity: 0.1 !important; -webkit-print-color-adjust: exact; }
         }
     </style>
 </head>
 <body>
-    <div class="print-container bg-white shadow-xl w-full max-w-2xl p-6 relative overflow-hidden">
-        <div class="watermark"><div class="flex flex-col items-center rotate-[-20deg]"><span style="font-size: 150px; font-weight: bold;">m</span><span style="font-size: 30px;">Micron Labor Union</span></div></div>
-        
-        <div class="no-print flex justify-end gap-2 mb-4">
-            <button onclick="ctx.clearRect(0,0,canvas.width,canvas.height)" class="px-3 py-1 bg-gray-200 text-sm">清除簽名</button>
-            <button onclick="window.print()" class="px-3 py-1 bg-blue-600 text-white text-sm">列印</button>
-        </div>
 
-        <div class="relative z-10">
-            <h1 class="text-xl font-bold text-center mb-5">台灣美光記憶體股份有限公司企業工會 - 入會申請書</h1>
-            <div class="space-y-3 text-sm">
-                <div class="grid grid-cols-2 gap-2">
-                    <div>姓名<input type="text" class="form-input"></div>
-                    <div>性別<select class="form-input"><option>男</option><option>女</option></select></div>
+<div class="print-container max-w-2xl mx-auto bg-white p-8 shadow-xl relative">
+    
+    <div class="watermark-overlay">
+        <div style="font-size: 150px; font-weight: bold; color: #000; line-height: 1;">m</div>
+        <div style="font-size: 30px; font-weight: bold; color: #000;">Micron Labor Union</div>
+    </div>
+
+    <div class="main-form-content">
+        <h1 class="text-xl font-bold text-center mb-6">台灣美光記憶體股份有限公司企業工會 - 入會申請書</h1>
+        <div class="space-y-4 text-sm">
+            <div class="grid grid-cols-2 gap-4">
+                <div>姓名<input type="text" class="form-input bg-white/70"></div>
+                <div>性別<select class="form-input bg-white/70"><option>男</option><option>女</option></select></div>
+            </div>
+            <div>出生年月日<input type="date" class="form-input bg-white/70"></div>
+            <div class="grid grid-cols-3 gap-2">
+                <div>工號<input type="text" class="form-input bg-white/70"></div>
+                <div>分機<input type="text" class="form-input bg-white/70"></div>
+                <div>單位<input type="text" class="form-input bg-white/70"></div>
+            </div>
+            <div>戶籍地址<input type="text" class="form-input bg-white/70"></div>
+            <div>通訊地址<input type="text" class="form-input bg-white/70"></div>
+            <div>手機<input type="tel" class="form-input bg-white/70"></div>
+            
+            <div class="p-4 bg-gray-50/70 border rounded text-xs leading-relaxed">
+                本人同意按工會章程行使權利與義務並同意於加入企業工會成為會員之日起由台灣美光記憶體股份有限公司依據工會法於每月薪資代扣工會經常會費(按章程規定之會費)，且於本人退會或離開美光後將停止此代扣作業。
+            </div>
+            
+            <div class="flex flex-col items-center pt-4">
+                <span class="font-bold mb-2">申請人簽名：</span>
+                <div id="signature-display" onclick="openModal()" class="w-full h-24 border-2 border-dashed flex items-center justify-center text-gray-400 bg-white hover:bg-gray-50 transition">
+                    點擊此處進行簽名
                 </div>
-                <div>出生年月日<input type="date" class="form-input"></div>
-                <div class="grid grid-cols-3 gap-2">
-                    <div>工號<input type="text" class="form-input"></div>
-                    <div>分機<input type="text" class="form-input"></div>
-                    <div>單位<input type="text" class="form-input"></div>
-                </div>
-                <div>戶籍地址<input type="text" class="form-input"></div>
-                <div>通訊地址<input type="text" class="form-input"></div>
-                <div>手機<input type="tel" class="form-input"></div>
-                
-                <div class="p-3 bg-gray-50 border rounded text-xs leading-relaxed">
-                    本人同意按工會章程行使權利與義務並同意於加入企業工會成為會員之日起由台灣美光記憶體股份有限公司依據工會法於每月薪資代扣工會經常會費(按章程規定之會費)，且於本人退會或離開美光後將停止此代扣作業。
-                </div>
-                
-                <div class="flex flex-col items-center pt-2 space-y-4">
-                    <div class="flex flex-col items-center">
-                        <span class="font-bold mb-1">申請人簽名：</span>
-                        <canvas id="signature-pad" class="bg-gray-50"></canvas>
-                    </div>
-                    <div class="text-center font-bold">
-                        中  華  民  國 <input type="number" class="date-input" placeholder="___"> 年 
-                        <input type="number" class="date-input" placeholder="__"> 月 
-                        <input type="number" class="date-input" placeholder="__"> 日
-                    </div>
+                <div class="mt-6 font-bold">
+                    中華民國 <input type="number" class="date-input" placeholder="___"> 年 
+                    <input type="number" class="date-input" placeholder="__"> 月 
+                    <input type="number" class="date-input" placeholder="__"> 日
                 </div>
             </div>
         </div>
+        
+        <div class="no-print mt-8 flex gap-4">
+            <button onclick="window.print()" class="flex-1 bg-blue-600 text-white py-2 rounded font-bold">列印申請書</button>
+        </div>
     </div>
+</div>
 
-    <script>
-        const canvas = document.getElementById('signature-pad');
-        const ctx = canvas.getContext('2d');
-        let isDrawing = false;
-        ctx.lineWidth = 2;
-        canvas.addEventListener('mousedown', () => isDrawing = true);
-        canvas.addEventListener('mousemove', (e) => {
-            if (!isDrawing) return;
-            const rect = canvas.getBoundingClientRect();
-            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-            ctx.stroke();
-        });
-        window.addEventListener('mouseup', () => { isDrawing = false; ctx.beginPath(); });
-        canvas.addEventListener('touchstart', (e) => { isDrawing = true; ctx.beginPath(); e.preventDefault(); }, {passive: false});
-        canvas.addEventListener('touchmove', (e) => { 
-            if (!isDrawing) return;
-            const rect = canvas.getBoundingClientRect();
-            ctx.lineTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
-            ctx.stroke(); 
-            e.preventDefault(); 
-        }, {passive: false});
-    </script>
+<div id="signature-modal">
+    <div class="bg-white p-4 rounded-lg relative">
+        <canvas id="signature-pad"></canvas>
+        <div class="flex justify-end gap-2 mt-4">
+            <button onclick="closeModal()" class="px-4 py-2 bg-gray-300 rounded">取消</button>
+            <button onclick="clearCanvas()" class="px-4 py-2 bg-red-500 text-white rounded">清除</button>
+            <button onclick="saveSignature()" class="px-4 py-2 bg-blue-600 text-white rounded">確定</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* JavaScript 保持原樣 */
+    const modal = document.getElementById('signature-modal');
+    const canvas = document.getElementById('signature-pad');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+    function openModal() { modal.style.display = 'flex'; canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; ctx.strokeStyle = '#000'; ctx.lineWidth = 3; ctx.lineJoin = 'round'; }
+    function closeModal() { modal.style.display = 'none'; }
+    function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.beginPath(); }
+    function saveSignature() { const display = document.getElementById('signature-display'); display.innerHTML = `<img src="${canvas.toDataURL()}" class="h-full object-contain">`; closeModal(); }
+    function getPos(e) { const r = canvas.getBoundingClientRect(); return { x: (e.touches ? e.touches[0].clientX : e.clientX) - r.left, y: (e.touches ? e.touches[0].clientY : e.clientY) - r.top }; }
+    canvas.addEventListener('mousedown', (e) => { isDrawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); });
+    canvas.addEventListener('mousemove', (e) => { if(isDrawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } });
+    window.addEventListener('mouseup', () => isDrawing = false);
+    canvas.addEventListener('touchstart', (e) => { isDrawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); e.preventDefault(); }, {passive: false});
+    canvas.addEventListener('touchmove', (e) => { if(isDrawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } e.preventDefault(); }, {passive: false});
+    canvas.addEventListener('touchend', () => isDrawing = false);
+</script>
 </body>
 </html>
