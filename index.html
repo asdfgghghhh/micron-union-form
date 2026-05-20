@@ -2,82 +2,100 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>入會申請書</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台灣美光記憶體股份有限公司企業工會 - 入會申請系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* PDF 輸出專用樣式 */
-        @media print { body { background: none; padding: 0; } }
-        .a4-page { width: 794px; background: white; margin: auto; padding: 50px; box-sizing: border-box; }
-        table { width: 100%; border-collapse: collapse; border: 2px solid #000; }
-        th, td { border: 1px solid #000; padding: 12px; height: 50px; vertical-align: middle; }
-        th { background-color: #f3f4f6; text-align: center; font-weight: bold; width: 15%; }
-        input, select { border: none; width: 100%; outline: none; font-size: 16px; }
-        .sig-container { border: 1px dashed #666; width: 280px; height: 100px; display: inline-block; cursor: crosshair; }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f3f4f6; }
+        .pdf-table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+        .pdf-table th, .pdf-table td { border: 1px solid #374151; padding: 12px; vertical-align: middle; }
+        .pdf-table th { background-color: #f9fafb; font-weight: 700; width: 15%; text-align: center; }
+        .form-input { width: 100%; border: none; outline: none; background: transparent; }
+        
+        #pdf-export-template { width: 794px; background-color: #ffffff; padding: 40px; box-sizing: border-box; overflow: hidden; }
+        
+        /* 簽名板樣式 */
+        #signature-pad { border: 1px dashed #9ca3af; background-color: #f9fafb; cursor: crosshair; width: 300px; height: 120px; touch-action: none; display: block; }
     </style>
 </head>
-<body class="bg-gray-100 py-10">
+<body class="p-4 flex flex-col items-center">
 
-<div class="max-w-[850px] mx-auto">
-    <div class="flex justify-end gap-3 mb-6">
-        <button onclick="clearCanvas()" class="px-5 py-2 bg-gray-200 rounded hover:bg-gray-300">清除簽名</button>
-        <button onclick="generatePDF()" class="px-5 py-2 bg-blue-800 text-white font-bold rounded shadow hover:bg-blue-900">下載專業 PDF</button>
-    </div>
-
-    <div id="pdf-content" class="a4-page shadow-2xl">
-        <h1 class="text-2xl font-bold text-center mb-1">台灣美光記憶體股份有限公司企業工會</h1>
-        <h2 class="text-xl font-bold text-center mb-8">入會申請書</h2>
-
-        <table>
-            <tr><th>姓名</th><td><input type="text"></td><th>性別</th><td><select><option>男</option><option>女</option></select></td><th>出生年月日</th><td><input type="date"></td></tr>
-            <tr><th>工號</th><td><input type="text"></td><th>公司分機</th><td><input type="text"></td><th>單位</th><td><input type="text"></td></tr>
-            <tr><th>戶籍住址</th><td colspan="5"><input type="text"></td></tr>
-            <tr><th>通訊住址</th><td colspan="5"><input type="text"></td></tr>
-            <tr><th>通訊電話</th><td><input type="text"></td><th>手機號碼</th><td colspan="3"><input type="text"></td></tr>
+    <div id="form-zone" class="bg-white shadow-xl rounded-lg max-w-4xl w-full p-6">
+        <h1 class="text-2xl font-bold text-center mb-6">台灣美光記憶體股份有限公司企業工會 - 入會申請書</h1>
+        
+        <!-- 表格欄位 -->
+        <table class="pdf-table mb-6">
+            <tr><th>姓　　名</th><td><input type="text" id="d-name" class="form-input"></td><th>性　　別</th><td><select id="d-gender" class="form-input"><option value="男">男</option><option value="女">女</option></select></td><th>出生年月日</th><td><input type="date" id="d-birth" class="form-input"></td></tr>
+            <tr><th>工　　號</th><td><input type="text" id="d-id" class="form-input"></td><th>公司分機</th><td><input type="text" id="d-ext" class="form-input"></td><th>單　　位</th><td><input type="text" id="d-unit" class="form-input"></td></tr>
+            <tr><th>戶籍住址</th><td colspan="5"><input type="text" id="d-raddr" class="form-input"></td></tr>
+            <tr><th>通訊住址</th><td colspan="5"><input type="text" id="d-caddr" class="form-input"></td></tr>
+            <tr><th>通訊電話</th><td colspan="2"><input type="text" id="d-phone" class="form-input"></td><th>手機號碼</th><td colspan="2"><input type="text" id="d-mobile" class="form-input"></td></tr>
         </table>
 
-        <div class="border-2 border-black p-6 mt-4">
-            <p class="mb-10 leading-relaxed font-medium">本人同意按工會章程行使權利與義務並同意於加入企業工會成為會員之日起，由台灣美光記憶體股份有限公司依據工會法於每月薪資代扣工會經常會費(按章程規定之會費)，且於本人退會或離開美光後將停止此代扣作業。</p>
-            <div class="flex items-center gap-4">
-                <span class="font-bold text-lg">申請人親筆簽名：</span>
-                <canvas id="sig-pad" class="sig-container"></canvas>
-                <span class="font-bold text-lg">(簽章)</span>
-            </div>
-            <div class="mt-8 font-bold">
-                中華民國 115 年 5 月 20 日
+        <!-- 簽名區 UI -->
+        <div class="mb-6">
+            <label class="font-bold block mb-2">請於下方親筆簽名：</label>
+            <canvas id="signature-pad"></canvas>
+            <button onclick="clearSignature()" class="mt-2 px-4 py-1 bg-gray-200 rounded text-sm hover:bg-gray-300">清除簽名</button>
+        </div>
+
+        <button onclick="executePrint()" class="w-full py-4 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700">產生並下載 PDF</button>
+    </div>
+
+    <!-- 隱藏的 PDF 生成模板 -->
+    <div style="position: absolute; left: -9999px;">
+        <div id="pdf-export-template">
+            <h1 style="text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 30px;">台灣美光記憶體股份有限公司企業工會 - 入會申請書</h1>
+            <table class="pdf-table" style="margin-bottom: 40px;">
+                <tr><th>姓　　名</th><td id="p-name"></td><th>性　　別</th><td id="p-gender"></td><th>出生年月日</th><td id="p-birth"></td></tr>
+                <tr><th>工　　號</th><td id="p-id"></td><th>公司分機</th><td id="p-ext"></td><th>單　　位</th><td id="p-unit"></td></tr>
+                <tr><th>戶籍住址</th><td colspan="5" id="p-raddr"></td></tr>
+                <tr><th>通訊住址</th><td colspan="5" id="p-caddr"></td></tr>
+                <tr><th>通訊電話</th><td colspan="2" id="p-phone"></td><th>手機號碼</th><td colspan="2" id="p-mobile"></td></tr>
+            </table>
+            <!-- PDF 裡的簽名顯示區 -->
+            <div style="margin-top: 50px;">
+                <p style="font-weight: bold; font-size: 18px;">申請人簽名：</p>
+                <img id="pdf-signature-img" style="width: 300px; height: 120px; border-bottom: 2px solid #000; object-fit: contain; margin-top: 10px;">
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    const canvas = document.getElementById('sig-pad');
-    const ctx = canvas.getContext('2d');
-    let drawing = false;
+    <script>
+        const canvas = document.getElementById('signature-pad');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false, hasSigned = false;
 
-    canvas.onmousedown = () => drawing = true;
-    canvas.onmouseup = () => { drawing = false; ctx.beginPath(); }
-    canvas.onmousemove = (e) => {
-        if(!drawing) return;
-        ctx.lineWidth = 3;
-        ctx.lineCap = 'round';
-        ctx.lineTo(e.offsetX, e.offsetY);
-        ctx.stroke();
-    };
+        // 簽名板滑鼠事件
+        canvas.addEventListener('mousedown', (e) => { isDrawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
+        canvas.addEventListener('mousemove', (e) => { if(isDrawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); hasSigned = true; } });
+        window.addEventListener('mouseup', () => isDrawing = false);
 
-    function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+        function clearSignature() { ctx.clearRect(0, 0, canvas.width, canvas.height); hasSigned = false; }
 
-    function generatePDF() {
-        const element = document.getElementById('pdf-content');
-        const opt = {
-            margin: 0.2,
-            filename: '美光工會入會申請書.pdf',
-            image: { type: 'jpeg', quality: 1.0 },
-            html2canvas: { scale: 3, letterRendering: true }, // scale 3 確保文字清晰
-            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-        };
-        html2pdf().set(opt).from(element).save();
-    }
-</script>
+        function executePrint() {
+            // 同步表單內容
+            ['name', 'gender', 'birth', 'id', 'ext', 'unit', 'raddr', 'caddr', 'phone', 'mobile'].forEach(id => {
+                document.getElementById('p-' + id).innerText = document.getElementById('d-' + id).value;
+            });
+
+            // 將簽名轉為 Base64 並填入隱藏範本
+            const sigImg = document.getElementById('pdf-signature-img');
+            if (hasSigned) {
+                sigImg.src = canvas.toDataURL();
+            } else {
+                sigImg.src = ""; // 若未簽名則保持空白
+            }
+
+            // PDF 匯出設定 (強制鎖定 A4 寬度以防止溢出)
+            html2pdf().set({
+                margin: 0.5,
+                filename: '美光工會入會申請書.pdf',
+                html2canvas: { scale: 2, useCORS: true, windowWidth: 794 },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            }).from(document.getElementById('pdf-export-template')).save();
+        }
+    </script>
 </body>
 </html>
