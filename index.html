@@ -17,29 +17,37 @@
         .pdf-table th { background-color: #f9fafb; font-weight: 700; color: #1f2937; white-space: nowrap; padding: 6px; width: 13%; font-size: 14px; }
         .pdf-table td { background-color: #ffffff; text-align: left; }
         
- /* 水印樣式 */
+/* 水印樣式（強制背景圖版） */
 .watermark-container {
     position: relative;
     overflow: hidden;
 }
 
-.watermark-bg {
+.watermark-container::before {
+    content: "m\A Micron Labor Union";
+    white-space: pre;
+    
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%) rotate(-25deg);  /* ✅ 加旋轉更明顯 */
+    transform: translate(-50%, -50%) rotate(-25deg);
 
-    color: rgba(0,0,0,0.08);   /* ✅ 調高透明度（關鍵） */
-
-    font-weight: bold;
-    z-index: 0;
-    pointer-events: none;
-    white-space: nowrap;
-    user-select: none;
+    font-size: 140px;
+    line-height: 1.2;
     text-align: center;
-    width: 100%;
+    font-weight: bold;
+
+    color: rgba(0,0,0,0.08);
+
+    pointer-events: none;
+    z-index: 0;
 }
-``
+
+/* 表格一定要在上面 */
+.pdf-table {
+    position: relative;
+    z-index: 10;
+}
         /* 確保表格在上面 */
 .pdf-table {
     position: relative;
