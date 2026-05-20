@@ -14,7 +14,7 @@
             background-color: #f3f4f6;
         }
 
-        /* 關鍵：解決變成兩頁的列印優化設定 */
+        /* 解決變成兩頁的列印優化設定 */
         @media print {
             @page {
                 size: portrait;
@@ -22,7 +22,7 @@
             }
             body {
                 background-color: white;
-                margin: 1.0cm; /* 微調邊距，釋放垂直空間 */
+                margin: 1.0cm; 
                 max-height: 100vh;
                 overflow: hidden;
             }
@@ -35,10 +35,9 @@
                 padding: 0 !important;
                 width: 100% !important;
                 max-width: 100% !important;
-                page-break-inside: avoid; /* 強制避免內部切頁 */
+                page-break-inside: avoid;
                 break-inside: avoid;
             }
-            /* 強制在列印時隱藏手機版，顯示標準表格 */
             .mobile-form-view {
                 display: none !important;
             }
@@ -58,7 +57,6 @@
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
-            /* 縮小列印時的字體與間距，確保塞進單頁 */
             .print-compact {
                 padding: 1rem !important;
                 margin-top: -1px !important;
@@ -306,8 +304,11 @@
     <script>
         // 資料同步雙向綁定機制
         function syncData(sourceId, targetId) {
-            const sourceVal = document.getElementById(sourceId).value;
-            document.getElementById(targetId).value = sourceVal;
+            const sourceElement = document.getElementById(sourceId);
+            const targetElement = document.getElementById(targetId);
+            if (sourceElement && targetElement) {
+                targetElement.value = sourceElement.value;
+            }
         }
 
         // 自動填入當天的民國年月日
@@ -390,15 +391,32 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
+        // 核心修正：強化相容性的列印 PDF 功能
         function saveAsPDF() {
-            canvas.style.border = 'none';
-            canvas.style.borderBottom = '1px solid black';
+            // 檢測是否處於內建瀏覽器（如 LINE 內建瀏覽器）
+            const ua = navigator.userAgent.toLowerCase();
+            const isLine = ua.indexOf('line') > -1;
             
-            window.print();
-            
-            setTimeout(() => {
-                canvas.style.border = '1px dashed #9ca3af';
-            }, 100);
+            if (isLine) {
+                alert("⚠️ 偵測到您正使用 LINE 內建瀏覽器，這會阻擋 PDF 下載。\n\n請點擊右上角「三個點 (···)」或「分享」按鈕，選擇【在 Safari 中開啟】或【在 Chrome 中開啟】，即可順利儲存為 PDF！");
+                return;
+            }
+
+            try {
+                // 暫時微調畫布邊框以便列印美觀
+                canvas.style.border = 'none';
+                canvas.style.borderBottom = '1px solid black';
+                
+                // 執行原生列印功能
+                window.print();
+            } catch (error) {
+                alert("您的瀏覽器暫不支援直接列印，請嘗試擷取螢幕畫面或更換成 Chrome 瀏覽器開啟！");
+            } finally {
+                // 恢復原本的虛線邊框
+                setTimeout(() => {
+                    canvas.style.border = '1px dashed #9ca3af';
+                }, 150);
+            }
         }
     </script>
 </body>
