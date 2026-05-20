@@ -1,81 +1,148 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>台灣美光記憶體股份有限公司企業工會 - 入會申請系統</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght=400;500;700&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f3f4f6; }
-        .form-input { width: 100%; padding: 10px 8px; outline: none; background: transparent; border: none; }
-        .pdf-table { border-collapse: collapse; width: 100%; table-layout: fixed; }
-        .pdf-table th, .pdf-table td { border: 1px solid #374151; padding: 10px; vertical-align: middle; text-align: left; }
-        .pdf-table th { background-color: #f9fafb; font-weight: 700; width: 15%; text-align: center; }
-        #signature-pad { border: 1px dashed #9ca3af; background-color: #f9fafb; cursor: pointer; width: 300px; height: 120px; }
-        /* 修正 PDF 渲染容器 */
-        #pdf-export-template { width: 794px; background-color: #ffffff; padding: 40px; box-sizing: border-box; overflow: hidden; }
-    </style>
-</head>
-<body class="py-4 px-2 md:py-8 md:px-4 flex flex-col justify-center items-center min-h-screen">
+let isDrawing = false;
+let isMDrawing = false;
 
-    <div id="form-zone" class="bg-white shadow-xl rounded-lg max-w-4xl w-full p-4 md:p-10">
-        <div class="text-center mb-6 pt-2">
-            <h1 class="text-xl md:text-3xl font-bold tracking-widest text-gray-900 mb-2">台灣美光記憶體股份有限公司企業工會</h1>
-            <h2 class="text-lg md:text-2xl font-bold tracking-widest text-gray-800">入會申請書</h2>
-        </div>
+        // 重點：移除 window.onresize 避免點擊外部或彈出鍵盤時重新初始化導致內容蒸發
+window.onload = function() {
+initMainCanvas();
+};
 
-        <!-- 表單輸入區 -->
-        <div class="watermark-container border border-gray-700 mb-6">
-            <table class="pdf-table">
-                <tr><th>姓　　名</th><td><input type="text" id="d-name" class="form-input" placeholder="請輸入姓名"></td><th>性　　別</th><td><select id="d-gender" class="form-input"><option value="">請選擇</option><option value="男">男</option><option value="女">女</option></select></td><th>出生<br>年月日</th><td><input type="date" id="d-birth" class="form-input"></td></tr>
-                <tr><th>工　　號</th><td><input type="text" id="d-id" class="form-input" placeholder="請輸入工號"></td><th>公司分機</th><td><input type="text" id="d-ext" class="form-input"></td><th>單　　位</th><td><input type="text" id="d-unit" class="form-input"></td></tr>
-                <tr><th>戶籍住址</th><td colspan="5"><input type="text" id="d-raddr" class="form-input"></td></tr>
-                <tr><th>通訊住址</th><td colspan="5"><input type="text" id="d-caddr" class="form-input"></td></tr>
-                <tr><th>通訊電話</th><td colspan="2"><input type="text" id="d-phone" class="form-input"></td><th>手機號碼</th><td colspan="2"><input type="text" id="d-mobile" class="form-input"></td></tr>
-            </table>
-        </div>
+        window.onresize = function() {
+            initMainCanvas();
+        };
 
-        <button onclick="executePrint()" class="w-full py-4 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700">儲存 / 生成完美 PDF</button>
-    </div>
+        // 初始化 A4 申請書內的小簽名框
+function initMainCanvas() {
+            canvas.width = 300;
+            canvas.height = 120;
+            // 固定實體像素解析度，防止任何動態清空
+            if (canvas.width !== 300) {
+                canvas.width = 300;
+                canvas.height = 120;
+            }
+ctx.strokeStyle = '#000000';
+ctx.lineWidth = 2.5;
+ctx.lineJoin = 'round';
+ctx.lineCap = 'round';
+}
 
-    <!-- 隱藏的 PDF 範本 (與上方對應) -->
-    <div style="position: absolute; left: -9999px;">
-        <div id="pdf-export-template">
-            <h1 style="text-align: center; font-size: 24px; font-weight: bold;">台灣美光記憶體股份有限公司企業工會 - 入會申請書</h1>
-            <table class="pdf-table">
-                <tr><th>姓　　名</th><td id="p-name"></td><th>性　　別</th><td id="p-gender"></td><th>出生年月日</th><td id="p-birth"></td></tr>
-                <tr><th>工　　號</th><td id="p-id"></td><th>公司分機</th><td id="p-ext"></td><th>單　　位</th><td id="p-unit"></td></tr>
-                <tr><th>戶籍住址</th><td colspan="5" id="p-raddr"></td></tr>
-                <tr><th>通訊住址</th><td colspan="5" id="p-caddr"></td></tr>
-                <tr><th>通訊電話</th><td colspan="2" id="p-phone"></td><th>手機號碼</th><td colspan="2" id="p-mobile"></td></tr>
-            </table>
-        </div>
-    </div>
+        // 判斷點擊裝置：小於 1024px 開啟手機大視窗
+function handleCanvasClick(e) {
+if (window.innerWidth < 1024) {
+e.preventDefault();
+openSignatureModal();
+}
+}
 
-    <script>
-        function executePrint() {
-            // 同步資料
-            ['name', 'gender', 'birth', 'id', 'ext', 'unit', 'raddr', 'caddr', 'phone', 'mobile'].forEach(id => {
-                document.getElementById('p-' + id).innerText = document.getElementById('d-' + id).value;
-            });
+        // 開啟滿版簽名視窗
+function openSignatureModal() {
+modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // 防止底層網頁亂滾
+            document.body.style.overflow = 'hidden'; 
 
-            // 生成 PDF
-            const element = document.getElementById('pdf-export-template');
-            const opt = {
-                margin: 0.5,
-                filename: '美光工會入會申請書.pdf',
-                html2canvas: { 
-                    scale: 2,           // 確保畫質與大小平衡
-                    useCORS: true, 
-                    windowWidth: 794    // 強制設定為 A4 寬度，徹底解決溢出問題
-                },
-                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            // 實體像素大小與 CSS 容器完全對齊
+            // 每次開大視窗才初始化大畫布，保障高解析度不拉伸
+mCanvas.width = mCanvas.offsetWidth;
+mCanvas.height = mCanvas.offsetHeight;
+
+mCtx.strokeStyle = '#000000';
+            mCtx.lineWidth = 4; // 加粗筆觸更好看
+            mCtx.lineWidth = 4; 
+mCtx.lineJoin = 'round';
+mCtx.lineCap = 'round';
+}
+@@ -203,7 +200,6 @@ <h3 class="text-lg font-bold tracking-wider">請在下方白色區域內手寫
+document.body.style.overflow = 'auto';
+}
+
+        // 取得相對坐標
+function getPos(e, c) {
+const rect = c.getBoundingClientRect();
+const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+@@ -214,7 +210,7 @@ <h3 class="text-lg font-bold tracking-wider">請在下方白色區域內手寫
+};
+}
+
+        // 桌機滑鼠原地畫圖邏輯
+        // 電腦版滑鼠事件
+canvas.addEventListener('mousedown', (e) => {
+if (window.innerWidth < 1024) return;
+isDrawing = true;
+@@ -230,7 +226,7 @@ <h3 class="text-lg font-bold tracking-wider">請在下方白色區域內手寫
+});
+window.addEventListener('mouseup', () => { isDrawing = false; });
+
+        // 手機大視窗觸控手勢
+        // 手機大視窗觸控事件
+mCanvas.addEventListener('touchstart', (e) => {
+isMDrawing = true;
+const p = getPos(e, mCanvas);
+@@ -248,40 +244,34 @@ <h3 class="text-lg font-bold tracking-wider">請在下方白色區域內手寫
+
+window.addEventListener('touchend', () => { isMDrawing = false; });
+
+        // 清除按鈕
+function clearSignature() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+function clearModalSignature() { mCtx.clearRect(0, 0, mCanvas.width, mCanvas.height); }
+
+        // 【核心修正】等比例置中縮放演算法（Contain 模式），絕不壓扁名字
+        // 【終極修復】同步且等比例繪製演算法：不經非同步，瞬間寫入，鎖死畫布！
+function saveModalSignature() {
+            // 1. 創立臨時變數存放這張剛簽完的大圖
+            const tempImage = new Image();
+            tempImage.src = mCanvas.toDataURL();
+            // 確保目標畫布狀態正確
+            initMainCanvas();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            tempImage.onload = function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // 2. 計算兩邊畫布的縮放比率，找出維持長寬比的縮放值 (Ratio)
+                const hRatio = canvas.width / mCanvas.width;
+                const vRatio = canvas.height / mCanvas.height;
+                const ratio  = Math.min(hRatio, vRatio); // 採用較小值，確保整張圖都塞得進去且不變形
+                
+                // 3. 計算讓圖片完美居中的位移量 (Center offset)
+                const shiftX = (canvas.width - mCanvas.width * ratio) / 2;
+                const shiftY = (canvas.height - mCanvas.height * ratio) / 2;
+                
+                // 4. 等比例渲染繪製回 A4 格子裡
+                ctx.drawImage(
+                    tempImage, 
+                    0, 0, mCanvas.width, mCanvas.height, // 來源區塊
+                    shiftX, shiftY, mCanvas.width * ratio, mCanvas.height * ratio // 目標區塊 (完美不變形)
+                );
+                
+                closeSignatureModal();
             };
+            // 計算不變形比例
+            const hRatio = canvas.width / mCanvas.width;
+            const vRatio = canvas.height / mCanvas.height;
+            const ratio  = Math.min(hRatio, vRatio);
+            
+            // 計算置中位移
+            const shiftX = (canvas.width - mCanvas.width * ratio) / 2;
+            const shiftY = (canvas.height - mCanvas.height * ratio) / 2;
+            
+            // 直接將大 Canvas 同步渲染至小 Canvas 中，免除 onload 被轉移焦點的問題
+            ctx.drawImage(
+                mCanvas, 
+                0, 0, mCanvas.width, mCanvas.height, 
+                shiftX, shiftY, mCanvas.width * ratio, mCanvas.height * ratio
+            );
+            
+            closeSignatureModal();
+}
 
-            html2pdf().set(opt).from(element).save();
-        }
-    </script>
-</body>
-</html>
+        // 欄位同步與日期自動帶入
+function syncData(sourceId, targetId) {
+const src = document.getElementById(sourceId);
+const tgt = document.getElementById(targetId);
+@@ -293,7 +283,6 @@ <h3 class="text-lg font-bold tracking-wider">請在下方白色區域內手寫
+document.getElementById('roc-month').value = today.getMonth() + 1;
+document.getElementById('roc-day').value = today.getDate();
+
+        // 列印與 PDF
+function executePrint() {
+canvas.style.border = 'none';
+canvas.style.borderBottom = '1px solid black';
