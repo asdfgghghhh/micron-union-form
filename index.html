@@ -12,23 +12,47 @@
         .form-input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
         .date-input { width: 60px; border: none; border-bottom: 1px solid #000; text-align: center; background: transparent; outline: none; }
         
+        /* 浮水印設計 - 專業美光藍色系 */
         .watermark-overlay { 
-            position: absolute; inset: 0; display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; opacity: 0.1; 
-            pointer-events: none; z-index: 0; 
+            position: absolute; inset: 0; 
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            opacity: 0.08; /* 透明度適中 */
+            pointer-events: none; 
+            z-index: 0;
+            overflow: hidden;
+            color: #004a99; /* 美光藍 */
         }
+        .watermark-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transform: rotate(-25deg);
+        }
+        .watermark-m { font-size: 80px; font-weight: 800; line-height: 1; }
+        .watermark-text { font-size: 14px; font-weight: bold; letter-spacing: 1px; }
+        
         .main-form-content { position: relative; z-index: 10; }
         #signature-display { min-height: 96px; cursor: pointer; display: flex; align-items: center; justify-content: center; background: white; }
         #signature-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
         #signature-pad { touch-action: none; background: white; width: 90vw; max-width: 500px; height: 250px; border: 1px solid #000; }
+
+        @media print {
+            #action-buttons-area { display: none !important; }
+        }
     </style>
 </head>
 <body>
 
-<div id="form-to-pdf" class="max-w-2xl mx-auto bg-white p-8 shadow-xl relative">
+<div id="form-to-pdf" class="max-w-2xl mx-auto bg-white p-8 shadow-xl relative overflow-hidden">
     <div class="watermark-overlay">
-        <div style="font-size: 150px; font-weight: bold; color: #000; line-height: 1;">m</div>
-        <div style="font-size: 30px; font-weight: bold; color: #000;">Micron Labor Union</div>
+        <div class="watermark-item"><div class="watermark-m">m</div><div class="watermark-text">MICRON LABOR UNION</div></div>
+        <div class="watermark-item"><div class="watermark-m">m</div><div class="watermark-text">MICRON LABOR UNION</div></div>
+        <div class="watermark-item"><div class="watermark-m">m</div><div class="watermark-text">MICRON LABOR UNION</div></div>
+        <div class="watermark-item"><div class="watermark-m">m</div><div class="watermark-text">MICRON LABOR UNION</div></div>
+        <div class="watermark-item"><div class="watermark-m">m</div><div class="watermark-text">MICRON LABOR UNION</div></div>
+        <div class="watermark-item"><div class="watermark-m">m</div><div class="watermark-text">MICRON LABOR UNION</div></div>
+        <div class="watermark-item"><div class="watermark-m">m</div><div class="watermark-text">MICRON LABOR UNION</div></div>
+        <div class="watermark-item"><div class="watermark-m">m</div><div class="watermark-text">MICRON LABOR UNION</div></div>
     </div>
 
     <div class="main-form-content">
@@ -98,33 +122,23 @@
         closeModal(); 
     }
 
-    // 簡單簽名邏輯
     canvas.addEventListener('mousedown', (e) => { isDrawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
     canvas.addEventListener('mousemove', (e) => { if (isDrawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } });
     window.addEventListener('mouseup', () => isDrawing = false);
 
     function generatePDF() {
-        // 1. 強制將所有 input 當前值同步到 HTML 屬性中
-        document.querySelectorAll('input, select').forEach(el => {
-            el.setAttribute('value', el.value);
-        });
-
+        document.querySelectorAll('input, select').forEach(el => el.setAttribute('value', el.value));
         const element = document.getElementById('form-to-pdf');
         const nameInput = document.querySelector('input[type="text"]');
         const fileName = nameInput.value ? `入會申請書_${nameInput.value}.pdf` : '入會申請書.pdf';
-
+        
         const opt = {
             margin: 10,
             filename: fileName,
             image: { type: 'jpeg', quality: 1 },
-            html2canvas: { 
-                scale: 2, 
-                useCORS: true, 
-                ignoreElements: (el) => el.id === 'action-buttons-area' 
-            },
+            html2canvas: { scale: 2, useCORS: true, ignoreElements: (el) => el.id === 'action-buttons-area' },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
-
         html2pdf().set(opt).from(element).save();
     }
 </script>
