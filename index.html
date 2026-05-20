@@ -5,35 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>入會申請書</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 html2pdf.js 套件 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
         body { font-family: 'Noto Sans TC', sans-serif; background-color: #f3f4f6; padding: 20px; }
         .form-input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
         .date-input { width: 60px; border: none; border-bottom: 1px solid #000; text-align: center; background: transparent; outline: none; }
         
-        /* 修正後的浮水印：強制充滿容器並垂直水平置中 */
+        /* 浮水印：強制充滿容器並垂直水平置中 */
         .watermark-overlay { 
             position: absolute;
-            inset: 0; /* 四邊距離為0，填滿父容器 */
+            inset: 0; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
             justify-content: center;
-            opacity: 0.1; /* 透明度設定 */
-            pointer-events: none; /* 穿透點擊 */
+            opacity: 0.1; 
+            pointer-events: none; 
             z-index: 0; 
         }
         
         .main-form-content { position: relative; z-index: 10; }
         #signature-display { pointer-events: auto; z-index: 20; cursor: pointer; }
         
-        /* 修正 Modal 遮罩層樣式 */
         #signature-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
-        #signature-pad { touch-action: none; background: white; width: 90vw; max-w-width: 500px; height: 250px; border: 1px solid #000; }
+        #signature-pad { touch-action: none; background: white; width: 90vw; max-width: 500px; height: 250px; border: 1px solid #000; }
         
         @media print {
             @page { margin: 5mm !important; size: auto; }
-            body { background: white !important; }
+            body { background: white !important; padding: 0; }
             .no-print { display: none !important; }
             .print-container { box-shadow: none !important; max-width: 100% !important; margin: 0 !important; }
             .watermark-overlay { opacity: 0.1 !important; -webkit-print-color-adjust: exact; }
@@ -42,7 +43,7 @@
 </head>
 <body>
 
-<div class="print-container max-w-2xl mx-auto bg-white p-8 shadow-xl relative">
+<div id="form-to-pdf" class="print-container max-w-2xl mx-auto bg-white p-8 shadow-xl relative">
     
     <div class="watermark-overlay">
         <div style="font-size: 150px; font-weight: bold; color: #000; line-height: 1;">m</div>
@@ -83,8 +84,10 @@
             </div>
         </div>
         
-        <div class="no-print mt-8 flex gap-4">
-            <button onclick="window.print()" class="flex-1 bg-blue-600 text-white py-2 rounded font-bold">列印申請書</button>
+        <!-- 給按鈕區塊加上 id="action-buttons-area" 方便 JS 排除它 -->
+        <div id="action-buttons-area" class="no-print mt-8 flex gap-4">
+            <button onclick="window.print()" class="flex-1 bg-gray-600 text-white py-2 rounded font-bold hover:bg-gray-700 transition">傳統列印</button>
+            <button onclick="generatePDF()" class="flex-1 bg-blue-600 text-white py-2 rounded font-bold hover:bg-blue-700 transition">生成並下載 PDF</button>
         </div>
     </div>
 </div>
@@ -101,6 +104,7 @@
 </div>
 
 <script>
+    // --- 簽名板核心邏輯 ---
     const modal = document.getElementById('signature-modal');
     const canvas = document.getElementById('signature-pad');
     const ctx = canvas.getContext('2d');
@@ -108,73 +112,59 @@
 
     function openModal() { 
         modal.style.display = 'flex'; 
-        // 解決 Canvas 高寬解析度對齊問題
         canvas.width = canvas.offsetWidth; 
         canvas.height = canvas.offsetHeight; 
-        
-        // 重新初始化畫筆屬性（每次重設寬高後必須重新指定）
         ctx.strokeStyle = '#000000'; 
         ctx.lineWidth = 3; 
         ctx.lineJoin = 'round'; 
         ctx.lineCap = 'round';
     }
-    
     function closeModal() { modal.style.display = 'none'; }
     function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
-    
     function saveSignature() { 
         const display = document.getElementById('signature-display'); 
-        // 檢查畫布是否為空（可選，這邊直接導出數據）
         display.innerHTML = `<img src="${canvas.toDataURL()}" class="h-full object-contain">`; 
         closeModal(); 
     }
-    
-    // 精準計算觸控/滑鼠在畫布內部的相對座標
     function getPos(e) { 
         const r = canvas.getBoundingClientRect(); 
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
         return { 
-            x: clientX - r.left, 
-            y: clientY - r.top 
+            x: (e.touches ? e.touches[0].clientX : e.clientX) - r.left, 
+            y: (e.touches ? e.touches[0].clientY : e.clientY) - r.top 
         }; 
     }
     
-    // --- 滑鼠事件監聽 ---
-    canvas.addEventListener('mousedown', (e) => { 
-        isDrawing = true; 
-        const p = getPos(e); 
-        ctx.beginPath(); // 這裡開啟新路徑即可
-        ctx.moveTo(p.x, p.y); 
-    });
-    
-    canvas.addEventListener('mousemove', (e) => { 
-        if (!isDrawing) return;
-        const p = getPos(e); 
-        ctx.lineTo(p.x, p.y); 
-        ctx.stroke(); 
-    });
-    
+    canvas.addEventListener('mousedown', (e) => { isDrawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+    canvas.addEventListener('mousemove', (e) => { if (!isDrawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
     window.addEventListener('mouseup', () => isDrawing = false);
     
-    // --- 行動裝置觸控事件監聽（強化滑順度與阻斷滾動） ---
-    canvas.addEventListener('touchstart', (e) => { 
-        e.preventDefault(); // 阻止手機頁面跟著滾動
-        isDrawing = true; 
-        const p = getPos(e); 
-        ctx.beginPath(); 
-        ctx.moveTo(p.x, p.y); 
-    }, { passive: false });
-    
-    canvas.addEventListener('touchmove', (e) => { 
-        e.preventDefault(); 
-        if (!isDrawing) return;
-        const p = getPos(e); 
-        ctx.lineTo(p.x, p.y); 
-        ctx.stroke(); 
-    }, { passive: false });
-    
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); isDrawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }, { passive: false });
+    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if (!isDrawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }, { passive: false });
     window.addEventListener('touchend', () => isDrawing = false);
+
+    // --- 修改後的 PDF 生成邏輯 ---
+    function generatePDF() {
+        const element = document.getElementById('form-to-pdf');
+        
+        const nameInput = document.querySelector('input[type="text"]');
+        const fileName = nameInput && nameInput.value ? `入會申請書_${nameInput.value}.pdf` : '入會申請書.pdf';
+
+        const opt = {
+            margin:       [10, 10, 10, 10], 
+            filename:     fileName,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { 
+                scale: 2,           
+                useCORS: true,      
+                letterRendering: true,
+                // 【關鍵修正】這行會在渲染前，把 id 為 action-buttons-area 的按鈕列直接剔除
+                ignoreElements: (element) => element.id === 'action-buttons-area'
+            },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+        };
+
+        html2pdf().set(opt).from(element).save();
+    }
 </script>
 </body>
 </html>
