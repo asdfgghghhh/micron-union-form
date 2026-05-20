@@ -31,7 +31,7 @@
         .watermark-text { font-size: 14px; font-weight: bold; letter-spacing: 1px; }
         
         .main-form-content { position: relative; z-index: 10; }
-        #signature-display { min-height: 96px; cursor: pointer; display: flex; align-items: center; justify-content: center; background: white; touch-action: none; }
+        #signature-display { min-height: 96px; cursor: pointer; display: flex; align-items: center; justify-content: center; background: white; touch-action: none; border: 2px dashed #ccc; }
         #signature-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
         #signature-pad { touch-action: none; background: white; width: 90vw; max-width: 500px; height: 250px; border: 1px solid #000; cursor: crosshair; }
 
@@ -77,7 +77,7 @@
             
             <div class="flex flex-col items-center pt-4">
                 <span class="font-bold mb-2">申請人簽名：</span>
-                <div id="signature-display" onclick="openModal()" class="w-full border-2 border-dashed text-gray-400 hover:bg-gray-50">
+                <div id="signature-display" onclick="openModal()" class="w-full">
                     點擊此處進行簽名
                 </div>
                 <div class="mt-6 font-bold">
@@ -112,16 +112,11 @@
     const ctx = canvas.getContext('2d');
     let isDrawing = false;
 
-    // 設定畫筆樣式
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 3;
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
-
     function openModal() { 
         modal.style.display = 'flex'; 
         canvas.width = canvas.offsetWidth; 
         canvas.height = canvas.offsetHeight;
+        ctx.strokeStyle = '#000000';
         ctx.lineWidth = 3;
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
@@ -132,11 +127,11 @@
     
     function saveSignature() { 
         const display = document.getElementById('signature-display'); 
-        display.innerHTML = `<img src="${canvas.toDataURL()}" style="max-height:80px; width:auto;">`; 
+        const dataURL = canvas.toDataURL('image/png');
+        display.innerHTML = `<img src="${dataURL}" style="max-height:80px; width:auto; display:block; margin:0 auto;">`; 
         closeModal(); 
     }
 
-    // 取得精確座標
     function getPos(e) {
         const rect = canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -144,31 +139,18 @@
         return { x: clientX - rect.left, y: clientY - rect.top };
     }
 
-    function startDrawing(e) {
-        isDrawing = true;
-        const pos = getPos(e);
-        ctx.beginPath();
-        ctx.moveTo(pos.x, pos.y);
-    }
+    function startDrawing(e) { isDrawing = true; const pos = getPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
+    function draw(e) { if (!isDrawing) return; const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); }
 
-    function draw(e) {
-        if (!isDrawing) return;
-        const pos = getPos(e);
-        ctx.lineTo(pos.x, pos.y);
-        ctx.stroke();
-    }
-
-    // 滑鼠事件
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mousemove', draw);
     window.addEventListener('mouseup', () => isDrawing = false);
 
-    // 觸控事件 (修正手機無法簽名問題)
     canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, {passive: false});
     canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, {passive: false});
     window.addEventListener('touchend', () => isDrawing = false);
 
-    function generatePDF() {
+    async function generatePDF() {
         document.querySelectorAll('input, select').forEach(el => el.setAttribute('value', el.value));
         const element = document.getElementById('form-to-pdf');
         const nameInput = document.querySelector('input[type="text"]');
