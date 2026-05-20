@@ -10,127 +10,174 @@
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght=400;500;700&display=swap');
         body { font-family: 'Noto Sans TC', sans-serif; background-color: #f3f4f6; }
 
-        /* 表格與欄位標準化樣式 */
-        .form-input { width: 100%; height: 100%; padding: 10px 8px; outline: none; background: transparent; min-height: 42px; border: none !important; }
-        .pdf-table { border-collapse: collapse; width: 100%; position: relative; z-index: 10; table-layout: fixed; }
-        .pdf-table th, .pdf-table td { border: 1px solid #374151; text-align: center; vertical-align: middle; height: 44px; }
-        .pdf-table th { background-color: #f9fafb; font-weight: 700; color: #1f2937; white-space: nowrap; padding: 6px; width: 13%; font-size: 14px; }
-        .pdf-table td { background-color: #ffffff; text-align: left; }
+        /* ========================================== */
+        /* 網頁端專用基礎樣式 */
+        /* ========================================== */
+        #signature-pad { border: 1px dashed #9ca3af; background-color: #f9fafb; cursor: pointer; width: 300px; height: 120px; display: block; }
+        #modal-signature-pad { background-color: #ffffff; cursor: crosshair; touch-action: none; width: 100%; height: 100%; }
+
+        /* ========================================== */
+        /* PDF 獨立容器：像素級鎖定，防止任何瀏覽器 RWD 干擾 */
+        /* ========================================== */
+        #pdf-export-pure-container {
+            position: absolute;
+            left: 5000px; /* 將 A4 實體推到螢幕極右側，不使用 display:none，確保瀏覽器完全渲染 */
+            top: 0;
+            width: 794px; /* A4 標準寬度像素 */
+            background-color: #ffffff;
+            padding: 45px;
+            box-sizing: border-box;
+        }
+        .pdf-title-1 { font-size: 24px; font-weight: 700; letter-spacing: 2px; color: #000000; text-align: center; margin-bottom: 6px; }
+        .pdf-title-2 { font-size: 19px; font-weight: 700; letter-spacing: 6px; color: #000000; text-align: center; margin-bottom: 4px; }
         
-        /* 水印樣式 */
-        .watermark-container { position: relative; overflow: hidden; }
-        .watermark-bg {
-            position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); opacity: 0.035;
+        .pdf-real-table { border-collapse: collapse; width: 100%; table-layout: fixed; border: 1px solid #000000; }
+        .pdf-real-table th, .pdf-real-table td { border: 1px solid #000000; text-align: center; vertical-align: middle; height: 46px; font-size: 14px; color: #000000; }
+        .pdf-real-table th { background-color: #fcfcfc; font-weight: 700; width: 13%; tracking-content: 2px; }
+        .pdf-real-table td { background-color: #ffffff; text-align: left; padding: 0 10px; font-weight: 500; }
+        
+        .pdf-watermark-zone { position: relative; overflow: hidden; border: 1px solid #000000; }
+        .pdf-watermark-text {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.035;
             font-weight: bold; color: #000; z-index: 1; pointer-events: none; white-space: nowrap; user-select: none;
             text-align: center; width: 100%;
         }
-        
-        /* 簽名板樣式固定 */
-        #signature-pad { border: 1px dashed #9ca3af; background-color: #f9fafb; cursor: pointer; width: 300px; height: 120px; display: block; }
-        #modal-signature-pad { background-color: #ffffff; cursor: crosshair; touch-action: none; width: 100%; height: 100%; }
+        .pdf-legal-text { font-size: 14px; font-weight: 700; line-height: 1.75; color: #000000; margin-bottom: 20px; text-align: justify; }
     </style>
 </head>
 <body class="py-4 px-2 md:py-8 md:px-4 flex flex-col justify-center items-center min-h-screen">
 
-    <div id="form-zone" class="bg-white shadow-xl rounded-lg max-w-4xl w-full p-4 md:p-10 relative">
+    <div id="web-form-shell" class="bg-white shadow-xl rounded-lg max-w-4xl w-full p-4 md:p-10 relative">
         
-        <div class="no-print hidden md:flex absolute top-4 right-4 gap-2">
+        <div class="hidden md:flex absolute top-4 right-4 gap-2">
             <button onclick="clearSignature()" class="px-4 py-2 bg-red-100 text-red-600 rounded hover:bg-red-200 transition text-sm font-medium">清除簽名</button>
             <button id="btn-pdf-desktop" onclick="executePrint()" class="px-5 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 transition text-sm font-bold shadow">
                 <span id="btn-text-desktop">儲存 / 生成完美 PDF</span>
             </button>
         </div>
 
-        <div id="pdf-target" class="w-full bg-white">
-            
-            <div class="text-center mb-6 pt-2">
-                <h1 class="text-xl md:text-3xl font-bold tracking-widest text-gray-900 mb-2">台灣美光記憶體股份有限公司企業工會</h1>
-                <h2 class="text-lg md:text-2xl font-bold tracking-widest text-gray-800本">入會申請書</h2>
-                <div id="pdf-serial" class="hidden text-right text-sm mr-4 mt-2 text-gray-700">序<span class="inline-block w-24 border-b border-gray-400 ml-2"></span></div>
-            </div>
-
-            <div id="web-mobile-view" class="block md:hidden space-y-4 mb-6">
-                <div class="bg-gray-50 p-4 rounded-lg space-y-3 border border-gray-200">
-                    <div><label class="block text-sm font-bold text-gray-700 mb-1">姓 名</label><input type="text" id="m-name" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入姓名" oninput="syncData('m-name', 'd-name')"></div>
-                    <div><label class="block text-sm font-bold text-gray-700 mb-1">性 別</label><select id="m-gender" class="w-full border border-gray-300 rounded p-2 text-base bg-white" onchange="syncData('m-gender', 'd-gender')"><option value="" disabled selected>請選擇</option><option value="男">男</option><option value="女">女</option></select></div>
-                    <div><label class="block text-sm font-bold text-gray-700 mb-1">出生年月日</label><input type="date" id="m-birth" class="w-full border border-gray-300 rounded p-2 text-base bg-white" onchange="syncData('m-birth', 'd-birth')"></div>
-                    <div><label class="block text-sm font-bold text-gray-700 mb-1">工 號</label><input type="text" id="m-id" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入工號" oninput="syncData('m-id', 'd-id')"></div>
-                    <div><label class="block text-sm font-bold text-gray-700 mb-1">公司分機</label><input type="text" id="m-ext" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入分機" oninput="syncData('m-ext', 'd-ext')"></div>
-                    <div><label class="block text-sm font-bold text-gray-700 mb-1">單 位</label><input type="text" id="m-unit" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入單位" oninput="syncData('m-unit', 'd-unit')"></div>
-                    <div><label class="block text-sm font-bold text-gray-700 mb-1">戶籍住址</label><input type="text" id="m-raddr" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入戶籍住址" oninput="syncData('m-raddr', 'd-raddr')"></div>
-                    <div><label class="block text-sm font-bold text-gray-700 mb-1">通訊住址</label><input type="text" id="m-caddr" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入通訊住址" oninput="syncData('m-caddr', 'd-caddr')"></div>
-                    <div><label class="block text-sm font-bold text-gray-700 mb-1">通訊電話</label><input type="tel" id="m-phone" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="（選填）" oninput="syncData('m-phone', 'd-phone')"></div>
-                    <div><label class="block text-sm font-bold text-gray-700 mb-1">手機號碼</label><input type="tel" id="m-mobile" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入手機號碼" oninput="syncData('m-mobile', 'd-mobile')"></div>
-                </div>
-            </div>
-
-            <div id="main-table-view" class="hidden md:block watermark-container border border-gray-700 rounded-sm mb-6">
-                <div class="watermark-bg flex flex-col items-center select-none"><span class="text-[160px] leading-none">m</span><span class="text-[28px] tracking-wider -mt-4">Micron Labor Union</span></div>
-                <table class="pdf-table">
-                    <tbody>
-                        <tr>
-                            <th class="tracking-widest">姓　　名</th>
-                            <td style="width: 20%;"><input type="text" id="d-name" class="form-input" placeholder="（請輸入）" oninput="syncData('d-name', 'm-name')"></td>
-                            <th class="tracking-widest">性　　別</th>
-                            <td style="width: 20%;"><select id="d-gender" class="form-input text-center bg-transparent" onchange="syncData('d-gender', 'm-gender')"><option value="" disabled selected>請選擇</option><option value="男">男</option><option value="女">女</option></select></td>
-                            <th>出生<br>年月日</th>
-                            <td style="width: 27%;"><input type="date" id="d-birth" class="form-input text-center" onchange="syncData('d-birth', 'm-birth')"></td>
-                        </tr>
-                        <tr>
-                            <th class="tracking-widest">工　　號</th>
-                            <td><input type="text" id="d-id" class="form-input" placeholder="（請輸入）" oninput="syncData('d-id', 'm-id')"></td>
-                            <th>公司分機</th>
-                            <td><input type="text" id="d-ext" class="form-input" placeholder="（請輸入）" oninput="syncData('d-ext', 'm-ext')"></td>
-                            <th class="tracking-widest">單　　位</th>
-                            <td><input type="text" id="d-unit" class="form-input" placeholder="（請輸入）" oninput="syncData('d-unit', 'm-unit')"></td>
-                        </tr>
-                        <tr><th class="tracking-widest">戶籍住址</th><td colspan="5"><input type="text" id="d-raddr" class="form-input text-left" placeholder="（請完整輸入戶籍地址）" oninput="syncData('d-raddr', 'm-raddr')"></td></tr>
-                        <tr><th class="tracking-widest">通訊住址</th><td colspan="5"><input type="text" id="d-caddr" class="form-input text-left" placeholder="（請完整輸入通訊地址）" oninput="syncData('d-caddr', 'm-caddr')"></td></tr>
-                        <tr>
-                            <th class="tracking-widest">通訊電話</th>
-                            <td colspan="2"><input type="tel" id="d-phone" class="form-input text-left" placeholder="（選填）" oninput="syncData('d-phone', 'm-phone')"></td>
-                            <th class="tracking-widest">手機號碼</th>
-                            <td colspan="2"><input type="tel" id="d-mobile" class="form-input text-left" placeholder="（請輸入主要聯絡電話）" oninput="syncData('d-mobile', 'm-mobile')"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="border border-gray-700 bg-white p-4 md:p-6 rounded-sm relative z-10">
-                <p class="leading-relaxed text-sm md:text-base mb-6 font-bold text-gray-800 tracking-wide">
-                    本人同意按工會章程行使權利與義務並同意於加入企業工會成為會員之日起，由台灣美光記憶體股份有限公司依據工會法於每月薪資代扣工會經常會費(按章程規定之會費)，且於本人退會或離開美光後將停止此代扣作業。
-                </p>
-                <div class="flex flex-col sm:flex-row justify-end items-center sm:items-end mt-4 md:mt-6 gap-4">
-                    <span class="font-bold text-base md:text-lg sm:mb-4 text-gray-900">申請人親筆簽名：</span>
-                    <div class="flex flex-col items-center w-full sm:w-auto">
-                        <canvas id="signature-pad" class="rounded"></canvas>
-                        <span class="text-xs text-gray-400 mt-1.5 font-normal no-print">(桌機可滑鼠簽名 / 手機點擊會放大簽名)</span>
-                    </div>
-                    <span class="font-bold text-base md:text-lg sm:mb-4 text-gray-800">(簽章)</span>
-                </div>
-                <div class="flex items-center pt-6 mt-4 border-t border-dashed border-gray-300 md:border-none md:pt-4">
-                    <span class="font-bold mr-1 text-gray-800">中華民國</span>
-                    <input type="text" id="roc-year" class="w-12 border-b border-gray-600 text-center bg-transparent outline-none mx-1 text-base font-bold text-gray-900">
-                    <span class="font-bold mx-1 text-gray-800">年</span>
-                    <input type="text" id="roc-month" class="w-8 border-b border-gray-600 text-center bg-transparent outline-none mx-1 text-base font-bold text-gray-900">
-                    <span class="font-bold mx-1 text-gray-800">月</span>
-                    <input type="text" id="roc-day" class="w-8 border-b border-gray-600 text-center bg-transparent outline-none mx-1 text-base font-bold text-gray-900">
-                    <span class="font-bold mx-1 text-gray-800">日</span>
-                </div>
-            </div>
-            
-            <div class="no-print text-right mt-3 text-xs md:text-sm font-bold pr-2 text-gray-500">可將申請書儲存為 PDF 後列印或直接投入 502 室信箱</div>
+        <div class="text-center mb-6 pt-2">
+            <h1 class="text-xl md:text-3xl font-bold tracking-widest text-gray-900 mb-2">台灣美光記憶體股份有限公司企業工會</h1>
+            <h2 class="text-lg md:text-2xl font-bold tracking-widest text-gray-800">入會申請書</h2>
         </div>
 
-        <div class="no-print flex md:hidden gap-2 mt-6">
-            <button onclick="clearSignature()" class="flex-1 py-3 bg-red-100 text-red-600 rounded-lg hover:bg-red-100 transition text-sm font-bold">清除</button>
-            <button id="btn-pdf-mobile" onclick="executePrint()" class="flex-[2] py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition text-sm font-bold shadow">
+        <div class="block md:hidden space-y-4 mb-6">
+            <div class="bg-gray-50 p-4 rounded-lg space-y-3 border border-gray-200">
+                <div><label class="block text-sm font-bold text-gray-700 mb-1">姓 名</label><input type="text" id="m-name" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入姓名"></div>
+                <div><label class="block text-sm font-bold text-gray-700 mb-1">性 別</label><select id="m-gender" class="w-full border border-gray-300 rounded p-2 text-base bg-white"><option value="" disabled selected>請選擇</option><option value="男">男</option><option value="女">女</option></select></div>
+                <div><label class="block text-sm font-bold text-gray-700 mb-1">出生年月日</label><input type="date" id="m-birth" class="w-full border border-gray-300 rounded p-2 text-base bg-white"></div>
+                <div><label class="block text-sm font-bold text-gray-700 mb-1">工 號</label><input type="text" id="m-id" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入工號"></div>
+                <div><label class="block text-sm font-bold text-gray-700 mb-1">公司分機</label><input type="text" id="m-ext" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入分機"></div>
+                <div><label class="block text-sm font-bold text-gray-700 mb-1">單 位</label><input type="text" id="m-unit" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入單位"></div>
+                <div><label class="block text-sm font-bold text-gray-700 mb-1">戶籍住址</label><input type="text" id="m-raddr" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入戶籍住址"></div>
+                <div><label class="block text-sm font-bold text-gray-700 mb-1">通訊住址</label><input type="text" id="m-caddr" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入通訊住址"></div>
+                <div><label class="block text-sm font-bold text-gray-700 mb-1">通訊電話</label><input type="tel" id="m-phone" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="（選填）"></div>
+                <div><label class="block text-sm font-bold text-gray-700 mb-1">手機號碼</label><input type="tel" id="m-mobile" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入手機號碼"></div>
+            </div>
+        </div>
+
+        <div class="hidden md:block border border-gray-300 rounded-sm mb-6 p-4 bg-gray-50">
+            <div class="grid grid-cols-6 gap-3">
+                <div class="col-span-2"><label class="block text-xs font-bold text-gray-600 mb-1">姓名</label><input type="text" id="d-name" class="w-full border border-gray-300 rounded px-2 py-1.5 bg-white"></div>
+                <div class="col-span-2"><label class="block text-xs font-bold text-gray-600 mb-1">性別</label><select id="d-gender" class="w-full border border-gray-300 rounded px-2 py-1.5 bg-white"><option value="" disabled selected>選擇</option><option value="男">男</option><option value="女">女</option></select></div>
+                <div class="col-span-2"><label class="block text-xs font-bold text-gray-600 mb-1">出生年月日</label><input type="date" id="d-birth" class="w-full border border-gray-300 rounded px-2 py-1.5 bg-white"></div>
+                <div class="col-span-2"><label class="block text-xs font-bold text-gray-600 mb-1">工號</label><input type="text" id="d-id" class="w-full border border-gray-300 rounded px-2 py-1.5 bg-white"></div>
+                <div class="col-span-2"><label class="block text-xs font-bold text-gray-600 mb-1">公司分機</label><input type="text" id="d-ext" class="w-full border border-gray-300 rounded px-2 py-1.5 bg-white"></div>
+                <div class="col-span-2"><label class="block text-xs font-bold text-gray-600 mb-1">單位</label><input type="text" id="d-unit" class="w-full border border-gray-300 rounded px-2 py-1.5 bg-white"></div>
+                <div class="col-span-6"><label class="block text-xs font-bold text-gray-600 mb-1">戶籍住址</label><input type="text" id="d-raddr" class="w-full border border-gray-300 rounded px-2 py-1.5 bg-white"></div>
+                <div class="col-span-6"><label class="block text-xs font-bold text-gray-600 mb-1">通訊住址</label><input type="text" id="d-caddr" class="w-full border border-gray-300 rounded px-2 py-1.5 bg-white"></div>
+                <div class="col-span-3"><label class="block text-xs font-bold text-gray-600 mb-1">通訊電話</label><input type="tel" id="d-phone" class="w-full border border-gray-300 rounded px-2 py-1.5 bg-white" placeholder="（選填）"></div>
+                <div class="col-span-3"><label class="block text-xs font-bold text-gray-600 mb-1">手機號碼</label><input type="tel" id="d-mobile" class="w-full border border-gray-300 rounded px-2 py-1.5 bg-white"></div>
+            </div>
+        </div>
+
+        <div class="border border-gray-300 bg-white p-4 md:p-6 rounded-md">
+            <p class="leading-relaxed text-sm md:text-base mb-6 font-bold text-gray-800 tracking-wide text-justify">
+                本人同意按工會章程行使權利與義務並同意於加入企業工會成為會員之日起，由台灣美光記憶體股份有限公司依據工會法於每月薪資代扣工會經常會費(按章程規定之會費)，且於本人退會或離開美光後將停止此代扣作業。
+            </p>
+            <div class="flex flex-col sm:flex-row justify-end items-center sm:items-end mt-4 md:mt-6 gap-4">
+                <span class="font-bold text-base md:text-lg sm:mb-4 text-gray-900">申請人親筆簽名：</span>
+                <div class="flex flex-col items-center w-full sm:w-auto">
+                    <canvas id="signature-pad" class="rounded"></canvas>
+                    <span class="text-xs text-gray-400 mt-1.5 font-normal">(桌機可滑鼠簽名 / 手機點擊會放大簽名)</span>
+                </div>
+                <span class="font-bold text-base md:text-lg sm:mb-4 text-gray-800">(簽章)</span>
+            </div>
+            <div class="flex items-center pt-6 mt-4 border-t border-dashed border-gray-200 md:border-none md:pt-4">
+                <span class="font-bold mr-1 text-gray-800">中華民國</span>
+                <input type="text" id="roc-year" class="w-12 border-b border-gray-600 text-center bg-transparent outline-none mx-1 text-base font-bold text-gray-900">
+                <span class="font-bold mx-1 text-gray-800">年</span>
+                <input type="text" id="roc-month" class="w-8 border-b border-gray-600 text-center bg-transparent outline-none mx-1 text-base font-bold text-gray-900">
+                <span class="font-bold mx-1 text-gray-800">月</span>
+                <input type="text" id="roc-day" class="w-8 border-b border-gray-600 text-center bg-transparent outline-none mx-1 text-base font-bold text-gray-900">
+                <span class="font-bold mx-1 text-gray-800">日</span>
+            </div>
+        </div>
+        
+        <div class="text-right mt-3 text-xs md:text-sm font-bold pr-2 text-gray-400">可將申請書儲存為 PDF 後列印或直接投入 502 室信箱</div>
+
+        <div class="flex md:hidden gap-2 mt-6">
+            <button onclick="clearSignature()" class="flex-1 py-3 bg-red-100 text-red-600 rounded-lg font-bold text-sm">清除</button>
+            <button id="btn-pdf-mobile" onclick="executePrint()" class="flex-[2] py-3 bg-emerald-600 text-white rounded-lg font-bold text-sm shadow">
                 <span id="btn-text-mobile">儲存 / 生成完美 PDF</span>
             </button>
         </div>
     </div>
 
-    <div id="signature-modal" class="no-print fixed inset-0 bg-black/90 z-50 flex flex-col justify-between p-4 hidden">
+
+    <div id="pdf-export-pure-container">
+        <div class="pdf-title-1">台灣美光記憶體股份有限公司企業工會</div>
+        <div class="pdf-title-2">入會申請書</div>
+        <div style="text-align: right; font-size: 13px; margin-bottom: 8px; padding-right: 5px; color:#000;">
+            序<span style="display: inline-block; width: 100px; border-bottom: 1px solid #000; margin-left: 5px;"></span>
+        </div>
+        
+        <div class="pdf-watermark-zone">
+            <div class="pdf-watermark-text flex flex-col items-center"><span style="font-size:150px; line-height:1;">m</span><span style="font-size:24px; margin-top:-20px; letter-spacing:1px;">Micron Labor Union</span></div>
+            <table class="pdf-real-table">
+                <tbody>
+                    <tr>
+                        <th>姓　　名</th><td style="width: 20%;" id="p-name"></td>
+                        <th>性　　別</th><td style="width: 20%; text-align: center;" id="p-gender"></td>
+                        <th>出生<br>年月日</th><td style="width: 27%; text-align: center;" id="p-birth"></td>
+                    </tr>
+                    <tr>
+                        <th>工　　號</th><td id="p-id"></td>
+                        <th>公司分機</th><td id="p-ext"></td>
+                        <th>單　　位</th><td id="p-unit"></td>
+                    </tr>
+                    <tr><th>戶籍住址</th><td colspan="5" id="p-raddr"></td></tr>
+                    <tr><th>通訊住址</th><td colspan="5" id="p-caddr"></td></tr>
+                    <tr>
+                        <th>通訊電話</th><td colspan="2" id="p-phone"></td>
+                        <th>手機號碼</th><td colspan="2" id="p-mobile"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="border: 1px solid #000000; border-top: none; background-color: #ffffff; padding: 22px 20px;">
+            <p class="pdf-legal-text">
+                本人同意按工會章程行使權利與義務並同意於加入企業工會成為會員之日起，由台灣美光記憶體股份有限公司依據工會法於每月薪資代扣工會經常會費(按章程規定之會費)，且於本人退會或離開美光後將停止此代扣作業。
+            </p>
+            <div style="display: flex; justify-content: flex-end; align-items: flex-end; margin-top: 35px; margin-bottom: 15px;">
+                <span style="font-size: 15px; font-weight: 700; color:#000; margin-bottom: 35px;">申請人親筆簽名：</span>
+                <div style="margin-right: 10px; margin-left: 5px;">
+                    <img id="pdf-sig-output-img" style="width: 240px; height: 95px; border-bottom: 1px solid #000000; object-fit: contain; display: block;" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="signature">
+                </div>
+                <span style="font-size: 15px; font-weight: 700; color:#000; margin-bottom: 35px;">(簽章)</span>
+            </div>
+            <div style="margin-top: 35px; font-size: 14px; font-weight: 700; color:#000; letter-spacing: 1px;">
+                <span>中華民國 </span><span id="p-year" style="border-b: 1px solid #000; padding: 0 12px; font-weight:700;"></span><span> 年 </span>
+                <span id="p-month" style="border-b: 1px solid #000; padding: 0 10px; font-weight:700;"></span><span> 月 </span>
+                <span id="p-day" style="border-b: 1px solid #000; padding: 0 10px; font-weight:700;"></span><span> 日</span>
+            </div>
+        </div>
+        <div style="text-align: right; margin-top: 15px; font-size: 12px; font-weight: 700; color: #555555; padding-right: 5px;">可將申請書儲存為 PDF 後列印或直接投入 502 室信箱</div>
+    </div>
+
+
+    <div id="signature-modal" class="fixed inset-0 bg-black/90 z-50 flex flex-col justify-between p-4 hidden">
         <div class="flex justify-between items-center text-white pt-2 px-1">
             <h3 class="text-lg font-bold tracking-wider">請在下方白色區域內手寫簽名</h3>
             <button onclick="closeSignatureModal()" class="text-gray-400 text-2xl p-2">✕</button>
@@ -144,6 +191,7 @@
         </div>
     </div>
 
+
     <script>
         const canvas = document.getElementById('signature-pad');
         const ctx = canvas.getContext('2d');
@@ -153,13 +201,18 @@
 
         let isDrawing = false;
         let isMDrawing = false;
+        let hasSigned = false; // 追蹤是否有簽名
 
         window.onload = function() {
             initMainCanvas();
+            // 自動帶入今日台灣民國日期
             const today = new Date();
             document.getElementById('roc-year').value = today.getFullYear() - 1911;
             document.getElementById('roc-month').value = today.getMonth() + 1;
             document.getElementById('roc-day').value = today.getDate();
+            
+            // 雙向同步網頁上手機版與桌機版的欄位
+            setupCrossSync();
         };
 
         function initMainCanvas() {
@@ -171,7 +224,6 @@
             ctx.lineCap = 'round';
         }
 
-        // 點擊簽名格事件綁定
         canvas.addEventListener('click', handleCanvasClick);
         canvas.addEventListener('touchstart', handleCanvasClick);
 
@@ -205,7 +257,7 @@
             return { x: clientX - rect.left, y: clientY - rect.top };
         }
 
-        // 桌機滑鼠事件
+        // 電腦版滑鼠簽名
         canvas.addEventListener('mousedown', (e) => {
             if (window.innerWidth < 1024) return;
             isDrawing = true;
@@ -215,10 +267,11 @@
         canvas.addEventListener('mousemove', (e) => {
             if (!isDrawing || window.innerWidth < 1024) return;
             const p = getPos(e, canvas); ctx.lineTo(p.x, p.y); ctx.stroke();
+            hasSigned = true;
         });
         window.addEventListener('mouseup', () => { isDrawing = false; });
 
-        // 手機大視窗觸控事件
+        // 手機全螢幕觸控簽名
         mCanvas.addEventListener('touchstart', (e) => {
             isMDrawing = true;
             const p = getPos(e, mCanvas);
@@ -227,10 +280,15 @@
         mCanvas.addEventListener('touchmove', (e) => {
             if (!isMDrawing) return; e.preventDefault();
             const p = getPos(e, mCanvas); mCtx.lineTo(p.x, p.y); mCtx.stroke();
+            hasSigned = true;
         }, { passive: false });
         window.addEventListener('touchend', () => { isMDrawing = false; });
 
-        function clearSignature() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+        function clearSignature() { 
+            ctx.clearRect(0, 0, canvas.width, canvas.height); 
+            document.getElementById('pdf-sig-output-img').src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+            hasSigned = false; 
+        }
         function clearModalSignature() { mCtx.clearRect(0, 0, mCanvas.width, mCanvas.height); }
 
         function saveModalSignature() {
@@ -243,69 +301,93 @@
             closeSignatureModal();
         }
 
-        function syncData(sourceId, targetId) {
-            const src = document.getElementById(sourceId);
-            const tgt = document.getElementById(targetId);
-            if (src && tgt) tgt.value = src.value;
+        // 綁定手機與桌機網頁欄位互相即時同步
+        function setupCrossSync() {
+            const fields = ['name', 'gender', 'birth', 'id', 'ext', 'unit', 'raddr', 'caddr', 'phone', 'mobile'];
+            fields.forEach(f => {
+                const mEl = document.getElementById(`m-${f}`);
+                const dEl = document.getElementById(`d-${f}`);
+                if(mEl && dEl) {
+                    mEl.addEventListener('input', () => { dEl.value = mEl.value; });
+                    mEl.addEventListener('change', () => { dEl.value = mEl.value; });
+                    dEl.addEventListener('input', () => { mEl.value = dEl.value; });
+                    dEl.addEventListener('change', () => { mEl.value = dEl.value; });
+                }
+            });
         }
 
         // ===================================================
-        // 【動態原地蓋版法】跨瀏覽器 100% 相容性、不分頁、不空白
+        // 核心對策：直接封裝拍照極右側固定像素容器，100% 不跑位
         // ===================================================
         function executePrint() {
-            const isMobileMode = window.innerWidth < 1024;
+            // 1. 即時抓取網頁資料（不管同仁是用手機填還是電腦填）
             const name = document.getElementById('d-name').value || document.getElementById('m-name').value || '';
-            
-            // 1. 調整物件顯示：強制讓當前畫面的 A4 標準表格現形，隱藏直列欄位
-            const mobileView = document.getElementById('web-mobile-view');
-            const tableView = document.getElementById('main-table-view');
-            const serialNo = document.getElementById('pdf-serial');
-            const noPrintElements = document.querySelectorAll('.no-print');
+            const gender = document.getElementById('d-gender').value || document.getElementById('m-gender').value || '';
+            const birth = document.getElementById('d-birth').value || document.getElementById('m-birth').value || '';
+            const empId = document.getElementById('d-id').value || document.getElementById('m-id').value || '';
+            const ext = document.getElementById('d-ext').value || document.getElementById('m-ext').value || '';
+            const unit = document.getElementById('d-unit').value || document.getElementById('m-unit').value || '';
+            const raddr = document.getElementById('d-raddr').value || document.getElementById('m-raddr').value || '';
+            const caddr = document.getElementById('d-caddr').value || document.getElementById('m-caddr').value || '';
+            const phone = document.getElementById('d-phone').value || document.getElementById('m-phone').value || '';
+            const mobile = document.getElementById('d-mobile').value || document.getElementById('m-mobile').value || '';
 
-            if (isMobileMode) {
-                if (mobileView) mobileView.style.display = 'none';
-                if (tableView) tableView.style.display = 'block';
+            // 2. 灌入極右側的 PDF 固定寬度 A4 容器中
+            document.getElementById('p-name').innerText = name;
+            document.getElementById('p-gender').innerText = gender;
+            document.getElementById('p-birth').innerText = birth;
+            document.getElementById('p-id').innerText = empId;
+            document.getElementById('p-ext').innerText = ext;
+            document.getElementById('p-unit').innerText = unit;
+            document.getElementById('p-raddr').innerText = raddr;
+            document.getElementById('p-caddr').innerText = caddr;
+            document.getElementById('p-phone').innerText = phone;
+            document.getElementById('p-mobile').innerText = mobile;
+
+            document.getElementById('p-year').innerText = document.getElementById('roc-year').value;
+            document.getElementById('p-month').innerText = document.getElementById('roc-month').value;
+            document.getElementById('p-day').innerText = document.getElementById('roc-day').value;
+
+            // 3. 把畫布實體化成 Base64 圖檔塞給 <img>，確保各瀏覽器都能順利拍照
+            const outImg = document.getElementById('pdf-sig-output-img');
+            if (hasSigned) {
+                outImg.src = canvas.toDataURL('image/png');
+                outImg.style.visibility = 'visible';
+            } else {
+                outImg.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
             }
-            if (serialNo) serialNo.style.display = 'block';
-            noPrintElements.forEach(el => el.style.display = 'none');
 
-            canvas.style.border = 'none';
-            canvas.style.borderBottom = '1px solid black';
+            // 按鈕狀態回饋
+            const txtD = document.getElementById('btn-text-desktop');
+            const txtM = document.getElementById('btn-text-mobile');
+            txtD.innerText = "PDF 生成中...";
+            txtM.innerText = "PDF 生成中...";
 
-            // 2. 鎖定當前可見的實體 DOM 元素進行精準拍照
-            const element = document.getElementById('pdf-target');
+            // 4. 指定對目標容器「#pdf-export-pure-container」進行精準高清轉譯
+            const element = document.getElementById('pdf-export-pure-container');
             const opt = {
-                margin:       [0.4, 0.4, 0.4, 0.4],
-                filename:     '美光工會入會申請書_' + (name || '未命名') + '.pdf',
+                margin:       [0.35, 0.35, 0.35, 0.35],
+                filename:     '美光工會入會申請書_' + (name.trim() || '未命名') + '.pdf',
                 image:        { type: 'jpeg', quality: 1.0 },
                 html2canvas:  { 
-                    scale: 3, 
+                    scale: 3,             // 3倍高清，印刷無毛邊
                     useCORS: true, 
                     letterRendering: true,
-                    logging: false
+                    width: 794,           // 鎖死擷取寬度，避免手機版寬度被瀏覽器壓縮
+                    windowWidth: 794
                 },
                 jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
             };
 
-            // 3. 產出 PDF 檔案
+            // 5. 啟動非同步下載並還原按鈕狀態
             html2pdf().set(opt).from(element).save().then(() => {
-                restoreLayout();
+                txtD.innerText = "儲存 / 生成完美 PDF";
+                txtM.innerText = "儲存 / 生成完美 PDF";
             }).catch(err => {
-                console.error("PDF導出出錯，改用系統列印防禦", err);
-                window.print();
-                restoreLayout();
+                console.error("html2pdf發生異常:", err);
+                txtD.innerText = "儲存 / 生成完美 PDF";
+                txtM.innerText = "儲存 / 生成完美 PDF";
             });
-
-            // 4. 下載完畢後 0.1 秒無縫復原 RWD 網頁狀態
-            function restoreLayout() {
-                if (isMobileMode) {
-                    if (mobileView) mobileView.style.display = '';
-                    if (tableView) tableView.style.display = '';
-                }
-                if (serialNo) serialNo.style.display = '';
-                noPrintElements.forEach(el => el.style.display = '');
-                canvas.style.border = '1px dashed #9ca3af';
-            }
         }
     </script>
 </body>
