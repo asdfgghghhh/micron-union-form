@@ -18,30 +18,27 @@
             pointer-events: none; z-index: 0; 
         }
         .main-form-content { position: relative; z-index: 10; }
-        #signature-display { 
-            min-height: 96px; cursor: pointer; display: flex; align-items: center; justify-content: center; 
-            background: white; border-2 border-dashed #ccc; border-radius: 4px; color: #999; 
-            transition: all 0.3s;
-        }
-        #signature-display:hover { background-color: #f9fafb; }
+        #signature-display { min-height: 96px; cursor: pointer; display: flex; align-items: center; justify-content: center; background: white; }
         #signature-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
         #signature-pad { touch-action: none; background: white; width: 90vw; max-width: 500px; height: 250px; border: 1px solid #000; }
         
         .platform-badge {
-            position: fixed; top: 10px; right: 10px; padding: 6px 12px; border-radius: 20px; 
-            color: white; font-size: 12px; font-weight: bold; z-index: 999;
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #333;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 50;
+            display: none;
         }
-        .badge-android { background-color: #3DDC84; }
-        .badge-ios { background-color: #555555; }
-        .badge-desktop { background-color: #4CAF50; }
         
-        .button-group { display: flex; gap: 8px; flex-wrap: wrap; }
-        .btn-primary { flex: 1; padding: 12px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; transition: all 0.3s; min-width: 150px; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-        .btn-android { background-color: #3DDC84; color: #fff; }
-        .btn-ios { background-color: #555555; color: #fff; }
-        .btn-desktop { background-color: #4CAF50; color: #fff; }
-        .btn-secondary { background-color: #6B7280; color: #fff; flex: 1; }
+        .platform-badge.show { display: block; }
+        .platform-badge.android { background: #3DDC84; color: #000; }
+        .platform-badge.ios { background: #555555; }
+        .platform-badge.desktop { background: #4CAF50; }
         
         @media print {
             #action-buttons-area { display: none !important; }
@@ -49,16 +46,11 @@
             body { background: white; padding: 0; }
             input, select { border: none !important; border-bottom: 1px solid #000 !important; border-radius: 0 !important; }
         }
-        
-        @media (max-width: 640px) {
-            .button-group { flex-direction: column; }
-            .btn-primary { width: 100%; }
-        }
     </style>
 </head>
 <body>
 
-<div id="platform-badge" class="platform-badge"></div>
+<div class="platform-badge show" id="platformBadge"></div>
 
 <div id="form-to-pdf" class="max-w-2xl mx-auto bg-white p-8 shadow-xl relative">
     <div class="watermark-overlay">
@@ -84,12 +76,12 @@
             <div>手機<input type="tel" class="form-input"></div>
             
             <div class="p-4 bg-gray-50 border rounded text-xs leading-relaxed">
-                本人同意按工會章程行使權利與義務並同意於加入企業工會成為會員之日起由台灣美光記憶體股份有限公司依據工會法於每月薪資代扣工會會費。
+                本人同意按工會章程行使權利與義務並同意於加入企業工會成為會員之日起由台灣美光記憶體股份有限公司依據工會法於每月薪資代扣工會會費，茲申請加入台灣美光記憶體股份有限公司企業工會為會員。
             </div>
             
             <div class="flex flex-col items-center pt-4">
                 <span class="font-bold mb-2">申請人簽名：</span>
-                <div id="signature-display" onclick="openModal()" class="w-full">
+                <div id="signature-display" onclick="openModal()" class="w-full border-2 border-dashed text-gray-400 hover:bg-gray-50">
                     點擊此處進行簽名
                 </div>
                 <div class="mt-6 font-bold">
@@ -100,8 +92,9 @@
             </div>
         </div>
 
-        <div id="action-buttons-area" class="mt-8">
-            <div id="button-container" class="button-group"></div>
+        <div id="action-buttons-area" class="mt-8 flex gap-4">
+            <button onclick="window.print()" class="flex-1 bg-gray-600 text-white py-2 rounded font-bold">傳統列印</button>
+            <button onclick="generatePDF()" class="flex-1 bg-blue-600 text-white py-2 rounded font-bold">生成並下載 PDF</button>
         </div>
     </div>
 </div>
@@ -118,6 +111,21 @@
 </div>
 
 <script>
+    // 平台檢測
+    function getPlatform() {
+        const ua = navigator.userAgent.toLowerCase();
+        if (/android/.test(ua)) return 'android';
+        if (/iphone|ipad|ipod/.test(ua)) return 'ios';
+        return 'desktop';
+    }
+
+    // 初始化平台徽章
+    const platform = getPlatform();
+    const badge = document.getElementById('platformBadge');
+    badge.classList.add(platform);
+    badge.textContent = platform.toUpperCase();
+
+    // 簽名功能
     const modal = document.getElementById('signature-modal');
     const canvas = document.getElementById('signature-pad');
     const ctx = canvas.getContext('2d');
@@ -138,138 +146,122 @@
         closeModal(); 
     }
 
-    // 簽名邏輯
+    // 簽名繪製
     canvas.addEventListener('mousedown', (e) => { isDrawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
     canvas.addEventListener('mousemove', (e) => { if (isDrawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } });
     window.addEventListener('mouseup', () => isDrawing = false);
     
     // 觸摸支持
-    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); const touch = e.touches[0]; const rect = canvas.getBoundingClientRect(); const x = touch.clientX - rect.left; const y = touch.clientY - rect.top; isDrawing = true; ctx.beginPath(); ctx.moveTo(x, y); }, {passive: false});
-    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if (!isDrawing) return; const touch = e.touches[0]; const rect = canvas.getBoundingClientRect(); const x = touch.clientX - rect.left; const y = touch.clientY - rect.top; ctx.lineTo(x, y); ctx.stroke(); }, {passive: false});
-    canvas.addEventListener('touchend', () => { isDrawing = false; });
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        isDrawing = true;
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        ctx.beginPath();
+        ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+    }, {passive: false});
+    
+    canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        if (!isDrawing) return;
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+        ctx.stroke();
+    }, {passive: false});
+    
+    canvas.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        isDrawing = false;
+    }, {passive: false});
 
-    // ===== 平台偵測 =====
-    function getPlatform() {
-        const ua = navigator.userAgent.toLowerCase();
-        if (/android/.test(ua)) return 'android';
-        if (/iphone|ipad|ipod/.test(ua)) return 'ios';
-        return 'desktop';
-    }
-
-    // ===== UI 初始化 =====
-    function initializeUI() {
-        const platform = getPlatform();
-        const badge = document.getElementById('platform-badge');
-        const container = document.getElementById('button-container');
-        
-        // 設定平台徽章
-        const badgeLabels = { android: 'Android', ios: 'iOS', desktop: 'Desktop' };
-        const badgeClasses = { android: 'badge-android', ios: 'badge-ios', desktop: 'badge-desktop' };
-        badge.textContent = badgeLabels[platform];
-        badge.className = `platform-badge ${badgeClasses[platform]}`;
-        
-        // 根據平台生成按鈕
-        container.innerHTML = getButtonsForPlatform(platform);
-    }
-
-    function getButtonsForPlatform(platform) {
-        if (platform === 'android') {
-            return `
-                <button onclick="generatePDFAndroid()" class="btn-primary btn-android">📥 下載 PDF</button>
-                <button onclick="window.print()" class="btn-primary btn-secondary">🖨️ 列印</button>
-            `;
-        } else if (platform === 'ios') {
-            return `
-                <button onclick="generatePDFiOS()" class="btn-primary btn-ios">📥 生成並分享 PDF</button>
-                <button onclick="window.print()" class="btn-primary btn-secondary">🖨️ 列印</button>
-            `;
-        } else {
-            return `
-                <button onclick="generatePDFDesktop()" class="btn-primary btn-desktop">💾 下載 PDF</button>
-                <button onclick="window.print()" class="btn-primary btn-secondary">🖨️ 列印</button>
-            `;
-        }
-    }
-
-    // ===== PDF 生成函數 =====
-    function syncFormData() {
+    // PDF 生成函數 - 針對手機優化
+    function generatePDF() {
+        // 同步所有輸入值到 HTML 屬性
         document.querySelectorAll('input, select').forEach(el => {
             el.setAttribute('value', el.value);
         });
-    }
 
-    function getFileName() {
+        const element = document.getElementById('form-to-pdf');
         const nameInput = document.querySelector('input[type="text"]');
-        return nameInput.value ? `入會申請書_${nameInput.value}.pdf` : '入會申請書.pdf';
+        const fileName = nameInput.value ? `入會申請書_${nameInput.value}.pdf` : '入會申請書.pdf';
+
+        const isMobile = /android|ios|iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+
+        if (isMobile) {
+            // ✅ 手機版本優化 - 完整頁面
+            generatePDFMobile(element, fileName);
+        } else {
+            // 📱 桌面版本 - 保持原樣
+            generatePDFDesktop(element, fileName);
+        }
     }
 
-    function generatePDFAndroid() {
-        syncFormData();
-        const element = document.getElementById('form-to-pdf');
+    // 🔧 桌面版 PDF 生成 (保持不變)
+    function generatePDFDesktop(element, fileName) {
         const opt = {
             margin: 10,
-            filename: getFileName(),
+            filename: fileName,
             image: { type: 'jpeg', quality: 1 },
-            html2canvas: { scale: 2, useCORS: true, ignoreElements: (el) => el.id === 'action-buttons-area' },
+            html2canvas: { 
+                scale: 2, 
+                useCORS: true, 
+                ignoreElements: (el) => el.id === 'action-buttons-area' 
+            },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
+
         html2pdf().set(opt).from(element).save();
-        alert('PDF 已開始下載到您的下載文件夾');
     }
 
-    function generatePDFiOS() {
-        syncFormData();
-        const element = document.getElementById('form-to-pdf');
+    // 📱 手機版 PDF 生成 (針對手機優化)
+    function generatePDFMobile(element, fileName) {
+        // 克隆元素以避免修改原始 DOM
+        const clone = element.cloneNode(true);
+        clone.style.width = '210mm';
+        clone.style.margin = '0';
+        clone.style.padding = '10mm';
+        clone.style.boxSizing = 'border-box';
+
+        // 隱藏 PDF 中不需要的元素
+        const buttons = clone.querySelector('#action-buttons-area');
+        if (buttons) buttons.style.display = 'none';
+
+        document.body.appendChild(clone);
+
         const opt = {
-            margin: 10,
-            filename: getFileName(),
-            image: { type: 'jpeg', quality: 1 },
-            html2canvas: { scale: 2, useCORS: true, ignoreElements: (el) => el.id === 'action-buttons-area' },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-        
-        html2pdf().set(opt).from(element).toPdf().get('pdf').then((pdf) => {
-            const pdfBlob = pdf.output('blob');
-            const url = URL.createObjectURL(pdfBlob);
-            
-            // iOS: 嘗試使用 Web Share API
-            if (navigator.share) {
-                const fileName = getFileName();
-                const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
-                navigator.share({
-                    files: [file],
-                    title: '入會申請書',
-                    text: '台灣美光企業工會入會申請書'
-                }).catch((err) => {
-                    if (err.name !== 'AbortError') {
-                        console.log('分享失敗，使用回退方案', err);
-                        // 回退: 在新分頁打開 PDF
-                        window.open(url, '_blank');
-                    }
-                });
-            } else {
-                // 回退: 在新分頁打開 PDF
-                alert('您的設備不支持分享功能，PDF 將在新分頁打開');
-                window.open(url, '_blank');
+            margin: [10, 10, 10, 10],
+            filename: fileName,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: {
+                scale: 1.5,
+                useCORS: true,
+                logging: false,
+                allowTaint: true,
+                backgroundColor: '#ffffff',
+                windowWidth: 820,      // A4 寬度 (210mm ≈ 794px)
+                windowHeight: 1200,    // 動態高度
+            },
+            jsPDF: {
+                unit: 'mm',
+                format: 'a4',
+                orientation: 'portrait',
+                compress: true
             }
-        });
-    }
-
-    function generatePDFDesktop() {
-        syncFormData();
-        const element = document.getElementById('form-to-pdf');
-        const opt = {
-            margin: 10,
-            filename: getFileName(),
-            image: { type: 'jpeg', quality: 1 },
-            html2canvas: { scale: 2, useCORS: true, ignoreElements: (el) => el.id === 'action-buttons-area' },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
-        html2pdf().set(opt).from(element).save();
-    }
 
-    // 頁面加載時初始化
-    document.addEventListener('DOMContentLoaded', initializeUI);
+        html2pdf()
+            .set(opt)
+            .from(clone)
+            .save()
+            .then(() => {
+                document.body.removeChild(clone);
+            })
+            .catch((err) => {
+                console.error('PDF 生成失敗:', err);
+                document.body.removeChild(clone);
+            });
+    }
 </script>
 </body>
 </html>
