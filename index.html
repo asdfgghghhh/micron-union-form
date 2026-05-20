@@ -12,42 +12,23 @@
         .form-input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
         .date-input { width: 60px; border: none; border-bottom: 1px solid #000; text-align: center; background: transparent; outline: none; }
         
-        .watermark-overlay { 
-            position: absolute; inset: 0; 
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(4, 1fr);
-            opacity: 0.08;
-            pointer-events: none; 
-            z-index: 0;
-            overflow: hidden;
-            color: #004a99;
-        }
-        .watermark-item {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transform: rotate(-25deg);
-        }
+        .watermark-overlay { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(4, 1fr); opacity: 0.08; pointer-events: none; z-index: 0; overflow: hidden; color: #004a99; }
+        .watermark-item { display: flex; flex-direction: column; align-items: center; justify-content: center; transform: rotate(-25deg); }
         .watermark-m { font-size: 80px; font-weight: 800; line-height: 1; }
         .watermark-text { font-size: 14px; font-weight: bold; letter-spacing: 1px; }
         
         .main-form-content { position: relative; z-index: 10; }
-        #signature-display { min-height: 96px; cursor: pointer; display: flex; align-items: center; justify-content: center; background: white; touch-action: none; border: 2px dashed #ccc; }
+        #signature-display { min-height: 100px; cursor: pointer; display: flex; align-items: center; justify-content: center; background: white; border: 2px dashed #ccc; overflow: hidden; position: relative; }
         #signature-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
         #signature-pad { touch-action: none; background: white; width: 90vw; max-width: 500px; height: 250px; border: 1px solid #000; cursor: crosshair; }
 
-        @media print {
-            #action-buttons-area { display: none !important; }
-        }
+        @media print { #action-buttons-area { display: none !important; } }
     </style>
 </head>
 <body>
 
 <div id="form-to-pdf" class="max-w-2xl mx-auto bg-white p-8 shadow-xl relative overflow-hidden">
     <div class="watermark-overlay">
-        <div class="watermark-item"><div class="watermark-m">m</div><div class="watermark-text">MICRON LABOR UNION</div></div>
-        <div class="watermark-item"><div class="watermark-m">m</div><div class="watermark-text">MICRON LABOR UNION</div></div>
-        <div class="watermark-item"><div class="watermark-m">m</div><div class="watermark-text">MICRON LABOR UNION</div></div>
-        <div class="watermark-item"><div class="watermark-m">m</div><div class="watermark-text">MICRON LABOR UNION</div></div>
         <div class="watermark-item"><div class="watermark-m">m</div><div class="watermark-text">MICRON LABOR UNION</div></div>
         <div class="watermark-item"><div class="watermark-m">m</div><div class="watermark-text">MICRON LABOR UNION</div></div>
         <div class="watermark-item"><div class="watermark-m">m</div><div class="watermark-text">MICRON LABOR UNION</div></div>
@@ -116,10 +97,7 @@
         modal.style.display = 'flex'; 
         canvas.width = canvas.offsetWidth; 
         canvas.height = canvas.offsetHeight;
-        ctx.strokeStyle = '#000000';
-        ctx.lineWidth = 3;
-        ctx.lineJoin = 'round';
-        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#000000'; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     }
 
     function closeModal() { modal.style.display = 'none'; }
@@ -128,7 +106,8 @@
     function saveSignature() { 
         const display = document.getElementById('signature-display'); 
         const dataURL = canvas.toDataURL('image/png');
-        display.innerHTML = `<img src="${dataURL}" style="max-height:80px; width:auto; display:block; margin:0 auto;">`; 
+        // 加入 object-fit: contain 確保圖片完整顯示不被截斷
+        display.innerHTML = `<img src="${dataURL}" style="max-height:90px; width:100%; object-fit:contain; pointer-events:none;">`; 
         closeModal(); 
     }
 
@@ -142,10 +121,7 @@
     function startDrawing(e) { isDrawing = true; const pos = getPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
     function draw(e) { if (!isDrawing) return; const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); }
 
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mousemove', draw);
-    window.addEventListener('mouseup', () => isDrawing = false);
-
+    canvas.addEventListener('mousedown', startDrawing); canvas.addEventListener('mousemove', draw); window.addEventListener('mouseup', () => isDrawing = false);
     canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, {passive: false});
     canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, {passive: false});
     window.addEventListener('touchend', () => isDrawing = false);
@@ -153,14 +129,18 @@
     async function generatePDF() {
         document.querySelectorAll('input, select').forEach(el => el.setAttribute('value', el.value));
         const element = document.getElementById('form-to-pdf');
-        const nameInput = document.querySelector('input[type="text"]');
-        const fileName = nameInput.value ? `入會申請書_${nameInput.value}.pdf` : '入會申請書.pdf';
         
         const opt = {
             margin: 10,
-            filename: fileName,
+            filename: '入會申請書.pdf',
             image: { type: 'jpeg', quality: 1 },
-            html2canvas: { scale: 2, useCORS: true, ignoreElements: (el) => el.id === 'action-buttons-area' },
+            html2canvas: { 
+                scale: 2, 
+                useCORS: true, 
+                scrollY: -window.scrollY, // 強制校正偏移
+                windowWidth: document.documentElement.offsetWidth,
+                ignoreElements: (el) => el.id === 'action-buttons-area' 
+            },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
         html2pdf().set(opt).from(element).save();
