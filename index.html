@@ -8,7 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f3f4f6; padding: 20px; }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f3f4f6; padding: 10px; }
         .form-input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
         .date-input { width: 60px; border: none; border-bottom: 1px solid #000; text-align: center; background: transparent; outline: none; }
         
@@ -37,6 +37,7 @@
 
         @media print {
             #action-buttons-area { display: none !important; }
+            body { background: white; padding: 0; }
         }
     </style>
 </head>
@@ -112,16 +113,7 @@
     const ctx = canvas.getContext('2d');
     let isDrawing = false;
 
-    function openModal() { 
-        modal.style.display = 'flex'; 
-        canvas.width = canvas.offsetWidth; 
-        canvas.height = canvas.offsetHeight;
-        ctx.strokeStyle = '#000000';
-        ctx.lineWidth = 3;
-        ctx.lineJoin = 'round';
-        ctx.lineCap = 'round';
-    }
-
+    function openModal() { modal.style.display = 'flex'; canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; ctx.strokeStyle = '#000000'; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; }
     function closeModal() { modal.style.display = 'none'; }
     function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
     
@@ -132,35 +124,21 @@
         closeModal(); 
     }
 
-    function getPos(e) {
-        const rect = canvas.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        return { x: clientX - rect.left, y: clientY - rect.top };
-    }
-
+    function getPos(e) { const rect = canvas.getBoundingClientRect(); const clientX = e.touches ? e.touches[0].clientX : e.clientX; const clientY = e.touches ? e.touches[0].clientY : e.clientY; return { x: clientX - rect.left, y: clientY - rect.top }; }
     function startDrawing(e) { isDrawing = true; const pos = getPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
     function draw(e) { if (!isDrawing) return; const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); }
 
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mousemove', draw);
-    window.addEventListener('mouseup', () => isDrawing = false);
-
-    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, {passive: false});
-    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, {passive: false});
-    window.addEventListener('touchend', () => isDrawing = false);
+    canvas.addEventListener('mousedown', startDrawing); canvas.addEventListener('mousemove', draw); window.addEventListener('mouseup', () => isDrawing = false);
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, {passive: false}); canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, {passive: false}); window.addEventListener('touchend', () => isDrawing = false);
 
     async function generatePDF() {
         document.querySelectorAll('input, select').forEach(el => el.setAttribute('value', el.value));
         const element = document.getElementById('form-to-pdf');
-        const nameInput = document.querySelector('input[type="text"]');
-        const fileName = nameInput.value ? `入會申請書_${nameInput.value}.pdf` : '入會申請書.pdf';
-        
         const opt = {
-            margin: 10,
-            filename: fileName,
+            margin: 5,
+            filename: '入會申請書.pdf',
             image: { type: 'jpeg', quality: 1 },
-            html2canvas: { scale: 2, useCORS: true, ignoreElements: (el) => el.id === 'action-buttons-area' },
+            html2canvas: { scale: 2, useCORS: true, windowWidth: 800 }, // 強制固定渲染寬度
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
         html2pdf().set(opt).from(element).save();
