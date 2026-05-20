@@ -62,7 +62,13 @@
                 <div>姓名<input type="text" class="form-input"></div>
                 <div>性別<select class="form-input"><option>男</option><option>女</option></select></div>
             </div>
-            <div>出生年月日<input type="date" class="form-input"></div>
+            
+            <!-- 修改後：出生年月日與手機左右並排 -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>出生年月日<input type="date" class="form-input"></div>
+                <div>手機<input type="tel" class="form-input"></div>
+            </div>
+
             <div class="grid grid-cols-3 gap-2">
                 <div>工號<input type="text" class="form-input"></div>
                 <div>分機<input type="text" class="form-input"></div>
@@ -70,7 +76,6 @@
             </div>
             <div>戶籍地址<input type="text" class="form-input"></div>
             <div>通訊地址<input type="text" class="form-input"></div>
-            <div>手機<input type="tel" class="form-input"></div>
             
             <div class="p-4 bg-gray-50 border rounded text-xs leading-relaxed">
                 本人同意按工會章程行使權利與義務並同意於加入企業工會成為會員之日起由台灣美光記憶體股份有限公司依據工會法於每月薪資代扣工會經常會費(按章程規定之會費)，且於本人退會或離開美光後將停止此代扣作業。
@@ -96,6 +101,7 @@
     </div>
 </div>
 
+<!-- 簽名遮罩層 (維持不變) -->
 <div id="signature-modal">
     <div class="bg-white p-4 rounded-lg">
         <canvas id="signature-pad"></canvas>
@@ -138,7 +144,7 @@
             margin: 5,
             filename: '入會申請書.pdf',
             image: { type: 'jpeg', quality: 1 },
-            html2canvas: { scale: 2, useCORS: true, windowWidth: 800 }, // 強制固定渲染寬度
+            html2canvas: { scale: 2, useCORS: true, windowWidth: 800 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
         html2pdf().set(opt).from(element).save();
