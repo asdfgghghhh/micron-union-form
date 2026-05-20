@@ -38,31 +38,7 @@
 </head>
 <body class="py-4 px-2 md:py-8 md:px-4 flex flex-col justify-center items-center min-h-screen">
 
-    <div id="guide-zone" class="no-print bg-white shadow-2xl rounded-2xl max-w-md w-full p-6 md:p-8 border border-gray-100 text-center my-auto">
-        <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-600/30">
-            <span class="text-white text-3xl font-bold font-serif tracking-tighter">m</span>
-        </div>
-        <h1 class="text-xl md:text-2xl font-bold text-gray-800 tracking-wider">台灣美光企業工會</h1>
-        <h2 class="text-base text-gray-600 mt-1 font-medium mb-6">線上入會申請系統</h2>
-
-        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-left mb-6">
-            <h3 class="text-sm font-bold text-blue-800 flex items-center gap-1.5 mb-1">
-                <span>💡</span> 填表前置提醒
-            </h3>
-            <p class="text-xs text-blue-700/90 leading-relaxed">
-                本表單填寫完畢後，需要呼叫內建的「列印功能」來儲存為 PDF。請確認您目前處於穩定的網路環境。
-            </p>
-        </div>
-
-        <button onclick="showFormDirectly()" class="w-full flex items-center justify-center gap-2 p-4 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white rounded-xl shadow-lg shadow-blue-600/20 transition duration-150 font-bold tracking-wider text-base">
-            <span>📝</span> 開始填寫申請書
-        </button>
-        
-        <div class="text-center text-[11px] text-gray-400 mt-8 tracking-wider">© 2026 台灣美光記憶體股份有限公司企業工會</div>
-    </div>
-
-
-    <div id="form-zone" class="hidden print-container bg-white shadow-xl rounded-lg max-w-4xl w-full p-4 md:p-8 relative">
+    <div id="form-zone" class="print-container bg-white shadow-xl rounded-lg max-w-4xl w-full p-4 md:p-8 relative">
         
         <div class="no-print hidden md:flex absolute top-4 right-4 gap-2">
             <button onclick="clearSignature()" class="px-4 py-2 bg-red-100 text-red-600 rounded hover:bg-red-200 transition text-sm font-medium">清除簽名</button>
@@ -80,4 +56,9 @@
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">姓 名</label><input type="text" id="m-name" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入姓名" oninput="syncData('m-name', 'd-name')"></div>
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">性 別</label><select id="m-gender" class="w-full border border-gray-300 rounded p-2 text-base bg-white" onchange="syncData('m-gender', 'd-gender')"><option value="" disabled selected>請選擇</option><option value="男">男</option><option value="女">女</option></select></div>
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">出生年月日</label><input type="date" id="m-birth" class="w-full border border-gray-300 rounded p-2 text-base bg-white" onchange="syncData('m-birth', 'd-birth')"></div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1">工 號</label><input type="text" id="m-id" class="w-full border border-gray-300 rounded p-2 text-base bg-white"
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">工 號</label><input type="text" id="m-id" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入工號" oninput="syncData('m-id', 'd-id')"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">公司分機</label><input type="text" id="m-ext" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入分機" oninput="syncData('m-ext', 'd-ext')"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">單 位</label><input type="text" id="m-unit" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入單位" oninput="syncData('m-unit', 'd-unit')"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">戶籍住址</label><input type="text" id="m-raddr" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入戶籍住址" oninput="syncData('m-raddr', 'd-raddr')"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">通訊住址</label><input type="text" id="m-caddr" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="請輸入通訊住址" oninput="syncData('m-caddr', 'd-caddr')"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">通訊電話</label><input type="tel" id="m-phone" class="w-full border border-gray-300 rounded p-2 text-base bg-white" placeholder="
