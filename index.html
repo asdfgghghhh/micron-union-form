@@ -14,7 +14,7 @@
             background-color: #f3f4f6;
         }
 
-        /* 隱藏列印時不必要的元素 */
+        /* 關鍵：解決變成兩頁的列印優化設定 */
         @media print {
             @page {
                 size: portrait;
@@ -22,7 +22,9 @@
             }
             body {
                 background-color: white;
-                margin: 1.5cm; 
+                margin: 1.0cm; /* 微調邊距，釋放垂直空間 */
+                max-height: 100vh;
+                overflow: hidden;
             }
             .no-print {
                 display: none !important;
@@ -33,8 +35,10 @@
                 padding: 0 !important;
                 width: 100% !important;
                 max-width: 100% !important;
+                page-break-inside: avoid; /* 強制避免內部切頁 */
+                break-inside: avoid;
             }
-            /* 強制在列印時將手機版卡片隱藏，顯示標準表格 */
+            /* 強制在列印時隱藏手機版，顯示標準表格 */
             .mobile-form-view {
                 display: none !important;
             }
@@ -53,6 +57,15 @@
             .watermark-bg {
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
+            }
+            /* 縮小列印時的字體與間距，確保塞進單頁 */
+            .print-compact {
+                padding: 1rem !important;
+                margin-top: -1px !important;
+            }
+            .print-space {
+                margin-bottom: 0.75rem !important;
+                margin-top: 1.5rem !important;
             }
         }
 
@@ -112,7 +125,7 @@
             background-color: #f9fafb;
             cursor: crosshair;
             touch-action: none; 
-            max-width: 100%; /* 防止手機端超出螢幕 */
+            max-width: 100%;
         }
     </style>
 </head>
@@ -131,16 +144,16 @@
         </div>
 
         <!-- 標題區 -->
-        <div class="text-center mb-6 md:mb-8 mt-2 md:mt-4 relative z-10">
-            <h1 class="text-xl md:text-3xl font-bold tracking-widest mb-2 md:mb-4">台灣美光記憶體股份有限公司企業工會</h1>
+        <div class="text-center mb-4 md:mb-6 mt-2 md:mt-4 relative z-10">
+            <h1 class="text-xl md:text-3xl font-bold tracking-widest mb-1 md:mb-3">台灣美光記憶體股份有限公司企業工會</h1>
             <h2 class="text-lg md:text-2xl font-medium tracking-widest flex justify-center items-end gap-16">
                 <span>入會申請書</span>
             </h2>
-            <div class="text-right text-sm mr-4 mt-2">序<span class="inline-block w-24 border-b border-gray-400 ml-2"></span></div>
+            <div class="text-right text-sm mr-4 mt-1">序<span class="inline-block w-24 border-b border-gray-400 ml-2"></span></div>
         </div>
 
         <!-- ========================================== -->
-        <!-- 1. 手機版專屬排版 (RWD 卡片模式，電腦版隱藏) -->
+        <!-- 1. 手機版專屬排版 (RWD 卡片模式) -->
         <!-- ========================================== -->
         <div class="mobile-form-view block md:hidden space-y-4 no-print">
             <div class="bg-gray-50 p-4 rounded-lg space-y-3 border border-gray-200">
@@ -192,7 +205,7 @@
         </div>
 
         <!-- ========================================== -->
-        <!-- 2. 電腦版/列印 A4 標準表格 (手機上寬度不夠時隱藏，但保留結構供列印) -->
+        <!-- 2. 電腦版/列印 A4 標準表格 -->
         <!-- ========================================== -->
         <div class="desktop-table-view hidden md:block watermark-container border border-gray-700">
             <!-- 模擬工會浮水印 -->
@@ -244,26 +257,26 @@
         </div>
 
         <!-- ========================================== -->
-        <!-- 3. 條款與簽名區 (手機與電腦共用，版面自適應調整) -->
+        <!-- 3. 條款與簽名區 (手機與電腦共用) -->
         <!-- ========================================== -->
-        <div class="border-x border-b border-gray-700 bg-white p-4 md:p-6 relative z-10 -mt-[1px]">
-            <p class="leading-relaxed text-sm md:text-base mb-6 font-medium text-gray-800">
+        <div class="print-compact border-x border-b border-gray-700 bg-white p-4 md:p-6 relative z-10 -mt-[1px]">
+            <p class="leading-relaxed text-sm md:text-base mb-4 font-medium text-gray-800">
                 本人同意按工會章程行使權利與義務並同意於加入企業工會成為會員之日起<br class="hidden md:inline">
                 由台灣美光記憶體股份有限公司依據工會法於每月薪資代扣工會經常會費(按章<br class="hidden md:inline">
                 程規定之會費)，且於本人退會或離開美光後將停止此代扣作業
             </p>
             
-            <div class="flex flex-col sm:flex-row justify-end items-center sm:items-end mt-6 md:mt-12 gap-4">
+            <div class="print-space flex flex-col sm:flex-row justify-end items-center sm:items-end mt-4 md:mt-6 gap-4">
                 <span class="font-medium text-base md:text-lg sm:mb-4">申請人：</span>
                 <!-- 簽名畫布 -->
                 <div class="flex flex-col items-center w-full sm:w-auto">
                     <canvas id="signature-pad" width="300" height="120" class="rounded w-full sm:w-[300px]"></canvas>
-                    <span class="text-xs text-gray-500 mt-2 no-print">(請在此處簽名)</span>
+                    <span class="text-xs text-gray-500 mt-1 no-print">(請在此處簽名)</span>
                 </div>
                 <span class="font-medium text-base md:text-lg sm:mb-4">(簽章)</span>
             </div>
 
-            <div class="flex items-center pt-6 mt-4 border-t border-dashed border-gray-300 md:border-none md:pt-2">
+            <div class="flex items-center pt-4 mt-2 border-t border-dashed border-gray-300 md:border-none md:pt-2">
                 <span class="font-medium mr-1 md:mr-2 text-sm md:text-base">中華民國</span>
                 <input type="text" id="roc-year" class="w-12 md:w-16 border-b border-gray-400 text-center bg-transparent outline-none mx-1 text-sm md:text-lg">
                 <span class="font-medium mx-1 text-sm md:text-base">年</span>
@@ -291,7 +304,7 @@
     </div>
 
     <script>
-        // 資料同步雙向綁定機制 (核心：確保手機輸入的字能同步進要列印的表格內)
+        // 資料同步雙向綁定機制
         function syncData(sourceId, targetId) {
             const sourceVal = document.getElementById(sourceId).value;
             document.getElementById(targetId).value = sourceVal;
@@ -309,16 +322,13 @@
         let lastX = 0;
         let lastY = 0;
 
-        // 設定畫筆樣式
         ctx.strokeStyle = '#000000';
         ctx.lineWidth = 2.5;
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
 
-        // 修正響應式下的 RWD 簽名板精準度 (處理手機大小縮放後的點擊落差)
         function getCoordinates(e) {
             const rect = canvas.getBoundingClientRect();
-            // 計算縮放比例
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
 
@@ -334,7 +344,6 @@
             };
         }
 
-        // 開始繪圖
         function startDrawing(e) {
             isDrawing = true;
             const coords = getCoordinates(e);
@@ -348,7 +357,6 @@
             ctx.moveTo(lastX, lastY);
         }
 
-        // 繪圖中
         function draw(e) {
             if (!isDrawing) return;
             e.preventDefault(); 
@@ -363,30 +371,25 @@
             lastY = coords.y;
         }
 
-        // 結束繪圖
         function stopDrawing() {
             isDrawing = false;
             ctx.beginPath();
         }
 
-        // 滑鼠事件
         canvas.addEventListener('mousedown', startDrawing);
         canvas.addEventListener('mousemove', draw);
         canvas.addEventListener('mouseup', stopDrawing);
         canvas.addEventListener('mouseout', stopDrawing);
 
-        // 觸控事件 (支援手機/平板)
         canvas.addEventListener('touchstart', startDrawing, { passive: false });
         canvas.addEventListener('touchmove', draw, { passive: false });
         canvas.addEventListener('touchend', stopDrawing);
         canvas.addEventListener('touchcancel', stopDrawing);
 
-        // 清除簽名
         function clearSignature() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
-        // 儲存/列印為 PDF
         function saveAsPDF() {
             canvas.style.border = 'none';
             canvas.style.borderBottom = '1px solid black';
