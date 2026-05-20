@@ -27,8 +27,9 @@
         .main-form-content { position: relative; z-index: 10; }
         #signature-display { pointer-events: auto; z-index: 20; cursor: pointer; }
         
+        /* 修正 Modal 遮罩層樣式 */
         #signature-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
-        #signature-pad { touch-action: none; background: white; width: 90vw; max-width: 500px; height: 250px; border: 1px solid #000; }
+        #signature-pad { touch-action: none; background: white; width: 90vw; max-w-width: 500px; height: 250px; border: 1px solid #000; }
         
         @media print {
             @page { margin: 5mm !important; size: auto; }
@@ -100,22 +101,80 @@
 </div>
 
 <script>
-    /* JavaScript 保持原樣 */
     const modal = document.getElementById('signature-modal');
     const canvas = document.getElementById('signature-pad');
     const ctx = canvas.getContext('2d');
     let isDrawing = false;
-    function openModal() { modal.style.display = 'flex'; canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; ctx.strokeStyle = '#000'; ctx.lineWidth = 3; ctx.lineJoin = 'round'; }
+
+    function openModal() { 
+        modal.style.display = 'flex'; 
+        // 解決 Canvas 高寬解析度對齊問題
+        canvas.width = canvas.offsetWidth; 
+        canvas.height = canvas.offsetHeight; 
+        
+        // 重新初始化畫筆屬性（每次重設寬高後必須重新指定）
+        ctx.strokeStyle = '#000000'; 
+        ctx.lineWidth = 3; 
+        ctx.lineJoin = 'round'; 
+        ctx.lineCap = 'round';
+    }
+    
     function closeModal() { modal.style.display = 'none'; }
-    function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.beginPath(); }
-    function saveSignature() { const display = document.getElementById('signature-display'); display.innerHTML = `<img src="${canvas.toDataURL()}" class="h-full object-contain">`; closeModal(); }
-    function getPos(e) { const r = canvas.getBoundingClientRect(); return { x: (e.touches ? e.touches[0].clientX : e.clientX) - r.left, y: (e.touches ? e.touches[0].clientY : e.clientY) - r.top }; }
-    canvas.addEventListener('mousedown', (e) => { isDrawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); });
-    canvas.addEventListener('mousemove', (e) => { if(isDrawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } });
+    function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+    
+    function saveSignature() { 
+        const display = document.getElementById('signature-display'); 
+        // 檢查畫布是否為空（可選，這邊直接導出數據）
+        display.innerHTML = `<img src="${canvas.toDataURL()}" class="h-full object-contain">`; 
+        closeModal(); 
+    }
+    
+    // 精準計算觸控/滑鼠在畫布內部的相對座標
+    function getPos(e) { 
+        const r = canvas.getBoundingClientRect(); 
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { 
+            x: clientX - r.left, 
+            y: clientY - r.top 
+        }; 
+    }
+    
+    // --- 滑鼠事件監聽 ---
+    canvas.addEventListener('mousedown', (e) => { 
+        isDrawing = true; 
+        const p = getPos(e); 
+        ctx.beginPath(); // 這裡開啟新路徑即可
+        ctx.moveTo(p.x, p.y); 
+    });
+    
+    canvas.addEventListener('mousemove', (e) => { 
+        if (!isDrawing) return;
+        const p = getPos(e); 
+        ctx.lineTo(p.x, p.y); 
+        ctx.stroke(); 
+    });
+    
     window.addEventListener('mouseup', () => isDrawing = false);
-    canvas.addEventListener('touchstart', (e) => { isDrawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); e.preventDefault(); }, {passive: false});
-    canvas.addEventListener('touchmove', (e) => { if(isDrawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } e.preventDefault(); }, {passive: false});
-    canvas.addEventListener('touchend', () => isDrawing = false);
+    
+    // --- 行動裝置觸控事件監聽（強化滑順度與阻斷滾動） ---
+    canvas.addEventListener('touchstart', (e) => { 
+        e.preventDefault(); // 阻止手機頁面跟著滾動
+        isDrawing = true; 
+        const p = getPos(e); 
+        ctx.beginPath(); 
+        ctx.moveTo(p.x, p.y); 
+    }, { passive: false });
+    
+    canvas.addEventListener('touchmove', (e) => { 
+        e.preventDefault(); 
+        if (!isDrawing) return;
+        const p = getPos(e); 
+        ctx.lineTo(p.x, p.y); 
+        ctx.stroke(); 
+    }, { passive: false });
+    
+    window.addEventListener('touchend', () => isDrawing = false);
 </script>
 </body>
 </html>
