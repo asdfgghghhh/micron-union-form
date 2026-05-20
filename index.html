@@ -17,18 +17,19 @@
         .pdf-table th { background-color: #f9fafb; font-weight: 700; color: #1f2937; white-space: nowrap; padding: 6px; width: 13%; font-size: 14px; }
         .pdf-table td { background-color: #ffffff; text-align: left; }
         
-        /* 水印樣式 */
+ /* 水印樣式 */
 .watermark-container {
     position: relative;
-    overflow: hidden;}
+    overflow: hidden;
+}
 
 .watermark-bg {
     position: absolute;
-    top: 45%;
+    top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) rotate(-25deg);  /* ✅ 加旋轉更明顯 */
 
-    color: rgba(0,0,0,0.035);
+    color: rgba(0,0,0,0.08);   /* ✅ 調高透明度（關鍵） */
 
     font-weight: bold;
     z-index: 0;
@@ -36,7 +37,8 @@
     white-space: nowrap;
     user-select: none;
     text-align: center;
-    width: 100%;}
+    width: 100%;
+}
 ``
         /* 確保表格在上面 */
 .pdf-table {
