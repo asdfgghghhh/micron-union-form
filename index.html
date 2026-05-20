@@ -1,148 +1,83 @@
-let isDrawing = false;
-let isMDrawing = false;
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>入會申請書</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        /* PDF 輸出專用樣式 */
+        @media print { body { background: none; padding: 0; } }
+        .a4-page { width: 794px; background: white; margin: auto; padding: 50px; box-sizing: border-box; }
+        table { width: 100%; border-collapse: collapse; border: 2px solid #000; }
+        th, td { border: 1px solid #000; padding: 12px; height: 50px; vertical-align: middle; }
+        th { background-color: #f3f4f6; text-align: center; font-weight: bold; width: 15%; }
+        input, select { border: none; width: 100%; outline: none; font-size: 16px; }
+        .sig-container { border: 1px dashed #666; width: 280px; height: 100px; display: inline-block; cursor: crosshair; }
+    </style>
+</head>
+<body class="bg-gray-100 py-10">
 
-        // 重點：移除 window.onresize 避免點擊外部或彈出鍵盤時重新初始化導致內容蒸發
-window.onload = function() {
-initMainCanvas();
-};
+<div class="max-w-[850px] mx-auto">
+    <div class="flex justify-end gap-3 mb-6">
+        <button onclick="clearCanvas()" class="px-5 py-2 bg-gray-200 rounded hover:bg-gray-300">清除簽名</button>
+        <button onclick="generatePDF()" class="px-5 py-2 bg-blue-800 text-white font-bold rounded shadow hover:bg-blue-900">下載專業 PDF</button>
+    </div>
 
-        window.onresize = function() {
-            initMainCanvas();
+    <div id="pdf-content" class="a4-page shadow-2xl">
+        <h1 class="text-2xl font-bold text-center mb-1">台灣美光記憶體股份有限公司企業工會</h1>
+        <h2 class="text-xl font-bold text-center mb-8">入會申請書</h2>
+
+        <table>
+            <tr><th>姓名</th><td><input type="text"></td><th>性別</th><td><select><option>男</option><option>女</option></select></td><th>出生年月日</th><td><input type="date"></td></tr>
+            <tr><th>工號</th><td><input type="text"></td><th>公司分機</th><td><input type="text"></td><th>單位</th><td><input type="text"></td></tr>
+            <tr><th>戶籍住址</th><td colspan="5"><input type="text"></td></tr>
+            <tr><th>通訊住址</th><td colspan="5"><input type="text"></td></tr>
+            <tr><th>通訊電話</th><td><input type="text"></td><th>手機號碼</th><td colspan="3"><input type="text"></td></tr>
+        </table>
+
+        <div class="border-2 border-black p-6 mt-4">
+            <p class="mb-10 leading-relaxed font-medium">本人同意按工會章程行使權利與義務並同意於加入企業工會成為會員之日起，由台灣美光記憶體股份有限公司依據工會法於每月薪資代扣工會經常會費(按章程規定之會費)，且於本人退會或離開美光後將停止此代扣作業。</p>
+            <div class="flex items-center gap-4">
+                <span class="font-bold text-lg">申請人親筆簽名：</span>
+                <canvas id="sig-pad" class="sig-container"></canvas>
+                <span class="font-bold text-lg">(簽章)</span>
+            </div>
+            <div class="mt-8 font-bold">
+                中華民國 115 年 5 月 20 日
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('sig-pad');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+
+    canvas.onmousedown = () => drawing = true;
+    canvas.onmouseup = () => { drawing = false; ctx.beginPath(); }
+    canvas.onmousemove = (e) => {
+        if(!drawing) return;
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.lineTo(e.offsetX, e.offsetY);
+        ctx.stroke();
+    };
+
+    function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+    function generatePDF() {
+        const element = document.getElementById('pdf-content');
+        const opt = {
+            margin: 0.2,
+            filename: '美光工會入會申請書.pdf',
+            image: { type: 'jpeg', quality: 1.0 },
+            html2canvas: { scale: 3, letterRendering: true }, // scale 3 確保文字清晰
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
         };
-
-        // 初始化 A4 申請書內的小簽名框
-function initMainCanvas() {
-            canvas.width = 300;
-            canvas.height = 120;
-            // 固定實體像素解析度，防止任何動態清空
-            if (canvas.width !== 300) {
-                canvas.width = 300;
-                canvas.height = 120;
-            }
-ctx.strokeStyle = '#000000';
-ctx.lineWidth = 2.5;
-ctx.lineJoin = 'round';
-ctx.lineCap = 'round';
-}
-
-        // 判斷點擊裝置：小於 1024px 開啟手機大視窗
-function handleCanvasClick(e) {
-if (window.innerWidth < 1024) {
-e.preventDefault();
-openSignatureModal();
-}
-}
-
-        // 開啟滿版簽名視窗
-function openSignatureModal() {
-modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; // 防止底層網頁亂滾
-            document.body.style.overflow = 'hidden'; 
-
-            // 實體像素大小與 CSS 容器完全對齊
-            // 每次開大視窗才初始化大畫布，保障高解析度不拉伸
-mCanvas.width = mCanvas.offsetWidth;
-mCanvas.height = mCanvas.offsetHeight;
-
-mCtx.strokeStyle = '#000000';
-            mCtx.lineWidth = 4; // 加粗筆觸更好看
-            mCtx.lineWidth = 4; 
-mCtx.lineJoin = 'round';
-mCtx.lineCap = 'round';
-}
-@@ -203,7 +200,6 @@ <h3 class="text-lg font-bold tracking-wider">請在下方白色區域內手寫
-document.body.style.overflow = 'auto';
-}
-
-        // 取得相對坐標
-function getPos(e, c) {
-const rect = c.getBoundingClientRect();
-const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-@@ -214,7 +210,7 @@ <h3 class="text-lg font-bold tracking-wider">請在下方白色區域內手寫
-};
-}
-
-        // 桌機滑鼠原地畫圖邏輯
-        // 電腦版滑鼠事件
-canvas.addEventListener('mousedown', (e) => {
-if (window.innerWidth < 1024) return;
-isDrawing = true;
-@@ -230,7 +226,7 @@ <h3 class="text-lg font-bold tracking-wider">請在下方白色區域內手寫
-});
-window.addEventListener('mouseup', () => { isDrawing = false; });
-
-        // 手機大視窗觸控手勢
-        // 手機大視窗觸控事件
-mCanvas.addEventListener('touchstart', (e) => {
-isMDrawing = true;
-const p = getPos(e, mCanvas);
-@@ -248,40 +244,34 @@ <h3 class="text-lg font-bold tracking-wider">請在下方白色區域內手寫
-
-window.addEventListener('touchend', () => { isMDrawing = false; });
-
-        // 清除按鈕
-function clearSignature() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
-function clearModalSignature() { mCtx.clearRect(0, 0, mCanvas.width, mCanvas.height); }
-
-        // 【核心修正】等比例置中縮放演算法（Contain 模式），絕不壓扁名字
-        // 【終極修復】同步且等比例繪製演算法：不經非同步，瞬間寫入，鎖死畫布！
-function saveModalSignature() {
-            // 1. 創立臨時變數存放這張剛簽完的大圖
-            const tempImage = new Image();
-            tempImage.src = mCanvas.toDataURL();
-            // 確保目標畫布狀態正確
-            initMainCanvas();
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            tempImage.onload = function() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                // 2. 計算兩邊畫布的縮放比率，找出維持長寬比的縮放值 (Ratio)
-                const hRatio = canvas.width / mCanvas.width;
-                const vRatio = canvas.height / mCanvas.height;
-                const ratio  = Math.min(hRatio, vRatio); // 採用較小值，確保整張圖都塞得進去且不變形
-                
-                // 3. 計算讓圖片完美居中的位移量 (Center offset)
-                const shiftX = (canvas.width - mCanvas.width * ratio) / 2;
-                const shiftY = (canvas.height - mCanvas.height * ratio) / 2;
-                
-                // 4. 等比例渲染繪製回 A4 格子裡
-                ctx.drawImage(
-                    tempImage, 
-                    0, 0, mCanvas.width, mCanvas.height, // 來源區塊
-                    shiftX, shiftY, mCanvas.width * ratio, mCanvas.height * ratio // 目標區塊 (完美不變形)
-                );
-                
-                closeSignatureModal();
-            };
-            // 計算不變形比例
-            const hRatio = canvas.width / mCanvas.width;
-            const vRatio = canvas.height / mCanvas.height;
-            const ratio  = Math.min(hRatio, vRatio);
-            
-            // 計算置中位移
-            const shiftX = (canvas.width - mCanvas.width * ratio) / 2;
-            const shiftY = (canvas.height - mCanvas.height * ratio) / 2;
-            
-            // 直接將大 Canvas 同步渲染至小 Canvas 中，免除 onload 被轉移焦點的問題
-            ctx.drawImage(
-                mCanvas, 
-                0, 0, mCanvas.width, mCanvas.height, 
-                shiftX, shiftY, mCanvas.width * ratio, mCanvas.height * ratio
-            );
-            
-            closeSignatureModal();
-}
-
-        // 欄位同步與日期自動帶入
-function syncData(sourceId, targetId) {
-const src = document.getElementById(sourceId);
-const tgt = document.getElementById(targetId);
-@@ -293,7 +283,6 @@ <h3 class="text-lg font-bold tracking-wider">請在下方白色區域內手寫
-document.getElementById('roc-month').value = today.getMonth() + 1;
-document.getElementById('roc-day').value = today.getDate();
-
-        // 列印與 PDF
-function executePrint() {
-canvas.style.border = 'none';
-canvas.style.borderBottom = '1px solid black';
+        html2pdf().set(opt).from(element).save();
+    }
+</script>
+</body>
+</html>
