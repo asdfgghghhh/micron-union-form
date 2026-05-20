@@ -160,44 +160,39 @@
             generatePDFDesktop(element, fileName);
         }
     }
+function generatePDFMobile(element, fileName) {
+    // 1. 取得內容的實際高度 (px)，轉為 mm
+    const elementHeight = element.scrollHeight; 
+    const heightInMm = elementHeight * 0.264583; // 1px 約等於 0.264583mm
 
-    // 📱 手機版 PDF 生成 - 使用單次 canvas 捕捉 + 正確分頁
-    function generatePDFMobile(element, fileName) {
-           const opt = {
-    margin: [0, 0, 0, 0],
-    filename: fileName,
-    image: { type: 'jpeg', quality: 1 },
-    html2canvas: {
-        scale: 1.2,
-        windowWidth: 794,
-        // 為了確保完整捕捉，這裡可以手動指定一個很大的高度
-        windowHeight: 5000 
-    },
-    jsPDF: {
-        unit: 'mm',
-        // 自定義頁面尺寸：[寬度, 超長的高度]
-        format: [210, 5000], 
-        orientation: 'portrait'
-    }
-};
-            jsPDF: {
-                unit: 'mm',
-                format: 'a4',
-                orientation: 'portrait',
-                compress: false                // 禁用壓縮，確保正確分頁
-            },
-            pagebreak: { mode: ['css', 'legacy'], before: '.page-break' }
-        };
+    const opt = {
+        margin: 0,
+        filename: fileName,
+        image: { type: 'jpeg', quality: 1 },
+        html2canvas: {
+            scale: 2, // 解析度設為 2 比較清晰
+            useCORS: true,
+            windowWidth: 794
+        },
+        jsPDF: {
+            unit: 'mm',
+            // [寬度: 210, 高度: 計算出的內容高度]
+            // 這樣 PDF 就會剛好包住所有內容，不會產生第二頁
+            format: [210, heightInMm + 20], 
+            orientation: 'portrait'
+        },
+        // 設定為 'none'，確保完全不觸發任何分頁邏輯
+        pagebreak: { mode: 'none' } 
+    };
 
-        html2pdf()
-            .set(opt)
-            .from(element)
-            .save()
-            .catch(err => {
-                console.error('PDF 生成失敗:', err);
-                alert('PDF 生成失敗，請重試');
-            });
-    }
+    html2pdf()
+        .set(opt)
+        .from(element)
+        .save()
+        .catch(err => {
+            console.error('PDF 生成失敗:', err);
+        });
+}
 
     // 💻 桌面版 PDF 生成 (保持原樣)
     function generatePDFDesktop(element, fileName) {
