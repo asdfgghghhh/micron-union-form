@@ -164,7 +164,7 @@
     // 📱 手機版 PDF 生成 - 使用單次 canvas 捕捉 + 正確分頁
     function generatePDFMobile(element, fileName) {
         const opt = {
-            margin: [ 5, 5, 5, 5],
+            margin: [ 0, 0, 0, 0],
             filename: fileName,
             image: { type: 'jpeg', quality: 1 },
             html2canvas: {
@@ -178,7 +178,7 @@
             },
             jsPDF: {
                 unit: 'mm',
-                format: 'a3',
+                format: 'a4',
                 orientation: 'portrait',
                 compress: false                // 禁用壓縮，確保正確分頁
             },
