@@ -26,7 +26,7 @@
             background-color: #f5f5f5;
         }
 
-        /* --- 螢幕預覽樣式（手機/電腦） --- */
+        /* --- 螢幕預覽樣式 --- */
         .form-container {
             background: #fff;
             padding: 20px;
@@ -55,7 +55,7 @@
             letter-spacing: 4px;
         }
 
-        /* 右上角 PDF 按鈕區塊（改為垂直排列） */
+        /* 右上角 PDF 按鈕區塊（上下緊湊排列） */
         .pdf-btn-container {
             position: absolute;
             top: 15px;
@@ -80,14 +80,14 @@
             transition: background 0.2s;
             min-width: 135px;
         }
-        /* 第一個按鈕：紅色調 */
+        /* 按鈕一：紅色 */
         .btn-pdf-print {
             background-color: #dc3545;
         }
         .btn-pdf-print:hover {
             background-color: #bd2130;
         }
-        /* 第二個按鈕：深藍/灰藍調（區隔功能） */
+        /* 按鈕二：深灰藍色 */
         .btn-pdf-generate {
             background-color: #495057;
         }
@@ -107,7 +107,7 @@
         .header-title-en { font-size: 16px; font-weight: 600; margin: 4px 0 0 0; color: #444; }
         .header-subtitle { font-size: 15px; font-weight: 700; margin: 15px 0 0 0; color: #222; }
 
-        /* 表格與欄位設計 */
+        /* 表格與欄位 */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -133,7 +133,7 @@
             line-height: 1.2;
         }
 
-        /* 輸入框樣式 */
+        /* 輸入框 */
         input[type="text"], input[type="date"] {
             width: 100%;
             border: 1px solid transparent;
@@ -157,7 +157,7 @@
             z-index: 2;
         }
 
-        /* 條款折疊控制器 */
+        /* 條款折疊控制列 */
         .toggle-container {
             display: flex;
             align-items: center;
@@ -182,7 +182,6 @@
             text-align: justify;
             transition: all 0.3s ease-in-out;
         }
-        /* 透過 CSS 控制條款折疊 */
         #hide-declaration:checked ~ .declaration-container {
             display: none;
         }
@@ -217,7 +216,7 @@
         }
         .date-section input.year-input { width: 55px; }
 
-        /* 簽名區塊樣式 */
+        /* 簽名區塊 */
         .signature-section {
             width: 220px;
             text-align: left;
@@ -260,7 +259,7 @@
             z-index: 2;
         }
 
-        /* --- 電子簽名彈出視窗 (Modal) --- */
+        /* 電子簽名視窗 */
         .sig-modal {
             display: none;
             position: fixed;
@@ -279,41 +278,18 @@
             max-width: 450px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.25);
         }
-        .sig-modal-header {
-            font-weight: bold;
-            margin-bottom: 12px;
-            font-size: 16px;
-            color: #333;
-        }
-        #signature-canvas {
-            border: 1px solid #ccc;
-            background: #fcfcfc;
-            border-radius: 4px;
-            display: block;
-            touch-action: none;
-        }
-        .sig-modal-btns {
-            margin-top: 15px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-        .sig-btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-        }
+        .sig-modal-header { font-weight: bold; margin-bottom: 12px; font-size: 16px; color: #333; }
+        #signature-canvas { border: 1px solid #ccc; background: #fcfcfc; border-radius: 4px; display: block; touch-action: none; }
+        .sig-modal-btns { margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px; }
+        .sig-btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600; }
         .sig-btn-clear { background: #eee; color: #333; }
         .sig-btn-cancel { background: #f5f5f5; color: #666; }
         .sig-btn-save { background: var(--primary-color); color: #fff; }
 
-        /* --- 手機板響應式優化 RWD --- */
+        /* 手機板響應式 */
         @media screen and (max-width: 600px) {
             body { padding: 5px; background: #fff; }
-            .form-container { box-shadow: none; padding: 10px; padding-top: 90px; } /* 增加頂部間距容納兩個按鈕 */
+            .form-container { box-shadow: none; padding: 10px; padding-top: 90px; }
             .pdf-btn-container { top: 10px; right: 10px; width: calc(100% - 20px); flex-direction: row; }
             .btn-pdf { flex: 1; min-width: 0; }
             table, tbody, tr, td { display: block; width: 100% !important; }
@@ -325,7 +301,7 @@
             .signature-section { width: 100%; }
         }
 
-        /* --- 精準 A4 列印與 PDF 輸出排版設定 --- */
+        /* --- 精準 A4 列印與 直接導出 PDF 設定 --- */
         @media print {
             @page {
                 size: A4;
@@ -339,12 +315,12 @@
                 border: none !important;
                 padding: 2px 0 !important;
             }
-            /* 隱藏所有的 PDF 控鍵按鈕與折疊列，保持文件乾淨 */
             .pdf-btn-container, .toggle-container, .sig-modal, .sig-modal-btns, .sig-btn { display: none !important; }
             .date-section input { border-bottom: 1px solid #000 !important; }
             .signature-trigger-box { border: none !important; background: transparent !important; height: auto; }
             .signature-trigger-box span { display: none !important; }
             .signature-display-img { display: block !important; max-height: 50px; }
+            /* 導出時，說明條款必定要完整顯示 */
             .declaration-container { display: block !important; border: 1px solid #ccc !important; background: transparent !important; }
         }
     </style>
@@ -360,7 +336,7 @@
         </button>
         <button class="btn-pdf btn-pdf-generate" onclick="generateFullPDF()">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-            生成 PDF 檔案
+            直接導出頁面
         </button>
     </div>
 
@@ -458,16 +434,28 @@
         document.getElementById('hide-declaration').checked = cb.checked;
     }
 
-    // 按鈕 1：原有的列印與另存 PDF 功能
     function exportToPDF() {
         window.print();
     }
 
-    // 按鈕 2：新新增的生成 PDF 獨立函式區塊
+    // 按鈕二：直接導出頁面（具備智慧條款展開恢復機制）
     function generateFullPDF() {
-        // 目前預設同樣呼叫純淨系統列印（可完美存成 PDF）
-        // 未來若想引入 html2pdf.js 等前端套件，可直接在此處改寫邏輯
+        const hideCheckbox = document.getElementById('hide-declaration');
+        const toggleCheckbox = document.getElementById('toggleCheckbox');
+        const originalState = hideCheckbox.checked; // 記錄當前的使用者網頁瀏覽狀態
+        
+        // 1. 強制在列印前將狀態設為展開，確保導出的實體文件必定完整
+        hideCheckbox.checked = false;
+        toggleCheckbox.checked = false;
+
+        // 2. 直接導出/儲存頁面
         window.print();
+
+        // 3. 延時自動恢復原本的折疊狀態，不影響使用者的網頁預覽操作
+        setTimeout(() => {
+            hideCheckbox.checked = originalState;
+            toggleCheckbox.checked = originalState;
+        }, 500);
     }
 
     const modal = document.getElementById('signatureModal');
