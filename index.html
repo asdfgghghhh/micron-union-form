@@ -3,23 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>入會申請書</title>
+    <title>台灣美光工會 入會申請書</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
-        * { box-sizing: border-box; }
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f3f4f6; padding: 10px; }
-        .form-input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f3f4f6; padding: 20px; }
+        .form-input { width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; margin-top: 4px; background: #fff; }
         .date-input { width: 60px; border: none; border-bottom: 1px solid #000; text-align: center; background: transparent; outline: none; }
-        
-        .watermark-overlay { 
-            position: absolute; inset: 0; display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; opacity: 0.1; 
-            pointer-events: none; z-index: 0; 
-        }
+        .watermark-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0.05; pointer-events: none; z-index: 0; }
         .main-form-content { position: relative; z-index: 10; }
-        #signature-display { min-height: 96px; cursor: pointer; display: flex; align-items: center; justify-content: center; background: white; touch-action: none; }
+        #signature-display { min-height: 80px; cursor: pointer; display: flex; align-items: center; justify-content: center; background: white; touch-action: none; border: 2px dashed #cbd5e1; color: #94a3b8; }
         #signature-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
         #signature-pad { touch-action: none; background: white; width: 90vw; max-width: 500px; height: 250px; border: 1px solid #000; cursor: crosshair; }
 
@@ -27,6 +21,7 @@
             #action-buttons-area { display: none !important; }
             body { background: white; padding: 0; }
             input, select { border: none !important; border-bottom: 1px solid #000 !important; border-radius: 0 !important; }
+            .form-input { margin-top: 0; padding-left: 0; }
         }
     </style>
 </head>
@@ -34,42 +29,38 @@
 
 <div id="form-to-pdf" class="max-w-2xl mx-auto bg-white p-8 shadow-xl relative overflow-visible">
     <div class="watermark-overlay">
-        <div style="font-size: 150px; font-weight: bold; color: #000; line-height: 1;">m</div>
-        <div style="font-size: 30px; font-weight: bold; color: #000;">Micron Labor Union</div>
+        <div style="font-size: 200px; font-weight: bold; color: #000; line-height: 1;">m</div>
+        <div style="font-size: 40px; font-weight: bold; color: #000;">Micron Labor Union</div>
     </div>
 
-    <div class="text-center space-y-4">
-    <h1 class="text-2xl font-bold">台灣美光記憶體股份有限公司企業工會 入會申請書</h1>
-    <h2 class="text-xl">Micron Labor Union — Membership Application</h2>
-    
-    <div class="text-sm space-y-4">
-        <!-- 內容區域 -->
-        <div class="grid grid-cols-2 gap-4">
-            <!-- 欄位內容 -->
-        </div>
-    </div>
-</div>
-                <div>姓名Chinese<input type="text" class="form-input"></div>
-                <div>性別Gender<select class="form-input"><option>男</option><option>女</option></select></div>
+    <div class="main-form-content text-center">
+        <h1 class="text-2xl font-bold mb-1">台灣美光記憶體股份有限公司企業工會 入會申請書</h1>
+        <h2 class="text-lg text-gray-600 mb-8">Micron Labor Union — Membership Application</h2>
+        
+        <div class="text-left space-y-4 text-sm">
+            <div class="grid grid-cols-2 gap-4">
+                <div>姓名 Name<input type="text" id="app-name" class="form-input"></div>
+                <div>性別 Gender<select class="form-input"><option>男</option><option>女</option></select></div>
             </div>
-            <div>出生年月日Birthdate<input type="date" class="form-input"></div>
+            <div>出生年月日 Birthdate<input type="date" class="form-input"></div>
             <div class="grid grid-cols-3 gap-2">
-                <div>工號Worker Number<input type="text" class="form-input"></div>
-                <div>分機Work extension<input type="text" class="form-input"></div>
-                <div>單位Workplace<input type="text" class="form-input"></div>
+                <div>工號 ID<input type="text" class="form-input"></div>
+                <div>分機 Ext<input type="text" class="form-input"></div>
+                <div>單位 Dept<input type="text" class="form-input"></div>
             </div>
-            <div>戶籍地址Household address<input type="text" class="form-input"></div>
-            <div>通訊地址Correspondence address<input type="text" class="form-input"></div>
-            <div>手機號碼Personal phone<input type="tel" class="form-input"></div>
+            <div>戶籍地址 Household address<input type="text" class="form-input"></div>
+            <div>通訊地址 Correspondence address<input type="text" class="form-input"></div>
+            <div>手機號碼 Phone<input type="tel" class="form-input"></div>
             
-            <div class="p-4 bg-gray-50 border rounded text-xs leading-relaxed">
-                本人同意按工會章程行使權利與義務並同意於加入企業工會成為會員之日起由台灣美光記憶體股份有限公司依據工會法於每月薪資代扣工會經常會費(按章程規定之會費)，且於本人退會或離開美光後將停止此代扣作業。I agree to exercise my rights and fulfill my obligations according to the union’s constitution, and consent to become a member of the enterprise union from the date of joining. Micron Memory Taiwan Co., Ltd. will deduct the regular union membership fee from my monthly salary (according to the union’s constitution). The deduction will stop when I withdraw from the union or leave Micron.
+            <div class="p-4 bg-gray-50 border rounded text-xs leading-relaxed text-gray-700">
+                本人同意按工會章程行使權利與義務並同意於加入企業工會成為會員之日起由台灣美光記憶體股份有限公司依據工會法於每月薪資代扣工會經常會費(按章程規定之會費)，且於本人退會或離開美光後將停止此代扣作業。<br>
+                I agree to exercise my rights and fulfill my obligations according to the union’s constitution, and consent to become a member of the enterprise union from the date of joining. Micron Memory Taiwan Co., Ltd. will deduct the regular union membership fee from my monthly salary (according to the union’s constitution). The deduction will stop when I withdraw from the union or leave Micron.
             </div>
             
             <div class="flex flex-col items-center pt-4">
-                <span class="font-bold mb-2">申請人Applicant：</span>
-                <div id="signature-display" onclick="openModal()" class="w-full border-2 border-dashed text-gray-400 hover:bg-gray-50">
-                    點擊此處進行簽名Signature/Seal
+                <span class="font-bold mb-2">申請人簽名 Applicant Signature:</span>
+                <div id="signature-display" onclick="openModal()" class="w-full">
+                    點擊此處簽名
                 </div>
                 <div class="mt-6 font-bold">
                     中華民國 <input type="number" class="date-input"> 年 
@@ -80,14 +71,14 @@
         </div>
 
         <div id="action-buttons-area" class="mt-8 flex gap-4">
-            <button onclick="window.print()" class="flex-1 bg-gray-600 text-white py-2 rounded font-bold">傳統列印</button>
-            <button onclick="generatePDF()" class="flex-1 bg-blue-600 text-white py-2 rounded font-bold">生成並下載 PDF</button>
+            <button onclick="window.print()" class="flex-1 bg-gray-600 text-white py-2 rounded font-bold hover:bg-gray-700">列印表單</button>
+            <button onclick="generatePDF()" class="flex-1 bg-blue-600 text-white py-2 rounded font-bold hover:bg-blue-700">下載 PDF</button>
         </div>
     </div>
 </div>
 
 <div id="signature-modal">
-    <div class="bg-white p-4 rounded-lg">
+    <div class="bg-white p-4 rounded-lg shadow-2xl">
         <canvas id="signature-pad"></canvas>
         <div class="flex justify-end gap-2 mt-4">
             <button onclick="closeModal()" class="px-4 py-2 bg-gray-300 rounded">取消</button>
@@ -103,91 +94,27 @@
     const ctx = canvas.getContext('2d');
     let isDrawing = false;
 
-    // --- 簽名板功能 ---
-    function openModal() { 
-        modal.style.display = 'flex'; 
-        canvas.width = canvas.offsetWidth; 
-        canvas.height = canvas.offsetHeight; 
-        ctx.strokeStyle = '#000000'; 
-        ctx.lineWidth = 3; 
-        ctx.lineJoin = 'round'; 
-    }
+    function openModal() { modal.style.display = 'flex'; canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; ctx.strokeStyle = '#000000'; ctx.lineWidth = 3; }
     function closeModal() { modal.style.display = 'none'; }
     function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
     function saveSignature() { 
-        const display = document.getElementById('signature-display'); 
-        display.innerHTML = `<img src="${canvas.toDataURL()}" style="max-height:80px; width:auto;">`; 
+        document.getElementById('signature-display').innerHTML = `<img src="${canvas.toDataURL()}" style="max-height:70px;">`; 
         closeModal(); 
     }
 
-    function getPos(e) { 
-        const rect = canvas.getBoundingClientRect(); 
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX; 
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY; 
-        return { x: clientX - rect.left, y: clientY - rect.top }; 
-    }
-    
+    function getPos(e) { const rect = canvas.getBoundingClientRect(); const clientX = e.touches ? e.touches[0].clientX : e.clientX; const clientY = e.touches ? e.touches[0].clientY : e.clientY; return { x: clientX - rect.left, y: clientY - rect.top }; }
     function startDrawing(e) { isDrawing = true; const pos = getPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
     function draw(e) { if (!isDrawing) return; const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); }
 
     canvas.addEventListener('mousedown', startDrawing); canvas.addEventListener('mousemove', draw); window.addEventListener('mouseup', () => isDrawing = false);
-    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, {passive: false}); 
-    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, {passive: false}); 
-    canvas.addEventListener('touchend', (e) => { e.preventDefault(); isDrawing = false; }, {passive: false});
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, {passive: false});
+    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, {passive: false});
 
-    // --- PDF 生成主程式 ---
     async function generatePDF() {
-        document.querySelectorAll('input, select').forEach(el => {
-            if (el.type !== 'checkbox' && el.type !== 'radio') el.setAttribute('value', el.value);
-        });
-
+        const name = document.getElementById('app-name').value;
+        if (!name) { alert("請填寫姓名"); return; }
         const element = document.getElementById('form-to-pdf');
-        const nameInput = document.querySelector('input[type="text"]');
-        const fileName = nameInput.value ? `入會申請書_${nameInput.value}.pdf` : '入會申請書.pdf';
-        
-        const isMobile = /android|ios|iphone|ipad|ipot/.test(navigator.userAgent.toLowerCase());
-
-        if (isMobile) {
-            generatePDFMobile(element, fileName);
-        } else {
-            generatePDFDesktop(element, fileName);
-        }
-    }
-
-    function generatePDFMobile(element, fileName) {
-        const elementHeight = element.scrollHeight;
-        const heightInMm = elementHeight * 0.244583;
-
-        const opt = {
-            margin: 0,
-            filename: fileName,
-            image: { type: 'jpeg', quality: 1 },
-            html2canvas: {
-                scale: 2,
-                useCORS: true,
-                windowWidth: element.scrollWidth,
-                height: elementHeight,
-                windowHeight: elementHeight,
-                ignoreElements: (el) => el.id === 'action-buttons-area'
-            },
-            jsPDF: {
-                unit: 'mm',
-                format: [210, heightInMm + 0],
-                orientation: 'portrait'
-            },
-            pagebreak: { mode: 'none' }
-        };
-        html2pdf().set(opt).from(element).save();
-    }
-
-    function generatePDFDesktop(element, fileName) {
-        const opt = {
-            margin: 10,
-            filename: fileName,
-            image: { type: 'jpeg', quality: 1 },
-            html2canvas: { scale: 2, useCORS: true, ignoreElements: (el) => el.id === 'action-buttons-area' },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
+        const opt = { margin: 10, filename: `入會申請書_${name}.pdf`, image: { type: 'jpeg', quality: 1 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
         html2pdf().set(opt).from(element).save();
     }
 </script>
