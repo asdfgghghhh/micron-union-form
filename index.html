@@ -27,27 +27,17 @@
             background-color: #f5f5f5;
         }
 
-        /* --- 螢幕預覽樣式（預設電腦版為標準 A4 比例） --- */
+        /* --- 螢幕預覽樣式 --- */
         .form-container {
             background: #fff;
             padding: 30px;
-            width: 100%;
-            max-width: 800px; /* 電腦版最大寬度 */
+            width: 210mm; /* 設定為標準 A4 寬度，確保導出不變形 */
+            max-width: 100%;
             margin: 0 auto;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             position: relative;
             overflow: hidden;
-            transition: all 0.1s ease;
-        }
-
-        /* 當 JS 在執行導出 PDF 時，會動態加上這個類別，強制將寬度放大到標準 A4 轉成高畫質圖片 */
-        .form-container.is-exporting {
-            width: 210mm !important;
-            max-width: none !important;
-            padding: 30px !important;
-            border-radius: 0 !important;
-            box-shadow: none !important;
         }
 
         /* 浮水印 */
@@ -66,7 +56,7 @@
             letter-spacing: 4px;
         }
 
-        /* 右上角 PDF 按鈕區塊 */
+        /* 右上角 PDF 按鈕區塊 - 導出時會被 JS 動態隱藏 */
         .pdf-btn-container {
             position: absolute;
             top: 15px;
@@ -95,7 +85,7 @@
         .btn-pdf-print { background-color: #dc3545; }
         .btn-pdf-print:hover { background-color: #bd2130; }
         
-        .btn-pdf-generate { background-color: #28a745; }
+        .btn-pdf-generate { background-color: #28a745; } /* 導出改為顯眼的綠色 */
         .btn-pdf-generate:hover { background-color: #218838; }
 
         .btn-pdf:disabled {
@@ -279,71 +269,18 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.25);
         }
         .sig-modal-header { font-weight: bold; margin-bottom: 12px; font-size: 16px; color: #333; }
-        #signature-canvas { border: 1px solid #ccc; background: #fcfcfc; border-radius: 4px; display: block; touch-action: none; max-width: 100%; }
+        #signature-canvas { border: 1px solid #ccc; background: #fcfcfc; border-radius: 4px; display: block; touch-action: none; }
         .sig-modal-btns { margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px; }
         .sig-btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600; }
         .sig-btn-clear { background: #eee; color: #333; }
         .sig-btn-cancel { background: #f5f5f5; color: #666; }
         .sig-btn-save { background: var(--primary-color); color: #fff; }
 
-        /* 📱 關鍵優化：手機板自適應響應式排版（僅在畫面上看是單欄，導出時依舊是漂亮的雙欄 A4） */
-        @media screen and (max-width: 768px) {
-            body { padding: 10px; background: #f5f5f5; }
-            /* 讓表單在手機畫面上滿版，不被固定寬度撐破 */
-            .form-container:not(.is-exporting) {
-                padding: 15px;
-                padding-top: 100px; /* 留空間給頂部絕對定位的按鈕 */
-            }
-            .form-container:not(.is-exporting) .pdf-btn-container {
-                top: 10px; right: 10px; left: 10px;
-                width: calc(100% - 20px);
-                flex-direction: row;
-            }
-            .form-container:not(.is-exporting) .btn-pdf {
-                flex: 1;
-                min-width: 0;
-                font-size: 12px;
-                padding: 8px 4px;
-            }
-            /* 手機畫面上表格拆開為流暢的垂直單欄，方便點擊輸入 */
-            .form-container:not(.is-exporting) table, 
-            .form-container:not(.is-exporting) tbody, 
-            .form-container:not(.is-exporting) tr, 
-            .form-container:not(.is-exporting) td {
-                display: block;
-                width: 100% !important;
-            }
-            .form-container:not(.is-exporting) tr {
-                margin-bottom: 12px;
-                border: 1px solid var(--border-color);
-                border-radius: 6px;
-                overflow: hidden;
-            }
-            .form-container:not(.is-exporting) td {
-                border: none;
-                border-bottom: 1px solid #eee;
-                padding: 10px;
-            }
-            .form-container:not(.is-exporting) td:last-child { border-bottom: none; }
-            .form-container:not(.is-exporting) .label-cell {
-                background-color: #f2f7fc;
-                border-bottom: 1px solid #ddd;
-            }
-            .form-container:not(.is-exporting) .footer-container {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 25px;
-            }
-            .form-container:not(.is-exporting) .signature-section {
-                width: 100%;
-            }
-        }
-
-        /* --- 備援的原生列印模式 --- */
+        /* --- 傳統原生列印模式微調 (@media print 仍保留作為備援) --- */
         @media print {
             .pdf-btn-container, .toggle-container, .sig-modal { display: none !important; }
             body { background: #fff; padding: 0; }
-            .form-container { box-shadow: none; padding: 0; width: 100% !important; max-width: none !important; }
+            .form-container { box-shadow: none; padding: 0; width: 100%; }
             input[type="text"], input[type="date"] { background: transparent !important; border: none !important; padding: 2px 0 !important; }
         }
     </style>
@@ -355,7 +292,7 @@
     <div class="pdf-btn-container" id="action-buttons">
         <button class="btn-pdf btn-pdf-print" id="btnPrint" onclick="exportToPDF()" disabled>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            儲4存 PDF / 列印
+            儲存 PDF / 列印
         </button>
         <button class="btn-pdf btn-pdf-generate" id="btnExport" onclick="generateFullPDFDirectly()" disabled>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
@@ -470,44 +407,41 @@
         }
     }
 
-    // 儲存 PDF / 列印
+    // 功能一：儲存 PDF / 列印 (呼叫 Edge 內建面板)
     function exportToPDF() {
         window.print();
     }
 
-    // 關鍵修改：直接導出頁面（自動校正手機排版回標準 A4 PDF）
+    // 功能二：直接導出頁面 (在 Edge 瀏覽器背景靜態直接生成 PDF 並下載)
     function generateFullPDFDirectly() {
         const element = document.getElementById('application-form');
         const actionButtons = document.getElementById('action-buttons');
         const toggleLabel = document.getElementById('toggleLabel');
         const nameInput = document.getElementById('field-name').value.trim();
         
+        // 動態生成檔名：如果有填名字就用名字，沒填就用通用名稱
         const fileName = nameInput ? `美光工會入會申請書_${nameInput}.pdf` : '美光工會入會申請書.pdf';
 
-        // 1. 下載前：隱藏按鈕、隱藏同意勾選列
+        // 1. 在生成前，隱藏畫面上不需要出現的元素（按鈕與勾選欄）
         actionButtons.style.display = 'none';
         toggleLabel.style.display = 'none';
-        
-        // 2. 核心技術：強制幫外殼加上「導出中樣式」，使手機版排版在一瞬間被還原為完美的標準電腦版 A4 雙欄網格
-        element.classList.add('is-exporting');
 
+        // 2. 配置高精密度的 A4 轉成 PDF 參數
         const opt = {
-            margin:       [15, 15, 15, 15],
+            margin:       [15, 15, 15, 15], // 上、左、下、右邊距 (mm)
             filename:     fileName,
             image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, letterRendering: true }, // 雙倍超高解析度
+            html2canvas:  { scale: 2, useCORS: true, letterRendering: true }, // scale: 2 確保文字與簽名極度清晰不模糊
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        // 3. 觸發 Edge 背景轉換與自動下載
+        // 3. 執行 Edge 背景生成並自動觸發下載
         html2pdf().set(opt).from(element).save().then(() => {
-            // 4. 下載成功後：恢復原本的手機自適應顯示
-            element.classList.remove('is-exporting');
+            // 4. 下載完成後，將畫面上的按鈕與勾選欄恢復顯示，讓使用者可以繼續操作
             actionButtons.style.display = 'flex';
             toggleLabel.style.display = 'flex';
         }).catch(err => {
             console.error('PDF 生成失敗:', err);
-            element.classList.remove('is-exporting');
             actionButtons.style.display = 'flex';
             toggleLabel.style.display = 'flex';
         });
@@ -529,13 +463,6 @@
     function openSignatureModal() {
         modal.style.display = 'flex';
         clearCanvas();
-        // 針對手機調整畫布實際大小，防止點擊位置偏移
-        setTimeout(() => {
-            const rect = canvas.getBoundingClientRect();
-            if(rect.width < 400) {
-                canvas.width = rect.width;
-            }
-        }, 50);
     }
 
     function closeSignatureModal() {
@@ -566,16 +493,15 @@
         const pos = getPos(e);
         ctx.beginPath();
         ctx.moveTo(pos.x, pos.y);
-        if(e.touches) e.preventDefault();
+        e.preventDefault();
     }
 
-    // 手機畫圖防滾動優化
     function draw(e) {
         if (!isDrawing) return;
         const pos = getPos(e);
         ctx.lineTo(pos.x, pos.y);
         ctx.stroke();
-        if(e.touches) e.preventDefault();
+        e.preventDefault();
     }
 
     function stopDraw() { isDrawing = false; }
@@ -584,8 +510,8 @@
     canvas.addEventListener('mousemove', draw);
     window.addEventListener('mouseup', stopDraw);
 
-    canvas.addEventListener('touchstart', startDraw, {passive: false});
-    canvas.addEventListener('touchmove', draw, {passive: false});
+    canvas.addEventListener('touchstart', startDraw);
+    canvas.addEventListener('touchmove', draw);
     canvas.addEventListener('touchend', stopDraw);
 </script>
 
