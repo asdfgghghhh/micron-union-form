@@ -3,148 +3,518 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>台灣美光工會 入會申請書</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <title>台灣美光記憶體股份有限公司企業工會 入會申請書</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f3f4f6; padding: 20px; }
-        .form-input { width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; margin-top: 4px; background: #fff; }
-        .date-input { width: 60px; border: none; border-bottom: 1px solid #000; text-align: center; background: transparent; outline: none; }
-        .watermark-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0.05; pointer-events: none; z-index: 0; }
-        .main-form-content { position: relative; z-index: 10; }
-        #signature-display { min-height: 80px; cursor: pointer; display: flex; align-items: center; justify-content: center; background: white; touch-action: none; border: 2px dashed #cbd5e1; color: #94a3b8; }
-        #signature-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
-        #signature-pad { touch-action: none; background: white; width: 90vw; max-width: 500px; height: 250px; border: 1px solid #000; cursor: crosshair; }
+        /* --- 基礎變數與重設 --- */
+        :root {
+            --primary-color: #0076d6;
+            --border-color: #1a1a1a;
+            --bg-light: #fcfcfc;
+        }
+        
+        * {
+            box-shadow: none;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang TC", "Microsoft JhengHei", sans-serif;
+            margin: 0 auto;
+            color: #1a1a1a;
+            line-height: 1.5;
+            padding: 15px;
+            background-color: #f5f5f5;
+        }
+
+        /* --- 螢幕預覽樣式（手機/電腦） --- */
+        .form-container {
+            background: #fff;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 浮水印 */
+        .form-container::before {
+            content: "限工會入會申請使用  /  Internal Use Only";
+            position: fixed;
+            top: 45%;
+            left: -15%;
+            width: 130%;
+            font-size: 32px;
+            color: rgba(0, 0, 0, 0.03);
+            font-weight: 700;
+            text-align: center;
+            transform: rotate(-32deg);
+            z-index: 1;
+            pointer-events: none;
+            letter-spacing: 4px;
+        }
+
+        /* 右上角精巧的 PDF 按鈕 */
+        .pdf-btn-container {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 10;
+        }
+        .btn-pdf {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+        .btn-pdf:hover {
+            background-color: #bd2130;
+        }
+
+        /* 標題區塊 */
+        .header-container {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            position: relative;
+        }
+        .header-title-zh { font-size: 22px; font-weight: 700; margin: 0; letter-spacing: 1.5px; color: #050505; }
+        .header-title-en { font-size: 16px; font-weight: 600; margin: 4px 0 0 0; color: #444; }
+        .header-subtitle { font-size: 15px; font-weight: 700; margin: 15px 0 0 0; color: #222; }
+
+        /* 表格與欄位設計 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+        }
+        table, th, td { border: 1px solid var(--border-color); }
+        td { padding: 8px 10px; vertical-align: middle; font-size: 14px; }
+        
+        .label-cell {
+            background-color: var(--bg-light);
+            font-weight: 600;
+            color: #111;
+            white-space: nowrap;
+        }
+        .sub-label {
+            font-size: 10px;
+            font-weight: 400;
+            color: #555;
+            margin-top: 2px;
+            display: block;
+            line-height: 1.2;
+        }
+
+        /* 輸入框樣式 */
+        input[type="text"], input[type="date"] {
+            width: 100%;
+            border: 1px solid transparent;
+            padding: 6px 8px;
+            font-size: 14px;
+            font-family: inherit;
+            background-color: #fafafa;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        input[type="text"]:focus, input[type="date"]:focus {
+            border-color: var(--primary-color);
+            background-color: #fff;
+            outline: none;
+        }
+
+        /* 說明與同意區塊包裹層 */
+        .declaration-wrapper {
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* 條款折疊控制器（移至說明條款正上方） */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            font-size: 13.5px;
+            background: #eaf5ea;
+            padding: 10px 12px;
+            border: 1px solid #ccebcc;
+            border-radius: 4px;
+            color: #2b6e2b;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+        .toggle-container input { margin-right: 10px; transform: scale(1.1); cursor: pointer; }
+
+        /* 同意宣告區塊 */
+        .declaration-container {
+            padding: 15px;
+            background-color: #fafafa;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            text-align: justify;
+            transition: all 0.3s ease-in-out;
+        }
+        /* 透過 CSS 控制條款折疊 */
+        #hide-declaration:checked ~ .declaration-container {
+            display: none;
+        }
+        .declaration-zh { font-size: 13px; font-weight: 600; line-height: 1.7; margin-bottom: 8px; color: #1a1a1a; }
+        .declaration-en { font-size: 11.5px; line-height: 1.5; color: #454545; }
+
+        /* 頁尾區塊 */
+        .footer-container {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 20px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .date-section {
+            font-size: 14px;
+            font-weight: 500;
+            padding-bottom: 10px;
+        }
+        .date-section input {
+            width: 45px;
+            text-align: center;
+            border: none;
+            border-bottom: 1px solid #000;
+            background: transparent;
+            font-size: 14px;
+            padding: 2px;
+        }
+        .date-section input.year-input { width: 55px; }
+
+        /* 簽名區塊樣式 */
+        .signature-section {
+            width: 220px;
+            text-align: left;
+        }
+        .applicant-label { font-size: 14px; font-weight: bold; margin-bottom: 8px; }
+        
+        .signature-trigger-box {
+            border: 1px dashed #999;
+            background: #fafafa;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 4px;
+            color: #666;
+            font-size: 13px;
+            position: relative;
+            transition: background 0.2s;
+        }
+        .signature-trigger-box:hover { background: #f0f7ff; border-color: var(--primary-color); }
+        .signature-display-img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+            display: none;
+        }
+
+        .signature-hint { font-size: 12px; color: #555; text-align: center; margin-top: 4px; }
+
+        .submission-note {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            border-top: 1px dashed #ccc;
+            padding-top: 15px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* --- 電子簽名彈出視窗 (Modal) --- */
+        .sig-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+        .sig-modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+        }
+        .sig-modal-header {
+            font-weight: bold;
+            margin-bottom: 12px;
+            font-size: 16px;
+            color: #333;
+        }
+        #signature-canvas {
+            border: 1px solid #ccc;
+            background: #fcfcfc;
+            border-radius: 4px;
+            display: block;
+            touch-action: none;
+        }
+        .sig-modal-btns {
+            margin-top: 15px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .sig-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .sig-btn-clear { background: #eee; color: #333; }
+        .sig-btn-cancel { background: #f5f5f5; color: #666; }
+        .sig-btn-save { background: var(--primary-color); color: #fff; }
+
+        /* --- 手機板響應式優化 RWD --- */
+        @media screen and (max-width: 600px) {
+            body { padding: 5px; background: #fff; }
+            .form-container { box-shadow: none; padding: 10px; padding-top: 50px; }
+            .pdf-btn-container { top: 10px; right: 10px; }
+            table, tbody, tr, td { display: block; width: 100% !important; }
+            tr { margin-bottom: 10px; border: 1px solid var(--border-color); border-radius: 4px; }
+            td { border: none; border-bottom: 1px solid #eee; }
+            td:last-child { border-bottom: none; }
+            .label-cell { background-color: #f0f4f8; }
+            .footer-container { flex-direction: column; align-items: flex-start; }
+            .signature-section { width: 100%; }
+        }
+
+        /* --- 精準 A4 列印與 PDF 輸出排版設定 --- */
         @media print {
-            #action-buttons-area { display: none !important; }
-            #terms-interactive { display: none !important; }
-            #terms-print-only { display: flex !important; }
-            body { background: white; padding: 0; }
-            input, select { border: none !important; border-bottom: 1px solid #000 !important; border-radius: 0 !important; }
-            .form-input { margin-top: 0; padding-left: 0; }
+            @page {
+                size: A4;
+                margin: 20mm 15mm 15mm 15mm;
+            }
+            body { background: #fff; padding: 0; width: 170mm; }
+            .form-container { box-shadow: none; padding: 0; width: 170mm; }
+            .form-container::before { color: rgba(0, 0, 0, 0.04) !important; }
+            input[type="text"], input[type="date"] {
+                background: transparent !important;
+                border: none !important;
+                padding: 2px 0 !important;
+            }
+            /* 隱藏 PDF 按鈕與折疊控制列，確保輸出的 PDF 乾淨專業 */
+            .pdf-btn-container, .toggle-container, .sig-modal, .sig-modal-btns, .sig-btn { display: none !important; }
+            .date-section input { border-bottom: 1px solid #000 !important; }
+            .signature-trigger-box { border: none !important; background: transparent !important; height: auto; }
+            .signature-trigger-box span { display: none !important; }
+            .signature-display-img { display: block !important; max-height: 50px; }
+            /* 輸出成實體文件或 PDF 時，條款一律強制完整顯示以符合法規誠信 */
+            .declaration-container { display: block !important; border: 1px solid #ccc !important; background: transparent !important; }
         }
     </style>
 </head>
 <body>
 
-<div id="form-to-pdf" class="max-w-2xl mx-auto bg-white p-8 shadow-xl relative overflow-visible">
-    <div class="watermark-overlay">
-        <div style="font-size: 200px; font-weight: bold; color: #000; line-height: 1;">m</div>
-        <div style="font-size: 40px; font-weight: bold; color: #000;">Micron Labor Union</div>
+<div class="form-container">
+    
+    <div class="pdf-btn-container">
+        <button class="btn-pdf" onclick="exportToPDF()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            儲存 PDF / 列印
+        </button>
     </div>
 
-    <div class="main-form-content text-center">
-        <h1 class="text-2xl font-bold mb-1">台灣美光記憶體股份有限公司企業工會 入會申請書</h1>
-        <h2 class="text-lg text-gray-600 mb-8">Micron Labor Union — Membership Application</h2>
+    <div class="header-container">
+        <div class="header-title-zh">台灣美光記憶體股份有限公司企業工會</div>
+        <div class="header-title-en">Micron Labor Union</div>
+        <div class="header-subtitle">入會申請書 / Membership Application</div>
+    </div>
+
+    <table>
+        <tr>
+            <td class="label-cell" style="width: 15%;">姓名<span class="sub-label">Chinese</span></td>
+            <td style="width: 18%;"><input type="text" placeholder="請輸入姓名"></td>
+            <td class="label-cell" style="width: 15%;">性別<span class="sub-label">Gender</span></td>
+            <td style="width: 18%;"><input type="text" placeholder="男 / 女"></td>
+            <td class="label-cell" style="width: 15%;">出生<br>年月日<span class="sub-label">Birthdate</span></td>
+            <td style="width: 19%;"><input type="date"></td>
+        </tr>
+        <tr>
+            <td class="label-cell">工號<span class="sub-label">Worker No.</span></td>
+            <td><input type="text" placeholder="工號"></td>
+            <td class="label-cell">公司<br>分機<span class="sub-label">Extension</span></td>
+            <td><input type="text" placeholder="分機"></td>
+            <td class="label-cell">單位<span class="sub-label">Workplace</span></td>
+            <td><input type="text" placeholder="部門/廠區"></td>
+        </tr>
+        <tr>
+            <td class="label-cell">戶籍住址<span class="sub-label">Household address</span></td>
+            <td colspan="5"><input type="text" placeholder="請輸入完整戶籍地址"></td>
+        </tr>
+        <tr>
+            <td class="label-cell">通訊住址<span class="sub-label">Correspondence address</span></td>
+            <td colspan="5"><input type="text" placeholder="請輸入完整通訊地址"></td>
+        </tr>
+        <tr>
+            <td class="label-cell">通訊電話<span class="sub-label">Home phone</span></td>
+            <td colspan="2"><input type="text" placeholder="市話號碼"></td>
+            <td class="label-cell">手機號碼<span class="sub-label">Personal phone</span></td>
+            <td colspan="2"><input type="text" placeholder="行動電話"></td>
+        </tr>
+    </table>
+
+    <div class="declaration-wrapper">
+        <input type="checkbox" id="hide-declaration" style="display: none;">
+
+        <label for="hide-declaration" class="toggle-container" id="toggleLabel">
+            <input type="checkbox" id="toggleCheckbox" onclick="syncCheckbox(this)"> 
+            <span>勾選以詳閱此條款並同意確認後隱藏（節省預覽空間）</span>
+        </label>
+
+        <div class="declaration-container">
+            <div class="declaration-zh">
+                本人同意按工會章程行使權現與義務並同意於加入企業工會成為會員之日起由台灣美光記憶體股份有限公司依據工會法於每月薪資代扣工會經常會費(按章程規定之會費),且於本人退會或離開美光後將停止此代扣作業
+            </div>
+            <div class="declaration-en">
+                I agree to exercise my rights and fulfill my obligations according to the union's constitution, and consent to become a member of the enterprise union from the date of joining. Micron Memory Taiwan Co., Ltd. will deduct the regular union membership fee from my monthly salary (according to the union's constitution). The deduction will stop when I withdraw from the union or leave Micron.
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-container">
+        <div class="date-section">
+            中華民國 <input type="text" class="year-input"> 年 <input type="text"> 月 <input type="text"> 日
+        </div>
         
-        <div class="text-left space-y-4 text-sm">
-            <div class="grid grid-cols-2 gap-4">
-                <div>姓名 Name<input type="text" id="app-name" class="form-input"></div>
-                <div>性別 Gender<select class="form-input"><option>請選擇</option><option>男</option><option>女</option></select></div>
+        <div class="signature-section">
+            <div class="applicant-label">申請人/Applicant:</div>
+            <div class="signature-trigger-box" id="sig-box" onclick="openSignatureModal()">
+                <span>點擊此處進行電子簽名</span>
+                <img id="sig-img" class="signature-display-img" alt="電子簽名">
             </div>
-            <div>出生年月日 Birthdate<input type="date" class="form-input"></div>
-            <div class="grid grid-cols-3 gap-2">
-                <div>工號 ID<input type="text" class="form-input"></div>
-                <div>分機 Ext<input type="text" class="form-input"></div>
-                <div>單位 Dept<input type="text" class="form-input"></div>
-            </div>
-            <div>戶籍地址 Household address<input type="text" class="form-input"></div>
-            <div>通訊地址 Correspondence address<input type="text" class="form-input"></div>
-            <div>手機號碼 Phone<input type="tel" class="form-input"></div>
-            
-            <!-- 互動式條款區 -->
-            <div id="terms-interactive" class="bg-blue-50 p-4 rounded border border-blue-200 mt-4">
-                <label class="flex items-center cursor-pointer mb-2">
-                    <input type="checkbox" id="agree-terms" class="w-4 h-4 mr-2">
-                    <span class="font-bold text-blue-800">我已詳閱並同意工會章程及會費代扣條款</span>
-                </label>
-                <details class="text-xs text-blue-600 cursor-pointer">
-                    <summary class="hover:underline">點擊閱讀詳細條款內容 (Click to read terms)</summary>
-                    <div class="mt-2 p-3 bg-white border rounded text-gray-700 leading-relaxed shadow-sm">
-                        本人同意按工會章程行使權利與義務，並同意於加入企業工會成為會員之日起，由台灣美光記憶體股份有限公司依據工會法於每月薪資代扣工會經常會費(按章程規定之會費)，且於本人退會或離開美光後將停止此代扣作業。<br>
-                        I agree to exercise my rights and fulfill my obligations according to the union’s constitution, and consent to become a member of the enterprise union. Micron Memory Taiwan Co., Ltd. will deduct the regular union membership fee from my monthly salary. The deduction will stop when I withdraw from the union or leave Micron.
-                    </div>
-                </details>
-            </div>
-
-            <!-- PDF/列印時顯示的精美確認聲明 -->
-            <div id="terms-print-only" class="hidden mt-4 p-3 border-2 border-green-600 rounded-lg flex items-center justify-center bg-green-50">
-                <span class="text-green-700 font-bold text-xl mr-2">✔</span>
-                <span class="text-green-800 font-bold">本人已詳閱並同意工會章程及會費代扣條款</span>
-            </div>
-            
-            <div class="flex flex-col items-center pt-4">
-                <span class="font-bold mb-2">申請人簽名 Applicant Signature:</span>
-                <div id="signature-display" onclick="openModal()" class="w-full">點擊此處簽名</div>
-                <div class="mt-6 font-bold">
-                    中華民國 <input type="number" class="date-input"> 年 
-                    <input type="number" class="date-input"> 月 
-                    <input type="number" class="date-input"> 日
-                </div>
-            </div>
+            <div class="signature-hint">(簽章/Signature/Seal)</div>
         </div>
+    </div>
 
-        <div id="action-buttons-area" class="mt-8 flex gap-4">
-            <button onclick="window.print()" class="flex-1 bg-gray-600 text-white py-2 rounded font-bold hover:bg-gray-700">列印表單</button>
-            <button onclick="generatePDF()" class="flex-1 bg-blue-600 text-white py-2 rounded font-bold hover:bg-blue-700">下載 PDF</button>
-        </div>
+    <div class="submission-note">
+        可將申請書直接投入AA502室信箱 / The application form can be directly put into the mailbox of Room AA502
     </div>
 </div>
 
-<div id="signature-modal">
-    <div class="bg-white p-4 rounded-lg shadow-2xl">
-        <canvas id="signature-pad"></canvas>
-        <div class="flex justify-end gap-2 mt-4">
-            <button onclick="closeModal()" class="px-4 py-2 bg-gray-300 rounded">取消</button>
-            <button onclick="clearCanvas()" class="px-4 py-2 bg-red-500 text-white rounded">清除</button>
-            <button onclick="saveSignature()" class="px-4 py-2 bg-blue-600 text-white rounded">確定</button>
+<div class="sig-modal" id="signatureModal">
+    <div class="sig-modal-content">
+        <div class="sig-modal-header">請在下方空白區域簽名：</div>
+        <canvas id="signature-canvas" width="400" height="180"></canvas>
+        <div class="sig-modal-btns">
+            <button class="sig-btn sig-btn-cancel" onclick="closeSignatureModal()">取消</button>
+            <button class="sig-btn sig-btn-clear" onclick="clearCanvas()">清除</button>
+            <button class="sig-btn sig-btn-save" onclick="saveSignature()">確認套用</button>
         </div>
     </div>
 </div>
 
 <script>
-    const modal = document.getElementById('signature-modal');
-    const canvas = document.getElementById('signature-pad');
+    function syncCheckbox(cb) {
+        document.getElementById('hide-declaration').checked = cb.checked;
+    }
+
+    // 觸發系統列印與 PDF 另存
+    function exportToPDF() {
+        window.print();
+    }
+
+    const modal = document.getElementById('signatureModal');
+    const canvas = document.getElementById('signature-canvas');
     const ctx = canvas.getContext('2d');
+    const sigBox = document.getElementById('sig-box');
+    const sigImg = document.getElementById('sig-img');
     let isDrawing = false;
 
-    function openModal() { modal.style.display = 'flex'; canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; ctx.strokeStyle = '#000000'; ctx.lineWidth = 3; }
-    function closeModal() { modal.style.display = 'none'; }
-    function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
-    function saveSignature() { 
-        document.getElementById('signature-display').innerHTML = `<img src="${canvas.toDataURL()}" style="max-height:70px;">`; 
-        closeModal(); 
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    function openSignatureModal() {
+        modal.style.display = 'flex';
+        clearCanvas();
     }
 
-    function getPos(e) { const rect = canvas.getBoundingClientRect(); const clientX = e.touches ? e.touches[0].clientX : e.clientX; const clientY = e.touches ? e.touches[0].clientY : e.clientY; return { x: clientX - rect.left, y: clientY - rect.top }; }
-    function startDrawing(e) { isDrawing = true; const pos = getPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
-    function draw(e) { if (!isDrawing) return; const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); }
-
-    canvas.addEventListener('mousedown', startDrawing); canvas.addEventListener('mousemove', draw); window.addEventListener('mouseup', () => isDrawing = false);
-    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, {passive: false});
-    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, {passive: false});
-
-    async function generatePDF() {
-        const name = document.getElementById('app-name').value;
-        const agreed = document.getElementById('agree-terms').checked;
-        if (!name) { alert("請填寫姓名"); return; }
-        if (!agreed) { alert("請先閱讀並勾選同意條款"); return; }
-        
-        // 切換顯示模式以利 PDF 排版
-        document.getElementById('terms-interactive').style.display = 'none';
-        document.getElementById('terms-print-only').style.display = 'flex';
-        
-        const element = document.getElementById('form-to-pdf');
-        const opt = { margin: 10, filename: `入會申請書_${name}.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } };
-        
-        await html2pdf().set(opt).from(element).save();
-        
-        // 恢復顯示
-        document.getElementById('terms-interactive').style.display = 'block';
-        document.getElementById('terms-print-only').style.display = 'none';
+    function closeSignatureModal() {
+        modal.style.display = 'none';
     }
+
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function saveSignature() {
+        const dataURL = canvas.toDataURL('image/png');
+        sigImg.src = dataURL;
+        sigImg.style.display = 'block';
+        sigBox.querySelector('span').style.display = 'none';
+        closeSignatureModal();
+    }
+
+    function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+            x: clientX - rect.left,
+            y: clientY - rect.top
+        };
+    }
+
+    function startDraw(e) {
+        isDrawing = true;
+        const pos = getPos(e);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+        e.preventDefault();
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+        const pos = getPos(e);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        e.preventDefault();
+    }
+
+    function stopDraw() {
+        isDrawing = false;
+    }
+
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mousemove', draw);
+    window.addEventListener('mouseup', stopDraw);
+
+    canvas.addEventListener('touchstart', startDraw);
+    canvas.addEventListener('touchmove', draw);
+    canvas.addEventListener('touchend', stopDraw);
 </script>
+
 </body>
 </html>
