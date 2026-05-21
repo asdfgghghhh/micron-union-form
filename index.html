@@ -383,7 +383,8 @@
 
         /* --- 傳統 PDF/列印 模式 --- */
         @media print {
-            .pdf-btn-container, .sig-modal, .submission-note, .declaration-container { display: none !important; }
+            .pdf-btn-container, .sig-modal, .declaration-container { display: none !important; }
+            .submission-note { display: block !important; } /* 確保傳統列印也能顯示 */
             body { background: #fff; padding: 0; }
             .form-container { box-shadow: none; padding: 0; width: 100% !important; }
             
@@ -546,14 +547,12 @@
         const actionButtons = document.getElementById('action-buttons');
         const toggleLabel = document.getElementById('toggleLabel');
         const declarationContainer = document.getElementById('declarationContainer');
-        const submissionNote = document.getElementById('submissionNote');
         const nameInput = document.getElementById('field-name').value.trim();
         
         const fileName = nameInput ? `美光工會入會申請書_${nameInput}.pdf` : '美光工會入會申請書.pdf';
 
-        // 隱藏不需要的雜項按鈕與提示
+        // 隱藏不需要的雜項按鈕與詳細提示內文
         actionButtons.style.display = 'none';       
-        submissionNote.style.display = 'none';      
         declarationContainer.style.display = 'none';
 
         // 核心修改：導出時保留「同意條款字樣」，並加上乾淨的樣式
@@ -570,13 +569,11 @@
         html2pdf().set(opt).from(element).save().then(() => {
             // 下載完成後還原網頁外觀
             actionButtons.style.display = 'flex';
-            submissionNote.style.display = 'block';
             toggleLabel.classList.remove('pdf-mode');
             declarationContainer.style.display = 'none';  
         }).catch(err => {
             console.error('PDF 生成失敗:', err);
             actionButtons.style.display = 'flex';
-            submissionNote.style.display = 'block';
             toggleLabel.classList.remove('pdf-mode');
             declarationContainer.style.display = document.getElementById('agreeCheckbox').checked ? 'none' : 'block';
         });
