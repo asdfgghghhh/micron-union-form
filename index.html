@@ -40,20 +40,36 @@
             overflow: hidden;
         }
 
-        /* 浮水印 */
-        .watermark {
+        /* ==========================================================================
+           新版滿版浮水印系統 (支援連續重複排列與斜度)
+           ========================================================================== */
+        .watermark-container {
             position: absolute;
-            top: 45%;
-            left: -10%;
-            width: 120%;
-            font-size: 28px;
-            color: rgba(0, 0, 0, 0.03);
-            font-weight: 700;
-            text-align: center;
-            transform: rotate(-32deg);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             z-index: 1;
             pointer-events: none;
-            letter-spacing: 4px;
+            overflow: hidden;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-content: space-around;
+            padding: 20px;
+            gap: 40px; /* 控制浮水印之間的間距 */
+        }
+
+        .watermark-item {
+            font-size: 16px; /* 滿版字體稍微縮小，看起來更專業精緻 */
+            font-weight: 700;
+            color: rgba(0, 0, 0, 0.035); /* 淡淡的灰色，不影響文字閱讀 */
+            transform: rotate(-30deg);
+            white-space: nowrap;
+            user-select: none;
+            flex: 0 0 220px; /* 每個浮水印區塊的預設寬度 */
+            text-align: center;
+            margin: 25px 10px;
         }
 
         /* 右上角 PDF 按鈕區塊 */
@@ -102,6 +118,7 @@
             border-bottom: 2px solid var(--border-color);
             padding-bottom: 12px;
             position: relative;
+            z-index: 2; /* 確保內容在浮水印上方 */
         }
         .header-title-zh { font-size: 20px; font-weight: 700; margin: 0; letter-spacing: 1.5px; color: #050505; }
         .header-title-en { font-size: 14px; font-weight: 600; margin: 4px 0 0 0; color: #444; }
@@ -113,7 +130,7 @@
             border-collapse: collapse;
             margin-bottom: 20px;
             position: relative;
-            z-index: 2;
+            z-index: 2; /* 確保內容在浮水印上方 */
         }
         table, th, td { border: 1px solid var(--border-color); }
         td { 
@@ -159,7 +176,7 @@
         .declaration-wrapper {
             margin-bottom: 20px;
             position: relative;
-            z-index: 2;
+            z-index: 2; /* 確保內容在浮水印上方 */
         }
 
         /* 同意控制列 */
@@ -214,7 +231,7 @@
             flex-wrap: wrap;
             gap: 15px;
             position: relative;
-            z-index: 2;
+            z-index: 2; /* 確保內容在浮水印上方 */
         }
         
         .date-section { font-size: 13px; font-weight: 500; padding-bottom: 8px; }
@@ -260,7 +277,7 @@
             border-top: 1px dashed #ccc;
             padding-top: 12px;
             position: relative;
-            z-index: 2;
+            z-index: 2; /* 確保內容在浮水印上方 */
         }
 
         /* 電子簽名視窗 */
@@ -315,6 +332,12 @@
             .form-container {
                 padding: 15px 12px;
                 width: 100%;
+            }
+
+            .watermark-item {
+                flex: 0 0 140px; /* 手機端縮小浮水印間距，防止穿幫 */
+                font-size: 11px;
+                margin: 15px 5px;
             }
 
             .pdf-btn-container {
@@ -384,7 +407,7 @@
         /* --- 傳統 PDF/列印 模式 --- */
         @media print {
             .pdf-btn-container, .sig-modal, .declaration-container { display: none !important; }
-            .submission-note { display: block !important; } /* 確保傳統列印也能顯示 */
+            .submission-note { display: block !important; } 
             body { background: #fff; padding: 0; }
             .form-container { box-shadow: none; padding: 0; width: 100% !important; }
             
@@ -405,6 +428,13 @@
             .label-cell { background-color: var(--bg-light) !important; }
             .sub-label { display: block; margin-left: 0; font-size: 9px !important; }
             input[type="text"], input[type="date"] { background: transparent !important; border: none !important; padding: 2px 0 !important; font-size: 13px !important; }
+            
+            /* 修正列印模式下的浮水印顏色，防止部分瀏覽器強制過濾過淡的顏色 */
+            .watermark-item {
+                color: rgba(0, 0, 0, 0.04) !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
         }
     </style>
 </head>
@@ -423,7 +453,24 @@
         </button>
     </div>
 
-    <div class="watermark">限工會入會申請使用  /  Internal Use Only</div>
+    <div class="watermark-container">
+        <div class="watermark-item">限工會入會申請使用 / Internal Use Only</div>
+        <div class="watermark-item">限工會入會申請使用 / Internal Use Only</div>
+        <div class="watermark-item">限工會入會申請使用 / Internal Use Only</div>
+        <div class="watermark-item">限工會入會申請使用 / Internal Use Only</div>
+        <div class="watermark-item">限工會入會申請使用 / Internal Use Only</div>
+        <div class="watermark-item">限工會入會申請使用 / Internal Use Only</div>
+        <div class="watermark-item">限工會入會申請使用 / Internal Use Only</div>
+        <div class="watermark-item">限工會入會申請使用 / Internal Use Only</div>
+        <div class="watermark-item">限工會入會申請使用 / Internal Use Only</div>
+        <div class="watermark-item">限工會入會申請使用 / Internal Use Only</div>
+        <div class="watermark-item">限工會入會申請使用 / Internal Use Only</div>
+        <div class="watermark-item">限工會入會申請使用 / Internal Use Only</div>
+        <div class="watermark-item">限工會入會申請使用 / Internal Use Only</div>
+        <div class="watermark-item">限工會入會申請使用 / Internal Use Only</div>
+        <div class="watermark-item">限工會入會申請使用 / Internal Use Only</div>
+        <div class="watermark-item">限工會入會申請使用 / Internal Use Only</div>
+    </div>
 
     <div class="header-container">
         <div class="header-title-zh">台灣美光記憶體股份有限公司企業工會</div>
@@ -555,7 +602,7 @@
         actionButtons.style.display = 'none';       
         declarationContainer.style.display = 'none';
 
-        // 核心修改：導出時保留「同意條款字樣」，並加上乾淨的樣式
+        // 導出時保留「同意條款字樣」，並加上乾淨的樣式
         toggleLabel.classList.add('pdf-mode');
 
         const opt = {
