@@ -147,7 +147,7 @@
             background-color: #fafafa;
             border-radius: 4px;
             transition: all 0.2s;
-            -webkit-appearance: none; /* 修正 iOS 輸入框內陰影 */
+            -webkit-appearance: none;
         }
         input[type="text"]:focus, input[type="date"]:focus {
             border-color: var(--primary-color);
@@ -295,18 +295,20 @@
 
 
         /* ==========================================================================
-           核心修改：針對手機/行動裝置（螢幕寬度小於 768px）的直向最佳化樣式
+           調整行動端：保持原本完美的表格比例，僅微調字體與間距（與截圖外觀一致）
            ========================================================================== */
         @media screen and (max-width: 767px) {
-            body { padding: 5px; background-color: #fff; }
+            body { 
+                padding: 10px; 
+                background-color: #f5f5f5; 
+            }
             
             .form-container {
-                padding: 15px;
-                box-shadow: none;
+                padding: 20px 15px;
                 width: 100%;
+                overflow-x: auto;
             }
 
-            /* 調整頂部按鈕，讓它符合行動端點擊 */
             .pdf-btn-container {
                 position: static;
                 width: 100%;
@@ -314,60 +316,67 @@
                 margin-bottom: 20px;
                 gap: 10px;
             }
-            .btn-pdf { flex: 1; min-width: 0; padding: 12px 8px; font-size: 13px; }
+            .btn-pdf { 
+                flex: 1; 
+                min-width: 0; 
+                padding: 10px 8px; 
+                font-size: 13px; 
+            }
 
-            /* 標題縮小一點避免換行太亂 */
             .header-title-zh { font-size: 18px; }
             .header-title-en { font-size: 13px; }
+            .header-subtitle { font-size: 14px; }
 
-            /* 強制表格在手機上變成「直向單欄」堆疊卡片，完美符合垂直填寫 */
-            table, tbody, tr, td {
-                display: block;
-                width: 100% !important;
+            /* 關鍵修正：保持表格原本的傳統外觀，不轉為直向堆疊 */
+            table {
+                display: table !important;
+                table-layout: fixed;
+            }
+            tbody { display: table-row-group !important; }
+            tr { display: table-row !important; }
+            td { 
+                display: table-cell !important; 
+                padding: 8px 6px !important; 
+                font-size: 12px !important;
             }
             
-            tr {
-                border-bottom: 1px solid var(--border-color);
-                margin-bottom: 10px;
+            .sub-label {
+                font-size: 9px;
             }
-            
-            td {
-                border: none !important;
-                padding: 8px 4px;
-            }
-
-            /* 讓標籤和輸入框分行，填寫超流暢 */
-            .label-cell {
-                background-color: transparent;
-                padding-bottom: 2px;
-                font-size: 13px;
-            }
-            .sub-label { display: inline; margin-left: 5px; }
 
             input[type="text"], input[type="date"] {
-                background-color: #f0f2f5; /* 讓手機上的輸入框更明顯可點擊 */
-                padding: 12px 10px; /* 擴大手機點擊區域 */
-                font-size: 15px; /* 防止 iOS 自動放大網頁 */
+                padding: 6px 8px;
+                font-size: 14px; /* 防止 iOS 自動縮放畫面 */
             }
 
-            /* 頁尾排版改為垂直 */
             .footer-container {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 25px;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: flex-end;
+                gap: 10px;
             }
-            .date-section { width: 100%; }
-            .signature-section { width: 100%; }
-            .signature-trigger-box { height: 80px; } /* 增大簽名點擊區 */
+            .date-section { 
+                font-size: 12px;
+                flex: 1;
+            }
+            .date-section input { width: 30px; font-size: 12px; }
+            .date-section input.year-input { width: 40px; }
+            
+            .signature-section { 
+                width: 160px; 
+            }
+            .signature-trigger-box { 
+                height: 50px; 
+                font-size: 11px;
+            }
         }
 
-        /* --- 傳統 PDF/列印 模式：保持嚴格 A4 格式，不因手機排版而變形 --- */
+        /* --- 傳統 PDF/列印 模式 --- */
         @media print {
             .pdf-btn-container, .toggle-container, .sig-modal, .submission-note, .declaration-container { display: none !important; }
             body { background: #fff; padding: 0; }
             .form-container { box-shadow: none; padding: 0; width: 100% !important; }
             
-            /* 確保列印時表格維持原樣 */
             table { display: table !important; }
             tbody { display: table-row-group !important; }
             tr { display: table-row !important; border: none !important; margin-bottom: 0; }
@@ -489,7 +498,6 @@
 </div>
 
 <script>
-    // 監聽勾選狀態
     function handleAgreementChange(checkbox) {
         const btnPrint = document.getElementById('btnPrint');
         const btnExport = document.getElementById('btnExport');
@@ -509,12 +517,10 @@
         }
     }
 
-    // 功能一：儲存 PDF / 列印
     function exportToPDF() {
         window.print();
     }
 
-    // 功能二：直接導出頁面 (html2pdf)
     function generateFullPDFDirectly() {
         const element = document.getElementById('application-form');
         const actionButtons = document.getElementById('action-buttons');
@@ -525,7 +531,6 @@
         
         const fileName = nameInput ? `美光工會入會申請書_${nameInput}.pdf` : '美光工會入會申請書.pdf';
 
-        // 導出前強制隱藏不需要的元素
         actionButtons.style.display = 'none';       
         toggleLabel.style.display = 'none';         
         submissionNote.style.display = 'none';      
@@ -540,10 +545,8 @@
         };
 
         html2pdf().set(opt).from(element).save().then(() => {
-            // 還原狀態（判斷目前螢幕寬度決定還原成 flex 還是行動端的排版）
-            const isMobile = window.innerWidth < 768;
-            actionButtons.style.display = isMobile ? 'flex' : 'flex';
-            toggleLabel.style.display = isMobile ? 'flex' : 'flex';
+            actionButtons.style.display = 'flex';
+            toggleLabel.style.display = 'flex';
             submissionNote.style.display = 'block';
             declarationContainer.style.display = 'none';  
         }).catch(err => {
@@ -555,7 +558,6 @@
         });
     }
 
-    // --- 電子簽名板邏輯 (已優化行動端高解析度與斷線問題) ---
     const modal = document.getElementById('signatureModal');
     const canvas = document.getElementById('signature-canvas');
     const ctx = canvas.getContext('2d');
@@ -565,7 +567,7 @@
 
     function openSignatureModal() {
         modal.style.display = 'flex';
-        resizeCanvas(); // 開啟時動態計算畫布大小，防止手機上手指位置偏移
+        resizeCanvas();
         clearCanvas();
     }
 
@@ -575,14 +577,12 @@
 
     function clearCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        // 重設畫筆樣式
         ctx.strokeStyle = '#000000';
         ctx.lineWidth = 3;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
     }
 
-    // 解決手機高解析度螢幕 Canvas 模糊與觸控偏移問題
     function resizeCanvas() {
         const ratio = Math.max(window.devicePixelRatio || 1, 1);
         canvas.width = canvas.offsetWidth * ratio;
@@ -591,7 +591,6 @@
     }
 
     function saveSignature() {
-        // 檢查畫布是否為空（簡易檢查）
         const dataURL = canvas.toDataURL('image/png');
         sigImg.src = dataURL;
         sigImg.style.display = 'block';
@@ -631,17 +630,14 @@
 
     function stopDraw() { isDrawing = false; }
 
-    // 滑鼠事件
     canvas.addEventListener('mousedown', startDraw);
     canvas.addEventListener('mousemove', draw);
     window.addEventListener('mouseup', stopDraw);
 
-    // 行動端觸控事件
     canvas.addEventListener('touchstart', startDraw, { passive: false });
     canvas.addEventListener('touchmove', draw, { passive: false });
     canvas.addEventListener('touchend', stopDraw);
     
-    // 監聽視窗縮放
     window.addEventListener('resize', () => {
         if (modal.style.display === 'flex') resizeCanvas();
     });
