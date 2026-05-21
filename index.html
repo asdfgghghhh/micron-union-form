@@ -111,7 +111,7 @@
             opacity: 0.6;
         }
 
-        /* 標題區塊 - 已放大字體 */
+        /* 標題區塊 - 已大幅放大中文字體 */
         .header-container {
             text-align: center;
             margin-bottom: 20px;
@@ -120,7 +120,13 @@
             position: relative;
             z-index: 2; /* 確保內容在浮水印上方 */
         }
-        .header-title-zh { font-size: 26px; font-weight: 800; margin: 0; letter-spacing: 1.5px; color: #050505; } /* 字體由20px放大至26px，加粗 */
+        .header-title-zh { 
+            font-size: 32px; /* 由 26px 放大至 32px */
+            font-weight: 900; /* 由 800 加粗至 900 */
+            margin: 0; 
+            letter-spacing: 2px; /* 加寬字距更有氣勢 */
+            color: #050505; 
+        } 
         .header-title-en { font-size: 16px; font-weight: 600; margin: 6px 0 0 0; color: #444; } /* 英文也同步微調匹配 */
         .header-subtitle { font-size: 15px; font-weight: 700; margin: 12px 0 0 0; color: #222; }
 
@@ -354,7 +360,7 @@
                 font-size: 12px; 
             }
 
-            .header-title-zh { font-size: 20px; } /* 行動端也按比例調大 */
+            .header-title-zh { font-size: 24px; } /* 行動端也按比例同步調大（原20px） */
             .header-title-en { font-size: 13px; }
             .header-subtitle { font-size: 13px; }
 
@@ -589,7 +595,6 @@
         window.print();
     }
 
-    // 修改此函數：導出 PDF 時強制顯示完整的條款內容
     function generateFullPDFDirectly() {
         const element = document.getElementById('application-form');
         const actionButtons = document.getElementById('action-buttons');
@@ -599,13 +604,8 @@
         
         const fileName = nameInput ? `美光工會入會申請書_${nameInput}.pdf` : '美光工會入會申請書.pdf';
 
-        // 隱藏不需要的雜項按鈕
         actionButtons.style.display = 'none';       
-        
-        // 修正：導出時強制將條款容器設為顯示(block)狀態，確保顯示在 PDF 內
         declarationContainer.style.display = 'block';
-
-        // 導出時保留「同意條款字樣」，並加上乾淨的樣式
         toggleLabel.classList.add('pdf-mode');
 
         const opt = {
@@ -617,7 +617,6 @@
         };
 
         html2pdf().set(opt).from(element).save().then(() => {
-            // 下載完成後還原網頁原始外觀（因為已被勾選，所以網頁畫面上隱藏條款）
             actionButtons.style.display = 'flex';
             toggleLabel.classList.remove('pdf-mode');
             declarationContainer.style.display = 'none';  
