@@ -23,29 +23,21 @@
             margin: 0 auto;
             color: #1a1a1a;
             line-height: 1.5;
-            padding: 10px;
+            padding: 15px;
             background-color: #f5f5f5;
         }
 
-        /* --- 📱 行動裝置優先的彈性網頁預覽樣式 --- */
+        /* --- 螢幕預覽樣式 --- */
         .form-container {
             background: #fff;
-            padding: 20px;
-            width: 100%; /* 手機網頁預覽時，寬度完全自適應螢幕 */
-            max-width: 800px; /* 電腦版最大寬度限制 */
+            padding: 35px;
+            width: 210mm; /* 設定為標準 A4 寬度，確保導出不變形 */
+            max-width: 100%;
             margin: 0 auto;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             position: relative;
             overflow: hidden;
-            transition: width 0.1s ease;
-        }
-
-        /* 為了讓 html2pdf 導出時強制使用 A4 寬度而設立的特殊類別 */
-        .form-container.pdf-mode {
-            width: 210mm !important;
-            max-width: none !important;
-            padding: 35px !important;
         }
 
         /* 浮水印 */
@@ -54,7 +46,7 @@
             top: 45%;
             left: -10%;
             width: 120%;
-            font-size: 28px;
+            font-size: 32px;
             color: rgba(0, 0, 0, 0.03);
             font-weight: 700;
             text-align: center;
@@ -66,28 +58,28 @@
 
         /* 右上角 PDF 按鈕區塊 */
         .pdf-btn-container {
-            position: static; /* 手機上改為頂部平鋪，避免擋住內容 */
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 10;
             display: flex;
-            flex-direction: row;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
+            flex-direction: column;
+            gap: 8px;
         }
         .btn-pdf {
             color: white;
             border: none;
-            padding: 10px 16px; /* 增大按鈕，方便手機手指點擊 */
-            font-size: 14px;
+            padding: 6px 12px;
+            font-size: 13px;
             font-weight: 600;
-            border-radius: 6px;
+            border-radius: 4px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 6px;
             transition: all 0.2s;
-            flex: 1;
-            max-width: 180px;
+            min-width: 135px;
         }
         
         .btn-pdf-print { background-color: #dc3545; }
@@ -106,16 +98,16 @@
         /* 標題區塊 */
         .header-container {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             border-bottom: 2px solid var(--border-color);
             padding-bottom: 15px;
             position: relative;
         }
-        .header-title-zh { font-size: 18px; font-weight: 700; margin: 0; letter-spacing: 1px; color: #050505; }
-        .header-title-en { font-size: 14px; font-weight: 600; margin: 4px 0 0 0; color: #444; }
-        .header-subtitle { font-size: 14px; font-weight: 700; margin: 12px 0 0 0; color: #222; }
+        .header-title-zh { font-size: 22px; font-weight: 700; margin: 0; letter-spacing: 1.5px; color: #050505; }
+        .header-title-en { font-size: 16px; font-weight: 600; margin: 4px 0 0 0; color: #444; }
+        .header-subtitle { font-size: 15px; font-weight: 700; margin: 15px 0 0 0; color: #222; }
 
-        /* 表格響應式設計：手機上自動拆分，電腦或 A4 PDF 時維持標準表格 */
+        /* 表格與欄位優化：擴大間距與舒適度 */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -124,11 +116,8 @@
             z-index: 2;
         }
         table, th, td { border: 1px solid var(--border-color); }
-        
-        tbody, tr { width: 100%; }
-        
         td { 
-            padding: 10px 12px;
+            padding: 12px 14px; /* 增加上下左右的內距，拒絕擁擠 */
             vertical-align: middle; 
             font-size: 14px; 
         }
@@ -137,51 +126,22 @@
             background-color: var(--bg-light);
             font-weight: 600;
             color: #111;
+            white-space: nowrap;
         }
         .sub-label {
             font-size: 10px;
             font-weight: 400;
             color: #555;
-            margin-top: 2px;
-            display: inline-block;
-            margin-left: 5px;
+            margin-top: 3px;
+            display: block;
+            line-height: 1.2;
         }
 
-        /* 📱 關鍵手機排版：在螢幕寬度小於 768px 的手機上，欄位垂直整齊排列 */
-        @media screen and (max-width: 768px) {
-            table, tbody, tr, td {
-                display: block; /* 破壞原始表格限制，改為區塊流 */
-                width: 100% !important;
-            }
-            tr {
-                border-bottom: 1px solid var(--border-color);
-                margin-bottom: 10px;
-            }
-            td {
-                border: none !important; /* 移除內部格線 */
-                padding: 8px 10px;
-            }
-            .label-cell {
-                background-color: #f1f3f5;
-                padding-top: 10px;
-                padding-bottom: 4px;
-                font-size: 13px;
-            }
-            .sub-label {
-                display: inline;
-                margin-left: 6px;
-            }
-            input[type="text"], input[type="date"] {
-                border: 1px solid #ced4da !important; /* 手機上顯示淺色邊框，讓輸入區更直覺 */
-                background-color: #fff;
-            }
-        }
-
-        /* 輸入框通用樣式 */
+        /* 輸入框優化 */
         input[type="text"], input[type="date"] {
             width: 100%;
             border: 1px solid transparent;
-            padding: 8px 10px;
+            padding: 8px 10px; /* 擴大輸入框內部氣室，打字更從容 */
             font-size: 14px;
             font-family: inherit;
             background-color: #fafafa;
@@ -216,12 +176,13 @@
             margin-bottom: 10px;
             transition: all 0.2s;
         }
-        .toggle-container input { margin-right: 12px; transform: scale(1.3); cursor: pointer; }
+        .toggle-container:hover { background: #fff3cd; }
         .toggle-container.accepted {
             background: #eaf5ea;
             border-color: #ccebcc;
             color: #2b6e2b;
         }
+        .toggle-container input { margin-right: 12px; transform: scale(1.2); cursor: pointer; }
 
         /* 同意宣告條款內文容器 */
         .declaration-container {
@@ -246,7 +207,7 @@
             z-index: 2;
         }
         
-        .date-section { font-size: 14px; font-weight: 500; width: 100%; }
+        .date-section { font-size: 14px; font-weight: 500; padding-bottom: 10px; }
         .date-section input {
             width: 45px;
             text-align: center;
@@ -259,13 +220,13 @@
         .date-section input.year-input { width: 55px; }
 
         /* 簽名區 */
-        .signature-section { width: 100%; max-width: 260px; text-align: left; }
+        .signature-section { width: 220px; text-align: left; }
         .applicant-label { font-size: 14px; font-weight: bold; margin-bottom: 8px; }
         
         .signature-trigger-box {
             border: 1px dashed #999;
             background: #fafafa;
-            height: 70px;
+            height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -281,56 +242,45 @@
         .signature-hint { font-size: 12px; color: #555; text-align: center; margin-top: 4px; }
 
         .submission-note {
-            margin-top: 30px;
+            margin-top: 40px;
             text-align: center;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
-            color: #555;
+            color: #333;
             border-top: 1px dashed #ccc;
             padding-top: 15px;
             position: relative;
             z-index: 2;
-            width: 100%;
         }
 
-        /* 彈出式全螢幕電子簽名視窗 (手機全螢幕優化) */
+        /* 電子簽名視窗 */
         .sig-modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.5);
             z-index: 10000;
             justify-content: center;
             align-items: center;
-            padding: 10px;
+            padding: 15px;
         }
         .sig-modal-content {
             background: #fff;
-            padding: 15px;
+            padding: 20px;
             border-radius: 8px;
             width: 100%;
-            max-width: 420px;
+            max-width: 450px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.25);
         }
-        .sig-modal-header { font-weight: bold; margin-bottom: 12px; font-size: 15px; color: #333; }
-        #signature-canvas { border: 1px solid #ccc; background: #fcfcfc; border-radius: 4px; display: block; width: 100%; height: 180px; touch-action: none; }
-        .sig-modal-btns { margin-top: 15px; display: flex; justify-content: flex-end; gap: 8px; }
-        .sig-btn { padding: 10px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600; }
+        .sig-modal-header { font-weight: bold; margin-bottom: 12px; font-size: 16px; color: #333; }
+        #signature-canvas { border: 1px solid #ccc; background: #fcfcfc; border-radius: 4px; display: block; touch-action: none; }
+        .sig-modal-btns { margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px; }
+        .sig-btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600; }
         .sig-btn-clear { background: #eee; color: #333; }
         .sig-btn-cancel { background: #f5f5f5; color: #666; }
         .sig-btn-save { background: var(--primary-color); color: #fff; }
 
-        /* --- 🖨️ PDF 專用排版微調（當 html2pdf 或 window.print 啟動時） --- */
-        @media print, screen and (min-width: 769px) {
-            .form-container { padding: 35px; }
-            .header-title-zh { font-size: 22px; }
-            .header-title-en { font-size: 16px; }
-            .header-subtitle { font-size: 15px; }
-            .pdf-btn-container { position: absolute; top: 15px; right: 15px; flex-direction: column; margin-bottom: 0; }
-            .date-section { width: auto; }
-            .signature-section { width: 220px; }
-        }
-
+        /* --- 傳統列印模式微調 (@media print) --- */
         @media print {
             .pdf-btn-container, .toggle-container, .sig-modal, .submission-note, .declaration-container { display: none !important; }
             body { background: #fff; padding: 0; }
@@ -346,11 +296,11 @@
     <div class="pdf-btn-container" id="action-buttons">
         <button class="btn-pdf btn-pdf-print" id="btnPrint" onclick="exportToPDF()" disabled>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            儲存/列印
+            儲存 PDF / 列印
         </button>
         <button class="btn-pdf btn-pdf-generate" id="btnExport" onclick="generateFullPDFDirectly()" disabled>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-            直接導出
+            直接導出頁面
         </button>
     </div>
 
@@ -446,6 +396,7 @@
 </div>
 
 <script>
+    // 監聽勾選狀態
     function handleAgreementChange(checkbox) {
         const btnPrint = document.getElementById('btnPrint');
         const btnExport = document.getElementById('btnExport');
@@ -456,20 +407,21 @@
             btnPrint.disabled = false;
             btnExport.disabled = false;
             toggleLabel.classList.add('accepted');
-            declarationContainer.style.display = 'none';
+            declarationContainer.style.display = 'none'; // 網頁上：打勾即隱藏
         } else {
             btnPrint.disabled = true;
             btnExport.disabled = true;
             toggleLabel.classList.remove('accepted');
-            declarationContainer.style.display = 'block';
+            declarationContainer.style.display = 'block'; // 網頁上：取消打勾則顯示
         }
     }
 
+    // 功能一：儲存 PDF / 列印 (呼叫 Edge 內建面板)
     function exportToPDF() {
         window.print();
     }
 
-    // 核心技術優化：直接導出 PDF 時的模式瞬間切換
+    // 功能二：直接導出頁面
     function generateFullPDFDirectly() {
         const element = document.getElementById('application-form');
         const actionButtons = document.getElementById('action-buttons');
@@ -478,18 +430,16 @@
         const submissionNote = document.getElementById('submissionNote');
         const nameInput = document.getElementById('field-name').value.trim();
         
+        // 動態生成檔名
         const fileName = nameInput ? `美光工會入會申請書_${nameInput}.pdf` : '美光工會入會申請書.pdf';
 
-        // 1. 【動態黑魔法】為容器加上 .pdf-mode，強制它解開手機排版，採用標準的 A4 寬度與間距
-        element.classList.add('pdf-mode');
+        // 1. 生成 PDF 前的瞬間切換：徹底移除畫面上不需要印出的部分
+        actionButtons.style.display = 'none';       // 隱藏按鈕區
+        toggleLabel.style.display = 'none';         // 隱藏勾選控制列
+        submissionNote.style.display = 'none';      // 隱藏最下方信箱提示
+        declarationContainer.style.display = 'none';// 【核心修正】生成 PDF 時也絕對不出現說明欄！
 
-        // 2. 移除不需要印出來的網頁互動元素
-        actionButtons.style.display = 'none';       
-        toggleLabel.style.display = 'none';         
-        submissionNote.style.display = 'none';      
-        declarationContainer.style.display = 'none'; // 確保 PDF 絕無說明欄
-
-        // 3. 配置 A4 PDF 參數
+        // 2. 配置 A4 PDF 參數
         const opt = {
             margin:       [15, 15, 15, 15], 
             filename:     fileName,
@@ -498,17 +448,15 @@
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        // 4. 背景生成 PDF
+        // 3. 執行背景生成並自動觸發下載
         html2pdf().set(opt).from(element).save().then(() => {
-            // 5. 下載成功後，瞬間移除 .pdf-mode，讓手機畫面秒速恢復成原本漂亮的響應式垂直排版
-            element.classList.remove('pdf-mode');
+            // 4. 下載完成後還原網頁狀態（因為此時仍處於打勾狀態，說明欄繼續維持隱藏）
             actionButtons.style.display = 'flex';
             toggleLabel.style.display = 'flex';
             submissionNote.style.display = 'block';
             declarationContainer.style.display = 'none';  
         }).catch(err => {
             console.error('PDF 生成失敗:', err);
-            element.classList.remove('pdf-mode');
             actionButtons.style.display = 'flex';
             toggleLabel.style.display = 'flex';
             submissionNote.style.display = 'block';
@@ -516,7 +464,7 @@
         });
     }
 
-    // --- 電子簽名板邏輯 (修正 Canvas 的寬度自適應) ---
+    // --- 電子簽名板邏輯 ---
     const modal = document.getElementById('signatureModal');
     const canvas = document.getElementById('signature-canvas');
     const ctx = canvas.getContext('2d');
@@ -531,9 +479,6 @@
 
     function openSignatureModal() {
         modal.style.display = 'flex';
-        // 因應手機外殼大小不同，打開時重設畫布寬度避免變形
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
         clearCanvas();
     }
 
@@ -543,10 +488,6 @@
 
     function clearCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = '#000000';
-        ctx.lineWidth = 2.5;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
     }
 
     function saveSignature() {
@@ -586,8 +527,8 @@
     canvas.addEventListener('mousemove', draw);
     window.addEventListener('mouseup', stopDraw);
 
-    canvas.addEventListener('touchstart', startDraw, { passive: false });
-    canvas.addEventListener('touchmove', draw, { passive: false });
+    canvas.addEventListener('touchstart', startDraw);
+    canvas.addEventListener('touchmove', draw);
     canvas.addEventListener('touchend', stopDraw);
 </script>
 
