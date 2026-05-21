@@ -276,6 +276,28 @@
         .sig-btn-cancel { background: #f5f5f5; color: #666; }
         .sig-btn-save { background: var(--primary-color); color: #fff; }
 
+        /* --- 📱 行動裝置排版優化 (僅在螢幕預覽時生效，不影響 PDF 導出) --- */
+        @media screen and (max-width: 768px) {
+            body { padding: 8px; }
+            .form-container { padding: 15px; }
+            .pdf-btn-container { position: static; margin-bottom: 15px; width: 100%; flex-direction: row; }
+            .btn-pdf { flex: 1; min-width: auto; padding: 10px; font-size: 14px; }
+            
+            /* 將傳統表格格子轉為區塊彈性排版，防止擠壓 */
+            table, tbody, tr, td { display: block; width: 100% !important; }
+            tr { margin-bottom: 10px; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; }
+            td { border: none; padding: 8px 12px; }
+            td.label-cell { background-color: #f0f4f8; border-bottom: 1px solid #e1e8ed; }
+            
+            /* 讓標籤內的中英文分開成同一行或更好看 */
+            .sub-label { display: inline-block; margin-left: 6px; margin-top: 0; }
+            input[type="text"], input[type="date"] { padding: 8px; font-size: 15px; }
+            
+            /* 頁尾調整 */
+            .footer-container { flex-direction: column; align-items: flex-start; gap: 25px; }
+            .signature-section { width: 100%; }
+        }
+
         /* --- 傳統原生列印模式微調 (@media print 仍保留作為備援) --- */
         @media print {
             .pdf-btn-container, .toggle-container, .sig-modal { display: none !important; }
@@ -314,13 +336,13 @@
             <td style="width: 18%;"><input type="text" id="field-name" placeholder="請輸入姓名"></td>
             <td class="label-cell" style="width: 15%;">性別<span class="sub-label">Gender</span></td>
             <td style="width: 18%;"><input type="text" placeholder="男 / 女"></td>
-            <td class="label-cell" style="width: 15%;">出生<br>年月日<span class="sub-label">Birthdate</span></td>
+            <td class="label-cell" style="width: 15%;">出生年月日<span class="sub-label">Birthdate</span></td>
             <td style="width: 19%;"><input type="date"></td>
         </tr>
         <tr>
             <td class="label-cell">工號<span class="sub-label">Worker No.</span></td>
             <td><input type="text" placeholder="工號"></td>
-            <td class="label-cell">公司<br>分機<span class="sub-label">Extension</span></td>
+            <td class="label-cell">公司分機<span class="sub-label">Extension</span></td>
             <td><input type="text" placeholder="分機"></td>
             <td class="label-cell">單位<span class="sub-label">Workplace</span></td>
             <td><input type="text" placeholder="部門/廠區"></td>
