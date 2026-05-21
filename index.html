@@ -34,7 +34,7 @@
             width: 210mm; /* 桌機端標準 A4 寬度 */
             max-width: 100%;
             margin: 0 auto;
-            border-radius: 7px;
+            border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             position: relative;
             overflow: hidden;
@@ -119,7 +119,7 @@
         td { 
             padding: 10px 12px; 
             vertical-align: middle; 
-            font-size: 13px; /* 電腦端字體稍微調小 */
+            font-size: 13px; 
         }
         
         .label-cell {
@@ -129,7 +129,7 @@
             white-space: nowrap;
         }
         .sub-label {
-            font-size: 9px; /* 英文標籤縮小 */
+            font-size: 9px; 
             font-weight: 400;
             color: #555;
             margin-top: 2px;
@@ -184,6 +184,15 @@
             color: #2b6e2b;
         }
         .toggle-container input { margin-right: 10px; transform: scale(1.2); cursor: pointer; }
+        
+        /* 用於導出 PDF 時的簡潔勾選狀態樣式 */
+        .toggle-container.pdf-mode {
+            background: transparent !important;
+            border: none !important;
+            padding: 5px 0 !important;
+            color: #1a1a1a !important;
+            font-weight: 600 !important;
+        }
 
         /* 同意宣告條款內文容器 */
         .declaration-container {
@@ -336,7 +345,7 @@
             td { 
                 display: table-cell !important; 
                 padding: 6px 4px !important; 
-                font-size: 11px !important; /* 手機端字體精簡縮小 */
+                font-size: 11px !important; 
             }
             
             .sub-label {
@@ -345,7 +354,7 @@
 
             input[type="text"], input[type="date"] {
                 padding: 5px 6px;
-                font-size: 13px; /* 精準掌控寬度與輸入尺寸 */
+                font-size: 13px; 
             }
 
             .footer-container {
@@ -374,10 +383,20 @@
 
         /* --- 傳統 PDF/列印 模式 --- */
         @media print {
-            .pdf-btn-container, .toggle-container, .sig-modal, .submission-note, .declaration-container { display: none !important; }
+            .pdf-btn-container, .sig-modal, .submission-note, .declaration-container { display: none !important; }
             body { background: #fff; padding: 0; }
             .form-container { box-shadow: none; padding: 0; width: 100% !important; }
             
+            /* 列印時特別保留同意字樣並轉為簡潔外觀 */
+            .toggle-container {
+                background: transparent !important;
+                border: none !important;
+                padding: 5px 0 !important;
+                color: #1a1a1a !important;
+                font-weight: 600 !important;
+            }
+            .toggle-container input { display: inline-block !important; }
+
             table { display: table !important; }
             tbody { display: table-row-group !important; }
             tr { display: table-row !important; border: none !important; margin-bottom: 0; }
@@ -532,10 +551,13 @@
         
         const fileName = nameInput ? `美光工會入會申請書_${nameInput}.pdf` : '美光工會入會申請書.pdf';
 
+        // 隱藏不需要的雜項按鈕與提示
         actionButtons.style.display = 'none';       
-        toggleLabel.style.display = 'none';         
         submissionNote.style.display = 'none';      
         declarationContainer.style.display = 'none';
+
+        // 核心修改：導出時保留「同意條款字樣」，並加上乾淨的樣式
+        toggleLabel.classList.add('pdf-mode');
 
         const opt = {
             margin:       [15, 15, 15, 15], 
@@ -546,15 +568,16 @@
         };
 
         html2pdf().set(opt).from(element).save().then(() => {
+            // 下載完成後還原網頁外觀
             actionButtons.style.display = 'flex';
-            toggleLabel.style.display = 'flex';
             submissionNote.style.display = 'block';
+            toggleLabel.classList.remove('pdf-mode');
             declarationContainer.style.display = 'none';  
         }).catch(err => {
             console.error('PDF 生成失敗:', err);
             actionButtons.style.display = 'flex';
-            toggleLabel.style.display = 'flex';
             submissionNote.style.display = 'block';
+            toggleLabel.classList.remove('pdf-mode');
             declarationContainer.style.display = document.getElementById('agreeCheckbox').checked ? 'none' : 'block';
         });
     }
