@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=0.75">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>台灣美光記憶體股份有限公司企業工會 入會申請書</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -30,7 +30,7 @@
         /* --- 螢幕預覽樣式 --- */
         .form-container {
             background: #fff;
-            padding: 30px;
+            padding: 35px;
             width: 210mm; /* 設定為標準 A4 寬度，確保導出不變形 */
             max-width: 100%;
             margin: 0 auto;
@@ -56,7 +56,7 @@
             letter-spacing: 4px;
         }
 
-        /* 右上角 PDF 按鈕區塊 - 導出時會被 JS 動態隱藏 */
+        /* 右上角 PDF 按鈕區塊 */
         .pdf-btn-container {
             position: absolute;
             top: 15px;
@@ -85,7 +85,7 @@
         .btn-pdf-print { background-color: #dc3545; }
         .btn-pdf-print:hover { background-color: #bd2130; }
         
-        .btn-pdf-generate { background-color: #28a745; } /* 導出改為顯眼的綠色 */
+        .btn-pdf-generate { background-color: #28a745; }
         .btn-pdf-generate:hover { background-color: #218838; }
 
         .btn-pdf:disabled {
@@ -107,16 +107,20 @@
         .header-title-en { font-size: 16px; font-weight: 600; margin: 4px 0 0 0; color: #444; }
         .header-subtitle { font-size: 15px; font-weight: 700; margin: 15px 0 0 0; color: #222; }
 
-        /* 表格與欄位 */
+        /* 表格與欄位優化：擴大間距與舒適度 */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             position: relative;
             z-index: 2;
         }
         table, th, td { border: 1px solid var(--border-color); }
-        td { padding: 10px 12px; vertical-align: middle; font-size: 14px; }
+        td { 
+            padding: 12px 14px; /* 增加上下左右的內距，拒絕擁擠 */
+            vertical-align: middle; 
+            font-size: 14px; 
+        }
         
         .label-cell {
             background-color: var(--bg-light);
@@ -128,16 +132,16 @@
             font-size: 10px;
             font-weight: 400;
             color: #555;
-            margin-top: 2px;
+            margin-top: 3px;
             display: block;
             line-height: 1.2;
         }
 
-        /* 輸入框 */
+        /* 輸入框優化 */
         input[type="text"], input[type="date"] {
             width: 100%;
             border: 1px solid transparent;
-            padding: 6px 8px;
+            padding: 8px 10px; /* 擴大輸入框內部氣室，打字更從容 */
             font-size: 14px;
             font-family: inherit;
             background-color: #fafafa;
@@ -180,7 +184,7 @@
         }
         .toggle-container input { margin-right: 12px; transform: scale(1.2); cursor: pointer; }
 
-        /* 同意宣告條款內文 */
+        /* 同意宣告條款內文容器 */
         .declaration-container {
             padding: 15px;
             background-color: #fafafa;
@@ -193,7 +197,7 @@
 
         /* 頁尾區塊 */
         .footer-container {
-            margin-top: 20px;
+            margin-top: 25px;
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
@@ -276,51 +280,9 @@
         .sig-btn-cancel { background: #f5f5f5; color: #666; }
         .sig-btn-save { background: var(--primary-color); color: #fff; }
 
-        /* --- 📱 行動裝置排版優化：資訊欄兩兩一組，極致節省空間 (不影響 PDF 導出) --- */
-        @media screen and (max-width: 768px) {
-            body { padding: 8px; }
-            .form-container { padding: 15px; }
-            .pdf-btn-container { position: static; margin-bottom: 15px; width: 100%; flex-direction: row; }
-            .btn-pdf { flex: 1; min-width: auto; padding: 10px; font-size: 14px; }
-            
-            /* 將傳統表格轉換為靈活的彈性流動排版 */
-            table, tbody { display: block; width: 100% !important; }
-            tr { display: flex; flex-wrap: wrap; width: 100%; margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; }
-            td { display: block; width: 100% !important; padding: 8px 10px; border: none !important; }
-            
-            /* 標籤欄位底色美化 */
-            td.label-cell { background-color: #f0f4f8; font-size: 13px; padding-top: 6px; padding-bottom: 4px; border-bottom: 1px solid #e1e8ed !important; }
-            .sub-label { display: inline-block; margin-left: 5px; margin-top: 0; font-size: 10px; color: #666; }
-            
-            /* 姓名、性別、出生年月日、工號、分機、單位：兩兩一組並排排版 */
-            tr:nth-child(1) td, tr:nth-child(2) td {
-                width: 50% !important; /* 讓每個單元格佔半寬，標籤與輸入框上下靠齊，左右形成雙列對齊組合 */
-            }
-            
-            /* 市話與手機欄位：同樣二合一左右並排 */
-            tr:nth-child(5) td {
-                width: 50% !important;
-            }
-            
-            /* 戶籍地址與通訊地址：維持滿寬，確保長字串輸入舒適 */
-            tr:nth-child(3) td, tr:nth-child(4) td {
-                width: 100% !important;
-            }
-            /* 地址的標籤與輸入框之間加條微弱分割線更清晰 */
-            tr:nth-child(3) td.label-cell, tr:nth-child(4) td.label-cell {
-                border-bottom: 1px solid #e1e8ed !important;
-            }
-
-            input[type="text"], input[type="date"] { padding: 6px 8px; font-size: 14px; }
-            
-            /* 頁尾與簽名調整 */
-            .footer-container { flex-direction: column; align-items: flex-start; gap: 20px; }
-            .signature-section { width: 100%; }
-        }
-
-        /* --- 傳統原生列印模式微調 (@media print 仍保留作為備援) --- */
+        /* --- 傳統列印模式微調 (@media print) --- */
         @media print {
-            .pdf-btn-container, .toggle-container, .sig-modal { display: none !important; }
+            .pdf-btn-container, .toggle-container, .sig-modal, .submission-note, .declaration-container { display: none !important; }
             body { background: #fff; padding: 0; }
             .form-container { box-shadow: none; padding: 0; width: 100%; }
             input[type="text"], input[type="date"] { background: transparent !important; border: none !important; padding: 2px 0 !important; }
@@ -352,34 +314,36 @@
 
     <table>
         <tr>
-            <td class="label-cell" style="width: 15%;">姓名<span class="sub-label">Chinese</span></td>
-            <td style="width: 18%;"><input type="text" id="field-name" placeholder="請輸入姓名"></td>
-            <td class="label-cell" style="width: 15%;">性別<span class="sub-label">Gender</span></td>
-            <td style="width: 18%;"><input type="text" placeholder="男 / 女"></td>
-            <td class="label-cell" style="width: 15%;">出生年月日<span class="sub-label">Birthdate</span></td>
-            <td style="width: 19%;"><input type="date"></td>
+            <td class="label-cell" style="width: 18%;">姓名<span class="sub-label">Chinese Name</span></td>
+            <td style="width: 32%;"><input type="text" id="field-name" placeholder="請輸入姓名"></td>
+            <td class="label-cell" style="width: 18%;">性別<span class="sub-label">Gender</span></td>
+            <td style="width: 32%;"><input type="text" placeholder="男 / 女"></td>
         </tr>
         <tr>
             <td class="label-cell">工號<span class="sub-label">Worker No.</span></td>
-            <td><input type="text" placeholder="工號"></td>
-            <td class="label-cell">公司分機<span class="sub-label">Extension</span></td>
-            <td><input type="text" placeholder="分機"></td>
+            <td><input type="text" placeholder="請輸入工號"></td>
+            <td class="label-cell">出生年月日<span class="sub-label">Birthdate</span></td>
+            <td><input type="date"></td>
+        </tr>
+        <tr>
             <td class="label-cell">單位<span class="sub-label">Workplace</span></td>
-            <td><input type="text" placeholder="部門/廠區"></td>
+            <td><input type="text" placeholder="部門 / 廠區"></td>
+            <td class="label-cell">公司分機<span class="sub-label">Extension</span></td>
+            <td><input type="text" placeholder="分機號碼"></td>
         </tr>
         <tr>
-            <td class="label-cell">戶籍住址<span class="sub-label">Household address</span></td>
-            <td colspan="5"><input type="text" placeholder="請輸入完整戶籍地址"></td>
+            <td class="label-cell">手機號碼<span class="sub-label">Personal Phone</span></td>
+            <td><input type="text" placeholder="行動電話號碼"></td>
+            <td class="label-cell">通訊電話<span class="sub-label">Home Phone</span></td>
+            <td><input type="text" placeholder="市話號碼 (選填)"></td>
         </tr>
         <tr>
-            <td class="label-cell">通訊住址<span class="sub-label">Correspondence address</span></td>
-            <td colspan="5"><input type="text" placeholder="請輸入完整通訊地址"></td>
+            <td class="label-cell">戶籍住址<span class="sub-label">Household Address</span></td>
+            <td colspan="3"><input type="text" placeholder="請輸入完整戶籍地址"></td>
         </tr>
         <tr>
-            <td class="label-cell">通訊電話<span class="sub-label">Home phone</span></td>
-            <td colspan="2"><input type="text" placeholder="市話號碼"></td>
-            <td class="label-cell">手機號碼<span class="sub-label">Personal phone</span></td>
-            <td colspan="2"><input type="text" placeholder="行動電話"></td>
+            <td class="label-cell">通訊住址<span class="sub-label">Correspondence Address</span></td>
+            <td colspan="3"><input type="text" placeholder="請輸入完整通訊地址"></td>
         </tr>
     </table>
 
@@ -389,7 +353,7 @@
             <span>我已詳閱並同意工會章程及會費代扣條款</span>
         </label>
 
-        <div class="declaration-container">
+        <div class="declaration-container" id="declarationContainer">
             <div class="declaration-zh">
                 本人同意按工會章程行使權現與義務並同意於加入企業工會成為會員之日起由台灣美光記憶體股份有限公司依據工會法於每月薪資代扣工會經常會費(按章程規定之會費),且於本人退會或離開美光後將停止此代扣作業
             </div>
@@ -414,7 +378,7 @@
         </div>
     </div>
 
-    <div class="submission-note">
+    <div class="submission-note" id="submissionNote">
         可將申請書直接投入AA502室信箱 / The application form can be directly put into the mailbox of Room AA502
     </div>
 </div>
@@ -437,15 +401,18 @@
         const btnPrint = document.getElementById('btnPrint');
         const btnExport = document.getElementById('btnExport');
         const toggleLabel = document.getElementById('toggleLabel');
+        const declarationContainer = document.getElementById('declarationContainer');
 
         if (checkbox.checked) {
             btnPrint.disabled = false;
             btnExport.disabled = false;
             toggleLabel.classList.add('accepted');
+            declarationContainer.style.display = 'none'; // 網頁上：打勾即隱藏
         } else {
             btnPrint.disabled = true;
             btnExport.disabled = true;
             toggleLabel.classList.remove('accepted');
+            declarationContainer.style.display = 'block'; // 網頁上：取消打勾則顯示
         }
     }
 
@@ -454,38 +421,46 @@
         window.print();
     }
 
-    // 功能二：直接導出頁面 (在 Edge 瀏覽器背景靜態直接生成 PDF 並下載)
+    // 功能二：直接導出頁面
     function generateFullPDFDirectly() {
         const element = document.getElementById('application-form');
         const actionButtons = document.getElementById('action-buttons');
         const toggleLabel = document.getElementById('toggleLabel');
+        const declarationContainer = document.getElementById('declarationContainer');
+        const submissionNote = document.getElementById('submissionNote');
         const nameInput = document.getElementById('field-name').value.trim();
         
-        // 動態生成檔名：如果有填名字就用名字，沒填就用通用名稱
+        // 動態生成檔名
         const fileName = nameInput ? `美光工會入會申請書_${nameInput}.pdf` : '美光工會入會申請書.pdf';
 
-        // 1. 在生成前，隱藏畫面上不需要出現的元素（按鈕與勾選欄）
-        actionButtons.style.display = 'none';
-        toggleLabel.style.display = 'none';
+        // 1. 生成 PDF 前的瞬間切換：徹底移除畫面上不需要印出的部分
+        actionButtons.style.display = 'none';       // 隱藏按鈕區
+        toggleLabel.style.display = 'none';         // 隱藏勾選控制列
+        submissionNote.style.display = 'none';      // 隱藏最下方信箱提示
+        declarationContainer.style.display = 'none';// 【核心修正】生成 PDF 時也絕對不出現說明欄！
 
-        // 2. 配置高精密度的 A4 轉成 PDF 參數
+        // 2. 配置 A4 PDF 參數
         const opt = {
-            margin:       [15, 15, 15, 15], // 上、左、下、右邊距 (mm)
+            margin:       [15, 15, 15, 15], 
             filename:     fileName,
             image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, letterRendering: true }, // scale: 2 確保文字與簽名極度清晰不模糊
+            html2canvas:  { scale: 2, useCORS: true, letterRendering: true }, 
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        // 3. 執行 Edge 背景生成並自動觸發下載
+        // 3. 執行背景生成並自動觸發下載
         html2pdf().set(opt).from(element).save().then(() => {
-            // 4. 下載完成後，將畫面上的按鈕與勾選欄恢復顯示，讓使用者可以繼續操作
+            // 4. 下載完成後還原網頁狀態（因為此時仍處於打勾狀態，說明欄繼續維持隱藏）
             actionButtons.style.display = 'flex';
             toggleLabel.style.display = 'flex';
+            submissionNote.style.display = 'block';
+            declarationContainer.style.display = 'none';  
         }).catch(err => {
             console.error('PDF 生成失敗:', err);
             actionButtons.style.display = 'flex';
             toggleLabel.style.display = 'flex';
+            submissionNote.style.display = 'block';
+            declarationContainer.style.display = document.getElementById('agreeCheckbox').checked ? 'none' : 'block';
         });
     }
 
