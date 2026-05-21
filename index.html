@@ -19,6 +19,8 @@
 
         @media print {
             #action-buttons-area { display: none !important; }
+            #terms-interactive { display: none !important; }
+            #terms-print-only { display: flex !important; }
             body { background: white; padding: 0; }
             input, select { border: none !important; border-bottom: 1px solid #000 !important; border-radius: 0 !important; }
             .form-input { margin-top: 0; padding-left: 0; }
@@ -52,16 +54,30 @@
             <div>通訊地址 Correspondence address<input type="text" class="form-input"></div>
             <div>手機號碼 Phone<input type="tel" class="form-input"></div>
             
-            <div class="p-4 bg-gray-50 border rounded text-xs leading-relaxed text-gray-700">
-                本人同意按工會章程行使權利與義務並同意於加入企業工會成為會員之日起由台灣美光記憶體股份有限公司依據工會法於每月薪資代扣工會經常會費(按章程規定之會費)，且於本人退會或離開美光後將停止此代扣作業。<br>
-                I agree to exercise my rights and fulfill my obligations according to the union’s constitution, and consent to become a member of the enterprise union from the date of joining. Micron Memory Taiwan Co., Ltd. will deduct the regular union membership fee from my monthly salary (according to the union’s constitution). The deduction will stop when I withdraw from the union or leave Micron.
+            <!-- 互動式條款區 -->
+            <div id="terms-interactive" class="bg-blue-50 p-4 rounded border border-blue-200 mt-4">
+                <label class="flex items-center cursor-pointer mb-2">
+                    <input type="checkbox" id="agree-terms" class="w-4 h-4 mr-2">
+                    <span class="font-bold text-blue-800">我已詳閱並同意工會章程及會費代扣條款</span>
+                </label>
+                <details class="text-xs text-blue-600 cursor-pointer">
+                    <summary class="hover:underline">點擊閱讀詳細條款內容 (Click to read terms)</summary>
+                    <div class="mt-2 p-3 bg-white border rounded text-gray-700 leading-relaxed shadow-sm">
+                        本人同意按工會章程行使權利與義務，並同意於加入企業工會成為會員之日起，由台灣美光記憶體股份有限公司依據工會法於每月薪資代扣工會經常會費(按章程規定之會費)，且於本人退會或離開美光後將停止此代扣作業。<br>
+                        I agree to exercise my rights and fulfill my obligations according to the union’s constitution, and consent to become a member of the enterprise union. Micron Memory Taiwan Co., Ltd. will deduct the regular union membership fee from my monthly salary. The deduction will stop when I withdraw from the union or leave Micron.
+                    </div>
+                </details>
+            </div>
+
+            <!-- PDF/列印時顯示的精美確認聲明 -->
+            <div id="terms-print-only" class="hidden mt-4 p-3 border-2 border-green-600 rounded-lg flex items-center justify-center bg-green-50">
+                <span class="text-green-700 font-bold text-xl mr-2">✔</span>
+                <span class="text-green-800 font-bold">本人已詳閱並同意工會章程及會費代扣條款</span>
             </div>
             
             <div class="flex flex-col items-center pt-4">
                 <span class="font-bold mb-2">申請人簽名 Applicant Signature:</span>
-                <div id="signature-display" onclick="openModal()" class="w-full">
-                    點擊此處簽名
-                </div>
+                <div id="signature-display" onclick="openModal()" class="w-full">點擊此處簽名</div>
                 <div class="mt-6 font-bold">
                     中華民國 <input type="number" class="date-input"> 年 
                     <input type="number" class="date-input"> 月 
@@ -112,10 +128,22 @@
 
     async function generatePDF() {
         const name = document.getElementById('app-name').value;
+        const agreed = document.getElementById('agree-terms').checked;
         if (!name) { alert("請填寫姓名"); return; }
+        if (!agreed) { alert("請先閱讀並勾選同意條款"); return; }
+        
+        // 切換顯示模式以利 PDF 排版
+        document.getElementById('terms-interactive').style.display = 'none';
+        document.getElementById('terms-print-only').style.display = 'flex';
+        
         const element = document.getElementById('form-to-pdf');
-        const opt = { margin: 10, filename: `入會申請書_${name}.pdf`, image: { type: 'jpeg', quality: 1 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
-        html2pdf().set(opt).from(element).save();
+        const opt = { margin: 10, filename: `入會申請書_${name}.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } };
+        
+        await html2pdf().set(opt).from(element).save();
+        
+        // 恢復顯示
+        document.getElementById('terms-interactive').style.display = 'block';
+        document.getElementById('terms-print-only').style.display = 'none';
     }
 </script>
 </body>
