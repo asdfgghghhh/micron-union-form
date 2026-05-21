@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>台灣美光記憶體股份有限公司企業工會 入會申請書</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -31,7 +31,7 @@
         .form-container {
             background: #fff;
             padding: 35px;
-            width: 210mm; /* 設定為標準 A4 寬度，確保導出不變形 */
+            width: 210mm; /* 桌機端標準 A4 寬度 */
             max-width: 100%;
             margin: 0 auto;
             border-radius: 8px;
@@ -69,10 +69,10 @@
         .btn-pdf {
             color: white;
             border: none;
-            padding: 6px 12px;
-            font-size: 13px;
+            padding: 8px 14px;
+            font-size: 14px;
             font-weight: 600;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -107,7 +107,7 @@
         .header-title-en { font-size: 16px; font-weight: 600; margin: 4px 0 0 0; color: #444; }
         .header-subtitle { font-size: 15px; font-weight: 700; margin: 15px 0 0 0; color: #222; }
 
-        /* 表格與欄位優化：擴大間距與舒適度 */
+        /* 表格與欄位優化 */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -117,7 +117,7 @@
         }
         table, th, td { border: 1px solid var(--border-color); }
         td { 
-            padding: 12px 14px; /* 增加上下左右的內距，拒絕擁擠 */
+            padding: 12px 14px; 
             vertical-align: middle; 
             font-size: 14px; 
         }
@@ -141,12 +141,13 @@
         input[type="text"], input[type="date"] {
             width: 100%;
             border: 1px solid transparent;
-            padding: 8px 10px; /* 擴大輸入框內部氣室，打字更從容 */
+            padding: 8px 10px; 
             font-size: 14px;
             font-family: inherit;
             background-color: #fafafa;
             border-radius: 4px;
             transition: all 0.2s;
+            -webkit-appearance: none; /* 修正 iOS 輸入框內陰影 */
         }
         input[type="text"]:focus, input[type="date"]:focus {
             border-color: var(--primary-color);
@@ -167,7 +168,7 @@
             align-items: center;
             font-size: 14px;
             background: #fff9e6;
-            padding: 12px 14px;
+            padding: 14px;
             border: 1.5px solid #ffe0b2;
             border-radius: 6px;
             color: #b78103;
@@ -182,7 +183,7 @@
             border-color: #ccebcc;
             color: #2b6e2b;
         }
-        .toggle-container input { margin-right: 12px; transform: scale(1.2); cursor: pointer; }
+        .toggle-container input { margin-right: 12px; transform: scale(1.3); cursor: pointer; }
 
         /* 同意宣告條款內文容器 */
         .declaration-container {
@@ -258,7 +259,7 @@
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             z-index: 10000;
             justify-content: center;
             align-items: center;
@@ -273,18 +274,106 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.25);
         }
         .sig-modal-header { font-weight: bold; margin-bottom: 12px; font-size: 16px; color: #333; }
-        #signature-canvas { border: 1px solid #ccc; background: #fcfcfc; border-radius: 4px; display: block; touch-action: none; }
+        .canvas-container {
+            width: 100%;
+            background: #fcfcfc;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        #signature-canvas { 
+            width: 100%; 
+            height: 180px; 
+            display: block; 
+            touch-action: none; 
+        }
         .sig-modal-btns { margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px; }
-        .sig-btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600; }
+        .sig-btn { padding: 10px 18px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600; }
         .sig-btn-clear { background: #eee; color: #333; }
         .sig-btn-cancel { background: #f5f5f5; color: #666; }
         .sig-btn-save { background: var(--primary-color); color: #fff; }
 
-        /* --- 傳統列印模式微調 (@media print) --- */
+
+        /* ==========================================================================
+           核心修改：針對手機/行動裝置（螢幕寬度小於 768px）的直向最佳化樣式
+           ========================================================================== */
+        @media screen and (max-width: 767px) {
+            body { padding: 5px; background-color: #fff; }
+            
+            .form-container {
+                padding: 15px;
+                box-shadow: none;
+                width: 100%;
+            }
+
+            /* 調整頂部按鈕，讓它符合行動端點擊 */
+            .pdf-btn-container {
+                position: static;
+                width: 100%;
+                flex-direction: row;
+                margin-bottom: 20px;
+                gap: 10px;
+            }
+            .btn-pdf { flex: 1; min-width: 0; padding: 12px 8px; font-size: 13px; }
+
+            /* 標題縮小一點避免換行太亂 */
+            .header-title-zh { font-size: 18px; }
+            .header-title-en { font-size: 13px; }
+
+            /* 強制表格在手機上變成「直向單欄」堆疊卡片，完美符合垂直填寫 */
+            table, tbody, tr, td {
+                display: block;
+                width: 100% !important;
+            }
+            
+            tr {
+                border-bottom: 1px solid var(--border-color);
+                margin-bottom: 10px;
+            }
+            
+            td {
+                border: none !important;
+                padding: 8px 4px;
+            }
+
+            /* 讓標籤和輸入框分行，填寫超流暢 */
+            .label-cell {
+                background-color: transparent;
+                padding-bottom: 2px;
+                font-size: 13px;
+            }
+            .sub-label { display: inline; margin-left: 5px; }
+
+            input[type="text"], input[type="date"] {
+                background-color: #f0f2f5; /* 讓手機上的輸入框更明顯可點擊 */
+                padding: 12px 10px; /* 擴大手機點擊區域 */
+                font-size: 15px; /* 防止 iOS 自動放大網頁 */
+            }
+
+            /* 頁尾排版改為垂直 */
+            .footer-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 25px;
+            }
+            .date-section { width: 100%; }
+            .signature-section { width: 100%; }
+            .signature-trigger-box { height: 80px; } /* 增大簽名點擊區 */
+        }
+
+        /* --- 傳統 PDF/列印 模式：保持嚴格 A4 格式，不因手機排版而變形 --- */
         @media print {
             .pdf-btn-container, .toggle-container, .sig-modal, .submission-note, .declaration-container { display: none !important; }
             body { background: #fff; padding: 0; }
-            .form-container { box-shadow: none; padding: 0; width: 100%; }
+            .form-container { box-shadow: none; padding: 0; width: 100% !important; }
+            
+            /* 確保列印時表格維持原樣 */
+            table { display: table !important; }
+            tbody { display: table-row-group !important; }
+            tr { display: table-row !important; border: none !important; margin-bottom: 0; }
+            td { display: table-cell !important; border: 1px solid var(--border-color) !important; padding: 12px 14px !important; }
+            .label-cell { background-color: var(--bg-light) !important; }
+            .sub-label { display: block; margin-left: 0; }
             input[type="text"], input[type="date"] { background: transparent !important; border: none !important; padding: 2px 0 !important; }
         }
     </style>
@@ -295,11 +384,11 @@
     
     <div class="pdf-btn-container" id="action-buttons">
         <button class="btn-pdf btn-pdf-print" id="btnPrint" onclick="exportToPDF()" disabled>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             儲存 PDF / 列印
         </button>
         <button class="btn-pdf btn-pdf-generate" id="btnExport" onclick="generateFullPDFDirectly()" disabled>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
             直接導出頁面
         </button>
     </div>
@@ -313,38 +402,40 @@
     </div>
 
     <table>
-        <tr>
-            <td class="label-cell" style="width: 18%;">姓名<span class="sub-label">Chinese Name</span></td>
-            <td style="width: 32%;"><input type="text" id="field-name" placeholder="請輸入姓名"></td>
-            <td class="label-cell" style="width: 18%;">性別<span class="sub-label">Gender</span></td>
-            <td style="width: 32%;"><input type="text" placeholder="男 / 女"></td>
-        </tr>
-        <tr>
-            <td class="label-cell">工號<span class="sub-label">Worker No.</span></td>
-            <td><input type="text" placeholder="請輸入工號"></td>
-            <td class="label-cell">出生年月日<span class="sub-label">Birthdate</span></td>
-            <td><input type="date"></td>
-        </tr>
-        <tr>
-            <td class="label-cell">單位<span class="sub-label">Workplace</span></td>
-            <td><input type="text" placeholder="部門 / 廠區"></td>
-            <td class="label-cell">公司分機<span class="sub-label">Extension</span></td>
-            <td><input type="text" placeholder="分機號碼"></td>
-        </tr>
-        <tr>
-            <td class="label-cell">手機號碼<span class="sub-label">Personal Phone</span></td>
-            <td><input type="text" placeholder="行動電話號碼"></td>
-            <td class="label-cell">通訊電話<span class="sub-label">Home Phone</span></td>
-            <td><input type="text" placeholder="市話號碼 (選填)"></td>
-        </tr>
-        <tr>
-            <td class="label-cell">戶籍住址<span class="sub-label">Household Address</span></td>
-            <td colspan="3"><input type="text" placeholder="請輸入完整戶籍地址"></td>
-        </tr>
-        <tr>
-            <td class="label-cell">通訊住址<span class="sub-label">Correspondence Address</span></td>
-            <td colspan="3"><input type="text" placeholder="請輸入完整通訊地址"></td>
-        </tr>
+        <tbody>
+            <tr>
+                <td class="label-cell" style="width: 18%;">姓名<span class="sub-label">Chinese Name</span></td>
+                <td style="width: 32%;"><input type="text" id="field-name" placeholder="請輸入姓名"></td>
+                <td class="label-cell" style="width: 18%;">性別<span class="sub-label">Gender</span></td>
+                <td style="width: 32%;"><input type="text" placeholder="男 / 女"></td>
+            </tr>
+            <tr>
+                <td class="label-cell">工號<span class="sub-label">Worker No.</span></td>
+                <td><input type="text" placeholder="請輸入工號"></td>
+                <td class="label-cell">出生年月日<span class="sub-label">Birthdate</span></td>
+                <td><input type="date"></td>
+            </tr>
+            <tr>
+                <td class="label-cell">單位<span class="sub-label">Workplace</span></td>
+                <td><input type="text" placeholder="部門 / 廠區"></td>
+                <td class="label-cell">公司分機<span class="sub-label">Extension</span></td>
+                <td><input type="text" placeholder="分機號碼"></td>
+            </tr>
+            <tr>
+                <td class="label-cell">手機號碼<span class="sub-label">Personal Phone</span></td>
+                <td><input type="text" placeholder="行動電話號碼"></td>
+                <td class="label-cell">通訊電話<span class="sub-label">Home Phone</span></td>
+                <td><input type="text" placeholder="市話號碼 (選填)"></td>
+            </tr>
+            <tr>
+                <td class="label-cell">戶籍住址<span class="sub-label">Household Address</span></td>
+                <td colspan="3"><input type="text" placeholder="請輸入完整戶籍地址"></td>
+            </tr>
+            <tr>
+                <td class="label-cell">通訊住址<span class="sub-label">Correspondence Address</span></td>
+                <td colspan="3"><input type="text" placeholder="請輸入完整通訊地址"></td>
+            </tr>
+        </tbody>
     </table>
 
     <div class="declaration-wrapper">
@@ -386,7 +477,9 @@
 <div class="sig-modal" id="signatureModal">
     <div class="sig-modal-content">
         <div class="sig-modal-header">請在下方空白區域簽名：</div>
-        <canvas id="signature-canvas" width="400" height="180"></canvas>
+        <div class="canvas-container">
+            <canvas id="signature-canvas"></canvas>
+        </div>
         <div class="sig-modal-btns">
             <button class="sig-btn sig-btn-cancel" onclick="closeSignatureModal()">取消</button>
             <button class="sig-btn sig-btn-clear" onclick="clearCanvas()">清除</button>
@@ -407,21 +500,21 @@
             btnPrint.disabled = false;
             btnExport.disabled = false;
             toggleLabel.classList.add('accepted');
-            declarationContainer.style.display = 'none'; // 網頁上：打勾即隱藏
+            declarationContainer.style.display = 'none'; 
         } else {
             btnPrint.disabled = true;
             btnExport.disabled = true;
             toggleLabel.classList.remove('accepted');
-            declarationContainer.style.display = 'block'; // 網頁上：取消打勾則顯示
+            declarationContainer.style.display = 'block'; 
         }
     }
 
-    // 功能一：儲存 PDF / 列印 (呼叫 Edge 內建面板)
+    // 功能一：儲存 PDF / 列印
     function exportToPDF() {
         window.print();
     }
 
-    // 功能二：直接導出頁面
+    // 功能二：直接導出頁面 (html2pdf)
     function generateFullPDFDirectly() {
         const element = document.getElementById('application-form');
         const actionButtons = document.getElementById('action-buttons');
@@ -430,16 +523,14 @@
         const submissionNote = document.getElementById('submissionNote');
         const nameInput = document.getElementById('field-name').value.trim();
         
-        // 動態生成檔名
         const fileName = nameInput ? `美光工會入會申請書_${nameInput}.pdf` : '美光工會入會申請書.pdf';
 
-        // 1. 生成 PDF 前的瞬間切換：徹底移除畫面上不需要印出的部分
-        actionButtons.style.display = 'none';       // 隱藏按鈕區
-        toggleLabel.style.display = 'none';         // 隱藏勾選控制列
-        submissionNote.style.display = 'none';      // 隱藏最下方信箱提示
-        declarationContainer.style.display = 'none';// 【核心修正】生成 PDF 時也絕對不出現說明欄！
+        // 導出前強制隱藏不需要的元素
+        actionButtons.style.display = 'none';       
+        toggleLabel.style.display = 'none';         
+        submissionNote.style.display = 'none';      
+        declarationContainer.style.display = 'none';
 
-        // 2. 配置 A4 PDF 參數
         const opt = {
             margin:       [15, 15, 15, 15], 
             filename:     fileName,
@@ -448,11 +539,11 @@
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        // 3. 執行背景生成並自動觸發下載
         html2pdf().set(opt).from(element).save().then(() => {
-            // 4. 下載完成後還原網頁狀態（因為此時仍處於打勾狀態，說明欄繼續維持隱藏）
-            actionButtons.style.display = 'flex';
-            toggleLabel.style.display = 'flex';
+            // 還原狀態（判斷目前螢幕寬度決定還原成 flex 還是行動端的排版）
+            const isMobile = window.innerWidth < 768;
+            actionButtons.style.display = isMobile ? 'flex' : 'flex';
+            toggleLabel.style.display = isMobile ? 'flex' : 'flex';
             submissionNote.style.display = 'block';
             declarationContainer.style.display = 'none';  
         }).catch(err => {
@@ -464,7 +555,7 @@
         });
     }
 
-    // --- 電子簽名板邏輯 ---
+    // --- 電子簽名板邏輯 (已優化行動端高解析度與斷線問題) ---
     const modal = document.getElementById('signatureModal');
     const canvas = document.getElementById('signature-canvas');
     const ctx = canvas.getContext('2d');
@@ -472,13 +563,9 @@
     const sigImg = document.getElementById('sig-img');
     let isDrawing = false;
 
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 2.5;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-
     function openSignatureModal() {
         modal.style.display = 'flex';
+        resizeCanvas(); // 開啟時動態計算畫布大小，防止手機上手指位置偏移
         clearCanvas();
     }
 
@@ -488,9 +575,23 @@
 
     function clearCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // 重設畫筆樣式
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+    }
+
+    // 解決手機高解析度螢幕 Canvas 模糊與觸控偏移問題
+    function resizeCanvas() {
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
+        ctx.scale(ratio, ratio);
     }
 
     function saveSignature() {
+        // 檢查畫布是否為空（簡易檢查）
         const dataURL = canvas.toDataURL('image/png');
         sigImg.src = dataURL;
         sigImg.style.display = 'block';
@@ -500,8 +601,15 @@
 
     function getPos(e) {
         const rect = canvas.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        let clientX, clientY;
+        
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
         return { x: clientX - rect.left, y: clientY - rect.top };
     }
 
@@ -523,13 +631,20 @@
 
     function stopDraw() { isDrawing = false; }
 
+    // 滑鼠事件
     canvas.addEventListener('mousedown', startDraw);
     canvas.addEventListener('mousemove', draw);
     window.addEventListener('mouseup', stopDraw);
 
-    canvas.addEventListener('touchstart', startDraw);
-    canvas.addEventListener('touchmove', draw);
+    // 行動端觸控事件
+    canvas.addEventListener('touchstart', startDraw, { passive: false });
+    canvas.addEventListener('touchmove', draw, { passive: false });
     canvas.addEventListener('touchend', stopDraw);
+    
+    // 監聽視窗縮放
+    window.addEventListener('resize', () => {
+        if (modal.style.display === 'flex') resizeCanvas();
+    });
 </script>
 
 </body>
