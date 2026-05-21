@@ -111,7 +111,7 @@
             opacity: 0.6;
         }
 
-        /* 標題區塊 */
+        /* 標題區塊 - 已放大字體 */
         .header-container {
             text-align: center;
             margin-bottom: 20px;
@@ -120,9 +120,9 @@
             position: relative;
             z-index: 2; /* 確保內容在浮水印上方 */
         }
-        .header-title-zh { font-size: 20px; font-weight: 700; margin: 0; letter-spacing: 1.5px; color: #050505; }
-        .header-title-en { font-size: 14px; font-weight: 600; margin: 4px 0 0 0; color: #444; }
-        .header-subtitle { font-size: 14px; font-weight: 700; margin: 12px 0 0 0; color: #222; }
+        .header-title-zh { font-size: 26px; font-weight: 800; margin: 0; letter-spacing: 1.5px; color: #050505; } /* 字體由20px放大至26px，加粗 */
+        .header-title-en { font-size: 16px; font-weight: 600; margin: 6px 0 0 0; color: #444; } /* 英文也同步微調匹配 */
+        .header-subtitle { font-size: 15px; font-weight: 700; margin: 12px 0 0 0; color: #222; }
 
         /* 表格與欄位優化 */
         table {
@@ -354,8 +354,8 @@
                 font-size: 12px; 
             }
 
-            .header-title-zh { font-size: 16px; }
-            .header-title-en { font-size: 12px; }
+            .header-title-zh { font-size: 20px; } /* 行動端也按比例調大 */
+            .header-title-en { font-size: 13px; }
             .header-subtitle { font-size: 13px; }
 
             /* 保持表格外觀不轉為直向堆疊 */
@@ -406,7 +406,8 @@
 
         /* --- 傳統 PDF/列印 模式 --- */
         @media print {
-            .pdf-btn-container, .sig-modal, .declaration-container { display: none !important; }
+            .pdf-btn-container, .sig-modal { display: none !important; }
+            .declaration-container { display: block !important; } /* 保留列印下的條款 */
             .submission-note { display: block !important; } 
             body { background: #fff; padding: 0; }
             .form-container { box-shadow: none; padding: 0; width: 100% !important; }
@@ -429,7 +430,6 @@
             .sub-label { display: block; margin-left: 0; font-size: 9px !important; }
             input[type="text"], input[type="date"] { background: transparent !important; border: none !important; padding: 2px 0 !important; font-size: 13px !important; }
             
-            /* 修正列印模式下的浮水印顏色，防止部分瀏覽器強制過濾過淡的顏色 */
             .watermark-item {
                 color: rgba(0, 0, 0, 0.04) !important;
                 -webkit-print-color-adjust: exact;
@@ -523,10 +523,10 @@
 
         <div class="declaration-container" id="declarationContainer">
             <div class="declaration-zh">
-                本人同意按工會章程行使權現與義務並同意於加入企業工會成為會員之日起由台灣美光記憶體股份有限公司依據工會法於每月薪資代扣工會經常會費(按章程規定之會費),且於本人退會或離開美光後將停止此代扣作業
+                本人同意按工會章程行使權現與義務並同意於加入企業工會成為會員之日起由台灣美光記憶體股份有限公司依據工會法於每月薪資代扣工會經常會費(按章程規定之會費),且於本人退會或離開美光後將停止此代扣作業 （本申請書供會員入會、資料建檔及會員服務使用）
             </div>
             <div class="declaration-en">
-                I agree to exercise my rights and fulfill my obligations according to the union's constitution, and consent to become a member of the enterprise union from the date of joining. Micron Memory Taiwan Co., Ltd. will deduct the regular union membership fee from my monthly salary (according to the union's constitution). The deduction will stop when I withdraw from the union or leave Micron.
+                I agree to exercise my rights and fulfill my obligations according to the union's constitution, and consent to become a member of the enterprise union from the date of joining. Micron Memory Taiwan Co., Ltd. will deduct the regular union membership fee from my monthly salary (according to the union's constitution). The deduction will stop when I withdraw from the union or leave Micron.(This application form is used for membership registration, data archiving, and member services at the Micron Memory Corporation Taiwan branch union.)
             </div>
         </div>
     </div>
@@ -589,6 +589,7 @@
         window.print();
     }
 
+    // 修改此函數：導出 PDF 時強制顯示完整的條款內容
     function generateFullPDFDirectly() {
         const element = document.getElementById('application-form');
         const actionButtons = document.getElementById('action-buttons');
@@ -598,9 +599,11 @@
         
         const fileName = nameInput ? `美光工會入會申請書_${nameInput}.pdf` : '美光工會入會申請書.pdf';
 
-        // 隱藏不需要的雜項按鈕與詳細提示內文
+        // 隱藏不需要的雜項按鈕
         actionButtons.style.display = 'none';       
-        declarationContainer.style.display = 'none';
+        
+        // 修正：導出時強制將條款容器設為顯示(block)狀態，確保顯示在 PDF 內
+        declarationContainer.style.display = 'block';
 
         // 導出時保留「同意條款字樣」，並加上乾淨的樣式
         toggleLabel.classList.add('pdf-mode');
@@ -614,7 +617,7 @@
         };
 
         html2pdf().set(opt).from(element).save().then(() => {
-            // 下載完成後還原網頁外觀
+            // 下載完成後還原網頁原始外觀（因為已被勾選，所以網頁畫面上隱藏條款）
             actionButtons.style.display = 'flex';
             toggleLabel.classList.remove('pdf-mode');
             declarationContainer.style.display = 'none';  
