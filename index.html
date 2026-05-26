@@ -104,25 +104,9 @@ input[type="text"]:focus,select:focus{border-color:var(--primary-color);backgrou
     <tr><td class="label-cell">工號<span class="sub-label">Worker No.</span></td><td><input type="text" placeholder="請輸入工號"></td><td class="label-cell">出生年月日<span class="sub-label">Birthdate</span></td><td><div class="roc-date-group"><span class="roc-date-label">民國</span><select id="birth-roc-year" aria-label="民國年"></select><span class="roc-date-label">年</span><select id="birth-month" aria-label="月"></select><span class="roc-date-label">月</span><select id="birth-day" aria-label="日"></select><span class="roc-date-label">日</span></div></td></tr>
     <tr><td class="label-cell">單位<span class="sub-label">Workplace</span></td><td><input type="text" placeholder="廠區 / 部門"></td><td class="label-cell">公司分機<span class="sub-label">Extension</span></td><td><input type="text" placeholder="分機號碼(若無可不填)"></td></tr>
     <tr><td class="label-cell">手機號碼<span class="sub-label">Personal Phone</span></td><td><input type="text" placeholder="行動電話號碼"></td><td class="label-cell">通訊電話<span class="sub-label">Home Phone</span></td><td><input type="text" placeholder="市話號碼 (選填)"></td></tr>
-    <tr>
-  <td class="label-cell">戶籍住址<span class="sub-label">Household Address</span></td>
-  <td colspan="3">
-    <input type="text" id="household-address" placeholder="請輸入完整戶籍地址">
-  </td>
-</tr>
-
-<tr>
-  <td class="label-cell">通訊住址<span class="sub-label">Correspondence Address</span></td>
-  <td colspan="3">
-    <input type="text" id="correspondence-address" placeholder="請輸入完整通訊地址">
-
-    <div class="same-address-wrap">
-      <input type="checkbox" id="sameAddressCheckbox" onchange="handleSameAddressChange(this)">
-      <label for="sameAddressCheckbox">通訊地址同戶籍地址</label>
-    </div>
-  </td>
-</tr>
-</tbody></table>
+    <tr><td class="label-cell">戶籍住址<span class="sub-label">Household Address</span></td><td colspan="3"><input type="text" placeholder="請輸入完整戶籍地址"></td></tr>
+    <tr><td class="label-cell">通訊住址<span class="sub-label">Correspondence Address</span></td><td colspan="3"><input type="text" placeholder="請輸入完整通訊地址"></td></tr>
+  </tbody></table>
   <div class="declaration-wrapper">
     <label for="agreeCheckbox" class="toggle-container" id="toggleLabel"><input type="checkbox" id="agreeCheckbox" onchange="handleAgreementChange(this)"><span>我已詳閱並同意工會章程及會費代扣條款，I have read and agree to the union bylaws and the withholding of dues.</span></label>
     <div class="declaration-container" id="declarationContainer"><div class="declaration-zh">本人同意按工會章程行使權利與義務並同意於加入企業工會成為會員之日起由台灣美光記憶體股份有限公司依據工會法於每月薪資代扣工會經常會費（按章程規定之會費），且於本人退會或離開美光後將停止此代扣作業。</div><div class="declaration-en">I agree to exercise my rights and fulfill my obligations in accordance with the union bylaws, and agree to become a member of the company's union from the date of my employment. Micron Storage Taiwan Ltd. will deduct union membership fees from my monthly salary.</div></div>
@@ -167,117 +151,6 @@ function startDraw(e){isDrawing=true;const pos=getPos(e);ctx.beginPath();ctx.mov
 function draw(e){if(!isDrawing)return;const pos=getPos(e);ctx.lineTo(pos.x,pos.y);ctx.stroke();e.preventDefault();}
 function stopDraw(e){if(isDrawing){isDrawing=false;ctx.beginPath();}if(e)e.preventDefault();}
 canvas.addEventListener('mousedown',startDraw);canvas.addEventListener('mousemove',draw);window.addEventListener('mouseup',stopDraw);canvas.addEventListener('touchstart',startDraw,{passive:false});canvas.addEventListener('touchmove',draw,{passive:false});canvas.addEventListener('touchend',stopDraw,{passive:false});window.addEventListener('resize',()=>{if(modal.style.display==='flex')resizeCanvas();});
-function setCorrespondenceLocked(isLocked){
-  const correspondence = document.getElementById('correspondence-address');
-
-  if(!correspondence) return;
-
-  if(isLocked){
-    correspondence.setAttribute('readonly', 'readonly');
-    correspondence.disabled = true;
-    correspondence.classList.add('locked-address');
-    correspondence.style.background = '#f1f1f1';
-    correspondence.style.cursor = 'not-allowed';
-    correspondence.style.pointerEvents = 'none';
-    correspondence.tabIndex = -1;
-  }else{
-    correspondence.disabled = false;
-    correspondence.removeAttribute('readonly');
-    correspondence.classList.remove('locked-address');
-    correspondence.style.background = '';
-    correspondence.style.cursor = '';
-    correspondence.style.pointerEvents = '';
-    correspondence.tabIndex = 0;
-  }
-}
-
-function handleSameAddressChange(checkbox){
-  const household = document.getElementById('household-address');
-  const correspondence = document.getElementById('correspondence-address');
-
-  if(!household || !correspondence) return;
-
-  if(checkbox.checked){
-    correspondence.disabled = false;
-    correspondence.value = household.value.trim();
-
-    correspondence.dispatchEvent(new Event('input', { bubbles:true }));
-    correspondence.dispatchEvent(new Event('change', { bubbles:true }));
-
-    setCorrespondenceLocked(true);
-  }else{
-    setCorrespondenceLocked(false);
-
-    correspondence.dispatchEvent(new Event('input', { bubbles:true }));
-    correspondence.dispatchEvent(new Event('change', { bubbles:true }));
-  }
-
-  if(typeof validateRequiredFields === 'function') validateRequiredFields();
-  if(typeof checkRequiredFields === 'function') checkRequiredFields();
-  if(typeof updateAgreementAvailability === 'function') updateAgreementAvailability();
-}
-
-function syncSameAddressIfChecked(){
-  const same = document.getElementById('sameAddressCheckbox');
-  const household = document.getElementById('household-address');
-  const correspondence = document.getElementById('correspondence-address');
-
-  if(!same || !household || !correspondence) return;
-
-  if(same.checked){
-    correspondence.disabled = false;
-    correspondence.value = household.value.trim();
-
-    correspondence.dispatchEvent(new Event('input', { bubbles:true }));
-    correspondence.dispatchEvent(new Event('change', { bubbles:true }));
-
-    setCorrespondenceLocked(true);
-  }
-
-  if(typeof validateRequiredFields === 'function') validateRequiredFields();
-  if(typeof checkRequiredFields === 'function') checkRequiredFields();
-  if(typeof updateAgreementAvailability === 'function') updateAgreementAvailability();
-}
-
-document.addEventListener('DOMContentLoaded', function(){
-  const household = document.getElementById('household-address');
-  const correspondence = document.getElementById('correspondence-address');
-
-  if(household){
-    household.addEventListener('input', syncSameAddressIfChecked);
-    household.addEventListener('change', syncSameAddressIfChecked);
-  }
-
-  if(correspondence){
-    correspondence.addEventListener('beforeinput', function(e){
-      const same = document.getElementById('sameAddressCheckbox');
-      if(same && same.checked){
-        e.preventDefault();
-      }
-    });
-
-    correspondence.addEventListener('keydown', function(e){
-      const same = document.getElementById('sameAddressCheckbox');
-      if(same && same.checked){
-        e.preventDefault();
-      }
-    });
-
-    correspondence.addEventListener('paste', function(e){
-      const same = document.getElementById('sameAddressCheckbox');
-      if(same && same.checked){
-        e.preventDefault();
-      }
-    });
-
-    correspondence.addEventListener('drop', function(e){
-      const same = document.getElementById('sameAddressCheckbox');
-      if(same && same.checked){
-        e.preventDefault();
-      }
-    });
-  }
-});
 </script>
 </body>
 </html>
