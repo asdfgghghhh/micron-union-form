@@ -87,7 +87,7 @@ body.lock{
         <h2 style="margin-top:0;color:#0d6efd;">美光記憶體工會會員資格與入會規則說明</h2>
         <h2 style="margin-top:0;color:#0d6efd;">Micron Memory Corporation Union Membership Regulations.</h2>
 
-        <div class="policy-content">
+        <div class="policy-content" id="policyBox">
             <p><b>iOS 系統請使用 Safari 瀏覽器；Android 系統請使用 Google Chrome 瀏覽器。</b><br>
             For iOS devices, please use Safari. For Android devices, please use Google Chrome.</p>
                 
@@ -136,7 +136,6 @@ body.lock{
 
     </div>
 </div>
-
 <script>
 document.addEventListener("DOMContentLoaded", function(){
     const chk = document.getElementById("agreeCheck");
@@ -147,12 +146,23 @@ document.addEventListener("DOMContentLoaded", function(){
 
     document.body.classList.add("lock");
 
+    // 檢查內容是否已經到底（適用於內容較短或無需滾動的情況）
+    function checkScrollPosition() {
+        if (content.scrollHeight <= content.clientHeight + 5) {
+            chk.disabled = false;
+            if(hint) hint.style.display = "none";
+        }
+    }
+    
+    // 初始化執行檢查
+    checkScrollPosition();
+
     // 監測滾動
     content.addEventListener("scroll", function(){
-        const isBottom = Math.ceil(content.scrollTop + content.clientHeight) >= content.scrollHeight;
+        const isBottom = Math.ceil(content.scrollTop + content.clientHeight) >= content.scrollHeight - 5;
         if (isBottom) {
             chk.disabled = false;
-            hint.style.display = "none";
+            if(hint) hint.style.display = "none";
         }
     });
 
