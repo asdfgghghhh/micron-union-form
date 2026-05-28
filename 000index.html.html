@@ -87,20 +87,25 @@ body.lock{
         <h2 style="margin-top:0;color:#0d6efd;">美光記憶體工會會員資格與入會規則說明</h2>
         <h2 style="margin-top:0;color:#0d6efd;">Micron Memory Corporation Union Membership Regulations.</h2>
 
-        <div class="policy-content">
+        <div class="policy-content" id="policyBox">
             <p><b>iOS 系統請使用 Safari 瀏覽器；Android 系統請使用 Google Chrome 瀏覽器。</b><br>
             For iOS devices, please use Safari. For Android devices, please use Google Chrome.</p>
                 
             <p><b>可加入對象Addable objects</b><br>
-            凡本公司之全體受僱員工，均得申請加入本會為會員。</p>
-            All employees of the Company are eligible to apply for membership in this Union.</p>
+            凡隸屬於 Micron 美光記憶體股份有限公司之台中、台南、銅鑼廠區服務之全職員工，均可申請加入本會成為會員。</p>
+            All full-time employees working at Micron sites MMT (Taichung), MMTN (Tainan), and MMTL (Tongluo) are eligible to apply for membership in the association.</p>
             
+            <p><b>美光主體廠區代號說明 Micron Main Plant Code Explanation</b><br>
+            MMT = Micron Memory Taiwan (台中中部科學園區) <br>
+            MMTN = Micron Memory Taiwan Tainan(台南) <br>
+            MMTL = Micron Memory Taiwan Tongluo(銅鑼) <br>
+                
             <p><b>特定職務之限制Membership Restrictions</b><br>
             處級主管 M3 以上（含）之人員不得加入。</p>
             Department-level supervisors (rank M3 and above) of this company are not allowed to join this association.</p>
 
             <p><b>特殊審核Review of Specific Positions</b><br>
-            凡從事人力資源、法務等涉及資方利益之職務者，其入會申請，須經理監事會審議，確認其無利益衝突後，方得核准入會。</p>
+            凡從事人力資源、法務等涉及資方利益之職務者，其入會申請須經理事會審議，確認其無利益衝突後，方得核准入會。</p>
             Applicants holding positions involving management interests, such as Human Resources or Legal, are subject to a review by the Board of Directors. Membership shall only be approved upon verification that no conflict of interest exists.</p>
             
             <p><b>美光記憶體工會會費Micron union dues</b><br>
@@ -115,7 +120,7 @@ body.lock{
             電話Telephone:04-2576-2960 <br>
             辦公室 office:F16 AA502<br>
             Teams:Mark Hsu <br>
-            Email：micronuion@gmail.com <br>
+            Email：micronuion@gmail.com<br>
 
             <p><b>相關法律解釋Relevant legal interpretations </b><br>
             相關規範於《勞基法》、《工會法》、《團體協約法》、《勞資爭議處理法》、《電子簽章法》，等相關法律工會之運作與相關權益保障，係依循中華民國現行勞動相關法規辦理。<br>
@@ -131,38 +136,49 @@ body.lock{
 
     </div>
 </div>
-
 <script>
 document.addEventListener("DOMContentLoaded", function(){
-
     const chk = document.getElementById("agreeCheck");
     const btn = document.getElementById("enterBtn");
     const overlay = document.getElementById("policyOverlay");
+    const content = document.getElementById("policyBox");
+    const hint = document.getElementById("scrollHint");
 
-    if(!chk || !btn || !overlay) return;
-
-    /* ✅ 一定鎖背景 */
     document.body.classList.add("lock");
 
-    /* ✅ 勾選才可按 */
+    // 檢查內容是否已經到底（適用於內容較短或無需滾動的情況）
+    function checkScrollPosition() {
+        if (content.scrollHeight <= content.clientHeight + 5) {
+            chk.disabled = false;
+            if(hint) hint.style.display = "none";
+        }
+    }
+    
+    // 初始化執行檢查
+    checkScrollPosition();
+
+    // 監測滾動
+    content.addEventListener("scroll", function(){
+        const isBottom = Math.ceil(content.scrollTop + content.clientHeight) >= content.scrollHeight - 5;
+        if (isBottom) {
+            chk.disabled = false;
+            if(hint) hint.style.display = "none";
+        }
+    });
+
+    // 勾選邏輯
     chk.addEventListener("change", function(){
         btn.disabled = !chk.checked;
     });
 
-    /* ✅ 點擊進入 */
+    // 進入邏輯
     btn.addEventListener("click", function(){
-
-        if(btn.disabled) return;
-
         overlay.style.opacity = "0";
-        overlay.style.transition = "0.3s";
-
         setTimeout(()=>{
             overlay.style.display = "none";
             document.body.classList.remove("lock");
-        },300);
+        }, 300);
     });
-
 });
 </script>
 
