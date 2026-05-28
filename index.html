@@ -160,7 +160,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
     // 監測滾動
     content.addEventListener("scroll", function(){
-        const isBottom = Math.ceil(content.scrollTop + content.clientHeight) >= content.scrollHeight - 5;
+        const isBottom = Math.ceil(content.scrollTop + content.clientHeight) >= content.scrollHeight - 10;
         if (isBottom) {
             chk.disabled = false;
             if(hint) hint.style.display = "none";
