@@ -29,10 +29,6 @@ body.lock{
     box-shadow:0 4px 12px rgba(0,0,0,0.1);
 }
 
-h1{
-    font-size:20px;
-}
-
 /* ✅ 遮罩 */
 #policyOverlay{
     position:fixed;
@@ -53,7 +49,7 @@ h1{
     padding:20px;
 }
 
-/* ✅ 滑順 */
+/* ✅ 手機滑順 */
 .policy-content{
     font-size:13px;
     line-height:1.7;
@@ -84,6 +80,7 @@ h1{
 
 <body>
 
+<!-- ✅ 條款一定出現 -->
 <div id="policyOverlay">
     <div class="policy-card">
 
@@ -124,16 +121,10 @@ document.addEventListener("DOMContentLoaded", function(){
 
     if(!chk || !btn || !overlay) return;
 
-    /* ✅ 已同意就跳過 */
-    if(localStorage.getItem("policyAccepted") === "yes"){
-        overlay.style.display = "none";
-        return;
-    }
-
-    /* ✅ 鎖背景 */
+    /* ✅ 一定鎖背景 */
     document.body.classList.add("lock");
 
-    /* ✅ 勾選就能按 */
+    /* ✅ 勾選才可按 */
     chk.addEventListener("change", function(){
         btn.disabled = !chk.checked;
     });
@@ -142,8 +133,6 @@ document.addEventListener("DOMContentLoaded", function(){
     btn.addEventListener("click", function(){
 
         if(btn.disabled) return;
-
-        localStorage.setItem("policyAccepted", "yes");
 
         overlay.style.opacity = "0";
         overlay.style.transition = "0.3s";
