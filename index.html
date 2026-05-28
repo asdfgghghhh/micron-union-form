@@ -2,6 +2,167 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>工會入會申請</title>
+
+<style>
+body{
+    margin:0;
+    font-family:"Microsoft JhengHei", sans-serif;
+    background:#f5f7fb;
+}
+
+/* ✅ 鎖背景 */
+body.lock{
+    overflow:hidden;
+    height:100vh;
+}
+
+/* 表單 */
+.form-container{
+    max-width:600px;
+    margin:30px auto;
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+
+h1{
+    font-size:20px;
+}
+
+/* ✅ 遮罩 */
+#policyOverlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.6);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
+
+/* 卡片 */
+.policy-card{
+    background:#fff;
+    width:420px;
+    max-width:92%;
+    border-radius:12px;
+    padding:20px;
+}
+
+/* ✅ 滑順 */
+.policy-content{
+    font-size:13px;
+    line-height:1.7;
+    max-height:50vh;
+    overflow-y:auto;
+
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+}
+
+/* 按鈕 */
+#enterBtn{
+    width:100%;
+    margin-top:12px;
+    padding:10px;
+    border:none;
+    border-radius:6px;
+    background:#0d6efd;
+    color:#fff;
+}
+
+#enterBtn:disabled{
+    background:#ccc;
+}
+</style>
+</head>
+
+<body>
+
+<div id="policyOverlay">
+    <div class="policy-card">
+
+        <h2 style="margin-top:0;color:#0d6efd;">📋 會員資格與入會規則</h2>
+
+        <div class="policy-content">
+            <p><b>可加入對象</b><br>
+            全體公司員工均可申請加入。</p>
+
+            <p><b>限制條件</b><br>
+            處級主管 M3 以上（含）之人員不得加入。</p>
+
+            <p><b>特殊審核</b><br>
+            人資、法務等資方職務者須經理事會審議。</p>
+
+            <p><b>入會條件</b><br>
+            ✔ 填寫申請書<br>
+            ✔ 繳交入會費<br>
+            ✔ 理事會核准</p>
+        </div>
+
+        <label style="display:flex;align-items:center;margin-top:10px;">
+            <input type="checkbox" id="agreeCheck" style="margin-right:8px;">
+            我已閱讀並同意
+        </label>
+
+        <button id="enterBtn" disabled>進入填寫申請表</button>
+
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+
+    const chk = document.getElementById("agreeCheck");
+    const btn = document.getElementById("enterBtn");
+    const overlay = document.getElementById("policyOverlay");
+
+    if(!chk || !btn || !overlay) return;
+
+    /* ✅ 已同意就跳過 */
+    if(localStorage.getItem("policyAccepted") === "yes"){
+        overlay.style.display = "none";
+        return;
+    }
+
+    /* ✅ 鎖背景 */
+    document.body.classList.add("lock");
+
+    /* ✅ 勾選就能按 */
+    chk.addEventListener("change", function(){
+        btn.disabled = !chk.checked;
+    });
+
+    /* ✅ 點擊進入 */
+    btn.addEventListener("click", function(){
+
+        if(btn.disabled) return;
+
+        localStorage.setItem("policyAccepted", "yes");
+
+        overlay.style.opacity = "0";
+        overlay.style.transition = "0.3s";
+
+        setTimeout(()=>{
+            overlay.style.display = "none";
+            document.body.classList.remove("lock");
+        },300);
+    });
+
+});
+</script>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>台灣美光記憶體股份有限公司企業工會 入會申請書</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
